@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\ryjob\Documents\GitHub\subnettergui\lib\implot3d\implot3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ryjob\Documents\GitHub\subnettergui\lib\implot3d\implot3d_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ryjob\Documents\GitHub\subnettergui\lib\implot3d\implot3d_items.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ryjob\Documents\GitHub\subnettergui\lib\implot3d\implot3d_meshes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\ryjob\Documents\GitHub\subnettergui\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{98B9D907-11DE-3AF1-AB99-2CF5D6FA1A6B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
