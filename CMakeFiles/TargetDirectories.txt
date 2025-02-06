@@ -1,5 +1,0 @@
-C:/Users/ryjob/Documents/GitHub/subnettergui/CMakeFiles/subnettergui.dir
-C:/Users/ryjob/Documents/GitHub/subnettergui/CMakeFiles/imgui.dir
-C:/Users/ryjob/Documents/GitHub/subnettergui/CMakeFiles/implot3d.dir
-C:/Users/ryjob/Documents/GitHub/subnettergui/CMakeFiles/ALL_BUILD.dir
-C:/Users/ryjob/Documents/GitHub/subnettergui/CMakeFiles/ZERO_CHECK.dir
