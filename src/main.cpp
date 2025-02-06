@@ -1,6 +1,6 @@
-#include "glew.h"
-#include "glfw3.h"
-#include "glfw3native.h"
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+#include "GLFW/glfw3native.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -430,7 +430,7 @@ void exportWindow() {
     return;
 }
 
-int WinMain() {
+int Main() {
     // window creation and context initialization
     plotBackGroundColor = ImVec4(0.1137f, 0.1843f, 0.2863f, 1.0f);
     ImGuiInit();
@@ -482,3 +482,15 @@ int WinMain() {
     }
     return 0;
 }
+
+#ifdef _WIN32
+void WinMain() {
+    Main();
+}
+#endif
+#ifdef __linux__
+int main() {
+    Main();
+    return 0;
+}
+#endif
