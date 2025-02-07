@@ -10,7 +10,7 @@ unsigned int getRandomInteger(unsigned long long int start, unsigned long long i
 }
 
 unsigned int getRandomIPNumber() {
-	return getRandomInteger(0U, ~0U);
+	return ((char)rand() << 24) + ((char)rand() << 16) + ((char)rand() << 8) + (char)rand();
 }
 
 bool chance(unsigned int numerator, unsigned int denominator) {
@@ -30,5 +30,5 @@ double testChance(int numerator, int denominator) {
 }
 
 unsigned int getRandomCIDR() {
-	return getRandomInteger(0, 32);
+	return rand() % 33;
 }
