@@ -118,21 +118,29 @@ int exportChangedCallback(ImGuiInputTextCallbackData *data) {
 }
 
 void glfwErrorCallback(int error, const char *msg) {
-    printf("Error %d: %s\n", error, msg);
+    if (error != 65544) printf("Error %d: %s\n", error, msg);
 }
 
 void ImGuiInit() {
     glfwSetErrorCallback(glfwErrorCallback);
     glfwInit();
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    windowBackend = glfwCreateWindow(1, 1, "backend", NULL, NULL);
+    #ifdef __APPLE__
+        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+    #endif
+    windowBackend = glfwCreateWindow(100, 100, "backend", NULL, NULL);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwMakeContextCurrent(windowBackend);
+    float x, y;
+    glfwGetMonitorContentScale(monitor, &x, &y);
     glfwHideWindow(windowBackend);
     glewInit();
     ImGui::SetCurrentContext(ImGui::CreateContext());
     ImGuiIO &ioRef = ImGui::GetIO();
+    ioRef.DisplayFramebufferScale.x = 1.0f;
+    ioRef.DisplayFramebufferScale.y = 1.0f;
     ioRef.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ioRef.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
@@ -440,8 +448,12 @@ void exportWindow() {
 
 int Main() {
     // window creation and context initialization
+    srand(time(NULL));
     plotBackGroundColor = ImVec4(0.1137f, 0.1843f, 0.2863f, 1.0f);
     ImGuiInit();
+    // float x, y;
+    // glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &x, &y);
+    // ImGui::GetStyle().ScaleAllSizes(x);
     windowsAreOpen[0] = true;
     for (int i=1; i<sizeof(windowsAreOpen); i++) { // set windows that exist to false; only have main window open.
         windowsAreOpen[i] = false;
@@ -496,7 +508,7 @@ void WinMain() {
     Main();
 }
 #endif
-#ifdef __linux__
+#if defined __linux__ || __APPLE__
 int main() {
     Main();
     return 0;

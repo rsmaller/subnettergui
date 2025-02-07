@@ -1,25 +1,12 @@
 #pragma once
 #include <assert.h>
-#ifdef _WIN32
-#include <intrin.h>
-inline unsigned long long getTime() {
-	unsigned long long returnValue = __rdtsc();
-	return returnValue;
-}
-#endif
-#ifdef __linux__
-inline unsigned long long getTime() {
-    unsigned long long returnValue;
-	__asm__ __volatile__ ("rdtsc":"=A"(returnValue));
-}
-#endif
-
-
+#include <time.h>
+#include <stdlib.h>
 
 unsigned int getRandomInteger(unsigned long long int start, unsigned long long int end) {
 	assert(end > start);
 	unsigned long long int range = end - start + 1;
-	return (int)(getTime() % range);
+	return (unsigned int)(rand() % range);
 }
 
 unsigned int getRandomIPNumber() {
