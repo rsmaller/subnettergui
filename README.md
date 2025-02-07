@@ -15,4 +15,4 @@ This program can be compiled using CMake:
 cmake --build .
 ```
 
-The binary will be dropped in the `Debug` folder under the name `subnettergui.exe`.
+The binary will be dropped in the `build` folder under the name `subnettergui`.
