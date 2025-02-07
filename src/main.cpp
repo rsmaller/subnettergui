@@ -122,8 +122,8 @@ void ImGuiInit() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     windowBackend = glfwCreateWindow(1000, 800, "backend", NULL, NULL);
-    glfwHideWindow(windowBackend);
     glfwMakeContextCurrent(windowBackend);
+    glfwHideWindow(windowBackend);
     glewInit();
     ImGui::SetCurrentContext(ImGui::CreateContext());
     ImGuiIO &ioRef = ImGui::GetIO();
