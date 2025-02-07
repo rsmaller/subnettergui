@@ -117,11 +117,17 @@ int exportChangedCallback(ImGuiInputTextCallbackData *data) {
     return 1;
 }
 
+void glfwErrorCallback(int error, const char *msg) {
+    printf("Error %d: %s\n", error, msg);
+}
+
 void ImGuiInit() {
+    glfwSetErrorCallback(glfwErrorCallback);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    windowBackend = glfwCreateWindow(1000, 800, "backend", NULL, NULL);
+    windowBackend = glfwCreateWindow(1, 1, "backend", NULL, NULL);
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwMakeContextCurrent(windowBackend);
     glfwHideWindow(windowBackend);
     glewInit();
@@ -139,7 +145,9 @@ void ImGuiInit() {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
         debugLog("OpenGL error in ImGuiInit():" + to_string(error));
+        printf("OpenGL Error!: %d\n", error);
     }
+    ImGui::SetNextWindowViewport(ImGui::GetCurrentContext()->Viewports[0]->ID); // detach viewport from window
 }
 
 void startImGuiFrame() {
