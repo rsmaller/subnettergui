@@ -448,7 +448,7 @@ void exportWindow() {
 
 int Main() {
     // window creation and context initialization
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     plotBackGroundColor = ImVec4(0.1137f, 0.1843f, 0.2863f, 1.0f);
     ImGuiInit();
     // float x, y;
