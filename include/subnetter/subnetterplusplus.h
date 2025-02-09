@@ -13,7 +13,7 @@
 #include <fstream>
 
 using namespace std;
-unsigned int totalAddedToIP = 256;
+unsigned long long totalAddedToIP = 256;
 
 typedef union IPNumeric {
     unsigned int IP32;
@@ -397,7 +397,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     } else {
         subnetsToGenerate = (totalSubnetsToGenerate < 256) ? totalSubnetsToGenerate : 256;
     }
-    IP localIPCopy = (IPAddr & netMask1) + ((totalAddedToIP - 256) * (unsigned int)netMask2.blockSize);
+    IP localIPCopy = (IPAddr & netMask1) + ((unsigned int)(totalAddedToIP - 256) * (unsigned int)netMask2.blockSize);
     IP veryFirstIP = IPAddr & netMask1;
     IP veryLastIP = (IPAddr & netMask1) + (unsigned int)(((unsigned long long)totalSubnetsToGenerate * netMask2.blockSize) - 1);
     string netMask1StringToUse;

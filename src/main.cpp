@@ -25,6 +25,8 @@ typedef struct question {
     string answer4;
     string answer5;
     string answer6;
+    string answer7;
+    string answer8;
 } question;
 
 GLFWwindow *windowBackend = nullptr; // invisible GLFW window that allows ImGui to appear. currently the GLFW window itself cannot render new frames.
@@ -53,6 +55,8 @@ char *studyInputBuffer3 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer4 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer5 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer6 = (char *)calloc(256, 1); // reserved input
+char *studyInputBuffer7 = (char *)calloc(256, 1); // reserved input
+char *studyInputBuffer8 = (char *)calloc(256, 1); // reserved input
 question currentQuestion = {"", "", "", "", "", ""}; // the question currently displayed on the screen
 
 //  export input
@@ -78,7 +82,7 @@ IP currentIP(0); // IP cursor variables
 IP IPArg;
 SubnetMask netMaskArg1;
 SubnetMask netMaskArg2;
-extern unsigned int totalAddedToIP;
+extern unsigned long long totalAddedToIP;
 
 vector<string> debugEntries;
 
@@ -252,6 +256,8 @@ question randomQuestion() {
     returnValue.answer4 = (networkIP + 1).IPString;
     returnValue.answer5 = (networkIP + (int)(generatedSubnetMask.blockSize - 2ULL)).IPString;
     returnValue.answer6 = (networkIP + (int)(generatedSubnetMask.blockSize - 1ULL)).IPString;
+    returnValue.answer7 = generatedIP.IPBinaryString;
+    returnValue.answer8 = generatedSubnetMask.IPBinaryString;
     return returnValue;
 }
 
@@ -267,6 +273,8 @@ void resetCurrentQuestion() {
     memcpy(studyInputBuffer4, "", 255);
     memcpy(studyInputBuffer5, "", 255);
     memcpy(studyInputBuffer6, "", 255);
+    memcpy(studyInputBuffer7, "", 255);
+    memcpy(studyInputBuffer8, "", 255);
     currentQuestionAnswered = false;
 }
 
@@ -277,6 +285,8 @@ void showAnswers() {
     memcpy(studyInputBuffer4, currentQuestion.answer4.c_str(), 255);
     memcpy(studyInputBuffer5, currentQuestion.answer5.c_str(), 255);
     memcpy(studyInputBuffer6, currentQuestion.answer6.c_str(), 255);
+    memcpy(studyInputBuffer7, currentQuestion.answer7.c_str(), 255);
+    memcpy(studyInputBuffer8, currentQuestion.answer8.c_str(), 255);
     currentQuestionAnswered = false;
 }
 
@@ -294,6 +304,8 @@ void studyWindow() {
         ImGui::InputText("First Usable Address in Subnet", studyInputBuffer4, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         ImGui::InputText("Last Usable Address in Subnet", studyInputBuffer5, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         ImGui::InputText("Broadcast Address", studyInputBuffer6, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
+        ImGui::InputText("Binary for Provided IP", studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
+        ImGui::InputText("Binary for Subnet Mask", studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         if (ImGui::Button("Submit Answers")) {checkAnswers();}
         ImGui::SameLine();
         if (ImGui::Button("Show Answers")) {showAnswers();}
@@ -312,6 +324,8 @@ void studyWindow() {
         if (!currentQuestion.answer4.compare(studyInputBuffer4)) {ImGui::Text("First Usable Address is correct!");} else {ImGui::Text("First Usable Address is incorrect.");}
         if (!currentQuestion.answer5.compare(studyInputBuffer5)) {ImGui::Text("Last Usable Address is correct!");} else {ImGui::Text("Last Usable Address is incorrect.");}
         if (!currentQuestion.answer6.compare(studyInputBuffer6)) {ImGui::Text("Broadcast Address is correct!");} else {ImGui::Text("Broadcast Address is incorrect.");}
+        if (!currentQuestion.answer7.compare(studyInputBuffer7)) {ImGui::Text("Binary for Provided IP is correct!");} else {ImGui::Text("Binary for Provided IP is incorrect.");}
+        if (!currentQuestion.answer8.compare(studyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is correct!");} else {ImGui::Text("Binary for Subnet Mask is incorrect.");}
     }
     ImGui::End();
     return;
@@ -354,7 +368,16 @@ void mainWindow() {
         debugLog("Refresh Button Pressed");
         currentIP.IPAddress.IP32 = 0;
         totalAddedToIP = 256;
-    } 
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Generate Random Subnet")) {
+        currentIP.IPAddress.IP32 = 0;
+        totalAddedToIP = 256;
+        memcpy(mainInputBuffer1, constructRandomIP().IPString.c_str(), 255);
+        memcpy(mainInputBuffer2, to_string(getRandomCIDR()).c_str(), 255);
+        memcpy(mainInputBuffer3, to_string(getRandomCIDR()).c_str(), 255);
+        subnettingStarted = false;
+    }
     if (windowsAreOpen[2] && sameLineInIf() && ImGui::Button("Clear Debug Log")) {
         debugEntries.clear();
     }
@@ -362,10 +385,15 @@ void mainWindow() {
         ImGui::SameLine();
         ImGui::Text(("Number of Debug Entries: " + to_string(debugEntries.size())).c_str());
     }
+    if (ImGui::Button("Go to Start")) {
+        currentIP.IPAddress.IP32 = 0;
+        totalAddedToIP = 256;
+    }
+    ImGui::SameLine();
     if (ImGui::Button("Previous 256 Subnets") && (totalAddedToIP > 256)) {
         if (subnettingStarted) debugLog("Previous Button Pressed");
-        currentIP -= 256 * (unsigned int)netMaskArg2.blockSize;
-        totalAddedToIP -= 256;
+        if (totalAddedToIP > 256) {currentIP -= 256 * (unsigned int)netMaskArg2.blockSize;
+        totalAddedToIP -= 256;}
     }
     ImGui::SameLine();
     if (ImGui::Button("Next 256 Subnets") && (totalAddedToIP < totalSubnetsToGenerate)) {
@@ -373,16 +401,36 @@ void mainWindow() {
         currentIP += 256 * (unsigned int)netMaskArg2.blockSize;
         totalAddedToIP += 256;
     }
+    ImGui::SameLine();
+    if (ImGui::Button("Go to End") && totalAddedToIP != totalSubnetsToGenerate) {
+        currentIP += (unsigned int)(totalSubnetsToGenerate - totalAddedToIP - 256) * (unsigned int)netMaskArg2.blockSize;
+        totalAddedToIP = totalSubnetsToGenerate - (totalSubnetsToGenerate % 256);
+        if (totalAddedToIP < 256) {
+            totalAddedToIP = 256;
+            currentIP = (totalSubnetsToGenerate - 256) * netMaskArg2.blockSize;
+        }
+    }
     if (subnettingStarted) {
         ImGui::BeginChild("ScrollWheel");
+        SubnetMask swapMask;
         IPArg = IP(mainInputBuffer1);
         netMaskArg1 = SubnetMask(mainInputBuffer2);
         netMaskArg2 = SubnetMask(mainInputBuffer3);
+        if (netMaskArg1.networkBits > netMaskArg2.networkBits) {
+            swapMask = netMaskArg1;
+            netMaskArg1 = netMaskArg2;
+            netMaskArg2 = swapMask;
+        }
         networkMagnitudeDifference = netMaskArg1.hostBits - netMaskArg2.hostBits;
         totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
-        if (debugFlag) {ImGui::Text(("Added total in main: " + to_string(totalAddedToIP)).c_str());}
+        if (debugFlag) {
+            ImGui::Text(("Added total in main: " + to_string(totalAddedToIP)).c_str()); 
+            ImGui::Text(("Subnets to generate: " + to_string(totalSubnetsToGenerate)).c_str()); 
+            ImGui::Text(("Magnitude difference: " + to_string(networkMagnitudeDifference)).c_str());
+            ImGui::Text(("Current IP: " + currentIP.IPString).c_str());
+        }
         if (currentIP.IPAddress.IP32 == 0) {
-            currentIP = IPArg & netMaskArg2;
+            currentIP = IPArg & netMaskArg1;
         }
         timedVLSM(currentIP, netMaskArg1, netMaskArg2, false);
         ImGui::EndChild();
