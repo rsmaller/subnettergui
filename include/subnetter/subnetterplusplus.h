@@ -282,9 +282,9 @@ public:
         }
     }
 
-    string getChangingIPString(IP IPArg, SubnetMask netMask) {
+    string getChangingIPString(IP IPArg, SubnetMask netMaskArg) {
         string returnString = "";
-        int changingOctets = getChangingOctets(netMask);
+        int changingOctets = getChangingOctets(netMaskArg);
         for (int i=3; i>=changingOctets; i--) {
             returnString.append(to_string(IPArg.IPAddress.octets[i]));
             returnString.append(".");
@@ -296,9 +296,9 @@ public:
         return returnString;
     }
 
-    static string getChangingIPBinaryString(IP IPArg, SubnetMask netMask) {
+    static string getChangingIPBinaryString(IP IPArg, SubnetMask netMaskArg) {
         string returnString = "";
-        int changingBits = netMask.hostBits;
+        int changingBits = netMaskArg.hostBits;
         for (int i=3; i>=0; i--) {
             returnString += IP::toBinaryString(IPArg.IPAddress.octets[i]);
         }
@@ -313,8 +313,8 @@ public:
         return returnString;
     }
 
-    int getChangingOctets(SubnetMask netMask) {
-        return (int)ceil(netMask.hostBits / 8.0); // division requires float argument to return float.
+    int getChangingOctets(SubnetMask netMaskArg) {
+        return (int)ceil(netMaskArg.hostBits / 8.0); // division requires float argument to return float.
     }
 };
 

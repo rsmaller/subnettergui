@@ -107,21 +107,25 @@ bool textInIf(const char *stringArg) {
     return true;
 }
 
-int argumentCallback(ImGuiInputTextCallbackData *data) {
+int argumentResetFunc() {
     currentIP.IPAddress.IP32 = 0;
     totalAddedToIP = 256;
     return 1;
 }
 
-int questionChangedCallback(ImGuiInputTextCallbackData *data) {
+int questionResetFunc() {
     currentQuestionAnswered = false;
     return 1;
 }
 
-int exportChangedCallback(ImGuiInputTextCallbackData *data) {
+int exportResetFunc() {
     exportButtonPreviouslyPressed = false;
     return 1;
 }
+
+int (*argumentChangedCallback)(ImGuiInputTextCallbackData *data) = (int (*)(ImGuiInputTextCallbackData *))&argumentResetFunc;
+int (*questionChangedCallback)(ImGuiInputTextCallbackData *data) = (int (*)(ImGuiInputTextCallbackData *))&questionResetFunc;
+int (*exportChangedCallback)(ImGuiInputTextCallbackData *data) = (int (*)(ImGuiInputTextCallbackData *))&exportResetFunc;
 
 void glfwErrorCallback(int error, const char *msg) {
     if (error != 65544) printf("Error %d: %s\n", error, msg);
@@ -301,14 +305,14 @@ void studyWindow() {
     ImGui::Begin("Study", windowsAreOpen+3);
     if (currentQuestion.questionString.compare("")) { 
         ImGui::Text("%s", currentQuestion.questionString.c_str());
-        ImGui::InputText("Subnet Mask", studyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText("Block Size", studyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText("Network Address", studyInputBuffer3, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText("First Usable Address in Subnet", studyInputBuffer4, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText("Last Usable Address in Subnet", studyInputBuffer5, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText("Broadcast Address", studyInputBuffer6, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText(("Binary for " + currentQuestion.questionIP.IPString).c_str(), studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText(("Binary for /" + to_string(currentQuestion.questionNetMask.networkBits) + " Mask").c_str(), studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
+        ImGui::InputText("Subnet Mask", studyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
+        ImGui::InputText("Block Size", studyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
+        ImGui::InputText("Network Address", studyInputBuffer3, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
+        ImGui::InputText("First Usable Address in Subnet", studyInputBuffer4, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
+        ImGui::InputText("Last Usable Address in Subnet", studyInputBuffer5, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
+        ImGui::InputText("Broadcast Address", studyInputBuffer6, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
+        ImGui::InputText(("Binary for " + currentQuestion.questionIP.IPString).c_str(), studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
+        ImGui::InputText(("Binary for /" + to_string(currentQuestion.questionNetMask.networkBits) + " Mask").c_str(), studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
         if (ImGui::Button("Submit Answers")) {checkAnswers();}
         ImGui::SameLine();
         if (ImGui::Button("Show Answers")) {showAnswers();}
@@ -349,9 +353,9 @@ void mainWindow() {
             ImGui::EndMenu();
         }
     ImGui::EndMenuBar();
-    ImGui::InputText("IP", mainInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, &argumentCallback);
-    ImGui::InputText("Netmask 1", mainInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, &argumentCallback);
-    ImGui::InputText("Netmask 2", mainInputBuffer3, 255, ImGuiInputTextFlags_CallbackEdit, &argumentCallback);
+    ImGui::InputText("IP", mainInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, argumentChangedCallback);
+    ImGui::InputText("Netmask 1", mainInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, argumentChangedCallback);
+    ImGui::InputText("Netmask 2", mainInputBuffer3, 255, ImGuiInputTextFlags_CallbackEdit, argumentChangedCallback);
     ImGui::Checkbox("Binary", &binaryFlag);
     ImGui::SameLine();
     ImGui::Checkbox("Reverse", &reverseFlag);
@@ -410,7 +414,7 @@ void mainWindow() {
         totalAddedToIP = totalSubnetsToGenerate - (totalSubnetsToGenerate % 256);
         if (totalAddedToIP < 256) {
             totalAddedToIP = 256;
-            currentIP = (totalSubnetsToGenerate - 256) * netMaskArg2.blockSize;
+            currentIP = (unsigned int)((totalSubnetsToGenerate - 256) * netMaskArg2.blockSize);
         }
     }
     if (subnettingStarted) {
@@ -443,7 +447,7 @@ void mainWindow() {
 
 void exportWindow() {
     ImGui::Begin("Export...", windowsAreOpen+1);
-    ImGui::InputText("Export Path", exportInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, &exportChangedCallback);
+    ImGui::InputText("Export Path", exportInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback);
     if (ImGui::Button("Export")) {
         if (currentlyInExportThread) {
             ImGui::End();
@@ -480,7 +484,7 @@ void exportWindow() {
             debugLog("Result File: " + resultFile);
         }
     }
-    if (!exportButtonPreviouslyPressed) {
+    if (!exportButtonPreviouslyPressed && !currentlyInExportThread) {
         ImGui::End();
         return;
     }

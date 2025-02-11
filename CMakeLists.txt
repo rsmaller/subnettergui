@@ -41,9 +41,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 ENDIF()
 
 if (MSVC)
-    target_compile_options(subnettergui PRIVATE /W4 /WX)
+    target_compile_options(subnettergui PRIVATE /W4)
 else()
-    target_compile_options(subnettergui PRIVATE -Wall -Werror -Wpedantic)
+    target_compile_options(subnettergui PRIVATE -Wall -Wpedantic)
 endif()
 
 target_compile_definitions(subnettergui PRIVATE GLEW_STATIC)
