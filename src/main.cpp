@@ -18,6 +18,8 @@
 using namespace std;
 
 typedef struct question {
+    IP questionIP;
+    SubnetMask questionNetMask;
     string questionString;
     string answer1;
     string answer2;
@@ -57,7 +59,7 @@ char *studyInputBuffer5 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer6 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer7 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer8 = (char *)calloc(256, 1); // reserved input
-question currentQuestion = {"", "", "", "", "", ""}; // the question currently displayed on the screen
+question currentQuestion = {IP(0), SubnetMask(0), "", "", "", "", "", ""}; // the question currently displayed on the screen
 
 //  export input
 char *exportInputBuffer = (char *)calloc(512, 1); // main input for export path
@@ -101,7 +103,7 @@ bool sameLineInIf() {
 }
 
 bool textInIf(const char *stringArg) {
-    ImGui::Text(stringArg);
+    ImGui::Text("%s", stringArg);
     return true;
 }
 
@@ -192,11 +194,10 @@ void endImGuiFrame() {
 
 void printDebugEntries() {
     for (int i=0; i<debugEntries.size(); i++) {
-        ImGui::Text((">>> " + debugEntries[i]).c_str());
+        ImGui::Text("%s", (">>> " + debugEntries[i]).c_str());
     }
 }
 
-// TODO: test this function
 IP constructRandomIP() {
     return IP(getRandomIPNumber());
 }
@@ -250,6 +251,8 @@ question randomQuestion() {
     SubnetMask generatedSubnetMask = constructRandomSubnetMask();
     IP networkIP = generatedIP & generatedSubnetMask;
     returnValue.questionString = "Find all subnet information for a /" + to_string(generatedSubnetMask.networkBits) + " subnet containing the IP address " + generatedIP.IPString + ".";
+    returnValue.questionIP = generatedIP;
+    returnValue.questionNetMask = generatedSubnetMask;
     returnValue.answer1 = generatedSubnetMask.IPString;
     returnValue.answer2 = to_string(generatedSubnetMask.blockSize);
     returnValue.answer3 = networkIP.IPString;
@@ -297,15 +300,15 @@ void checkAnswers() {
 void studyWindow() {
     ImGui::Begin("Study", windowsAreOpen+3);
     if (currentQuestion.questionString.compare("")) { 
-        ImGui::Text(currentQuestion.questionString.c_str());
+        ImGui::Text("%s", currentQuestion.questionString.c_str());
         ImGui::InputText("Subnet Mask", studyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         ImGui::InputText("Block Size", studyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         ImGui::InputText("Network Address", studyInputBuffer3, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         ImGui::InputText("First Usable Address in Subnet", studyInputBuffer4, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         ImGui::InputText("Last Usable Address in Subnet", studyInputBuffer5, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         ImGui::InputText("Broadcast Address", studyInputBuffer6, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText("Binary for Provided IP", studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
-        ImGui::InputText("Binary for Subnet Mask", studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
+        ImGui::InputText(("Binary for " + currentQuestion.questionIP.IPString).c_str(), studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
+        ImGui::InputText(("Binary for /" + to_string(currentQuestion.questionNetMask.networkBits) + " Mask").c_str(), studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, &questionChangedCallback);
         if (ImGui::Button("Submit Answers")) {checkAnswers();}
         ImGui::SameLine();
         if (ImGui::Button("Show Answers")) {showAnswers();}
@@ -383,7 +386,7 @@ void mainWindow() {
     }
     if (windowsAreOpen[2]) {
         ImGui::SameLine();
-        ImGui::Text(("Number of Debug Entries: " + to_string(debugEntries.size())).c_str());
+        ImGui::Text("%s", ("Number of Debug Entries: " + to_string(debugEntries.size())).c_str());
     }
     if (ImGui::Button("Go to Start")) {
         currentIP.IPAddress.IP32 = 0;
@@ -424,10 +427,10 @@ void mainWindow() {
         networkMagnitudeDifference = netMaskArg1.hostBits - netMaskArg2.hostBits;
         totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
         if (debugFlag) {
-            ImGui::Text(("Added total in main: " + to_string(totalAddedToIP)).c_str()); 
-            ImGui::Text(("Subnets to generate: " + to_string(totalSubnetsToGenerate)).c_str()); 
-            ImGui::Text(("Magnitude difference: " + to_string(networkMagnitudeDifference)).c_str());
-            ImGui::Text(("Current IP: " + currentIP.IPString).c_str());
+            ImGui::Text("%s", ("Added total in main: " + to_string(totalAddedToIP)).c_str()); 
+            ImGui::Text("%s", ("Subnets to generate: " + to_string(totalSubnetsToGenerate)).c_str()); 
+            ImGui::Text("%s", ("Magnitude difference: " + to_string(networkMagnitudeDifference)).c_str());
+            ImGui::Text("%s", ("Current IP: " + currentIP.IPString).c_str());
         }
         if (currentIP.IPAddress.IP32 == 0) {
             currentIP = IPArg & netMaskArg1;
@@ -484,7 +487,7 @@ void exportWindow() {
     if (currentExportSuccessful) {
         unique_lock exportThreadLock(exportThreadMutex);
         if (!exportThreadComplete) {
-            ImGui::Text(("Exporting" + string(dotCounter, '.')).c_str());
+            ImGui::Text("%s", ("Exporting" + string(dotCounter, '.')).c_str());
         }
         else {ImGui::Text("File exported!");}
     } else {
@@ -519,8 +522,8 @@ int Main() {
         }
         if (windowsAreOpen[2]) {
             ImGui::Begin("Debug Log", windowsAreOpen+2);
-            ImGui::Text(("Frame Count: " + to_string(frameCount)).c_str());
-            ImGui::Text(("Dot Count: " + to_string(dotCounter)).c_str());
+            ImGui::Text("%s", ("Frame Count: " + to_string(frameCount)).c_str());
+            ImGui::Text("%s", ("Dot Count: " + to_string(dotCounter)).c_str());
             ImGui::BeginChild("ScrollWheel");
             printDebugEntries();
             ImGui::EndChild();

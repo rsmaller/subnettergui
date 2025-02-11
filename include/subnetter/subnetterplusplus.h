@@ -31,7 +31,7 @@ extern const int totalNumberOfWindows;
 extern bool windowsAreOpen[];
 
 void usage(const char *message) {
-    ImGui::Text(message);
+    ImGui::Text("%s", message);
 }
 
 class IP {
@@ -366,7 +366,7 @@ public:
 };
 
 void nonExportOutput(const char *string) {
-    ImGui::Text(string);
+    ImGui::Text("%s", string);
 }
 
 void exportOutput(const char *string) {
@@ -456,7 +456,7 @@ void timedVLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportF
     endingClock = clock();
     double timeTotal = (double)(endingClock - startingClock) / CLOCKS_PER_SEC;
     if (debugFlag && !exportFlag) {
-        ImGui::Text((to_string(timeTotal) + " seconds to run\n").c_str());
+        ImGui::Text("%s", (to_string(timeTotal) + " seconds to run\n").c_str());
     } else if (debugFlag && exportFlag) {
         exportFileStream << to_string(timeTotal) + " seconds to run\n";
     }

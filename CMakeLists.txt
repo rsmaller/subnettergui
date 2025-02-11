@@ -4,7 +4,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ./bin)
 project(subnettergui VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 23)
 
-
 include_directories(include)
 include_directories(include/random)
 include_directories(include/GLFW)
@@ -40,6 +39,12 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set_target_properties(glfw3 PROPERTIES IMPORTED_LOCATION "./lib/bin/glfw/linux32/libglfw3.a")
     target_link_libraries(subnettergui PRIVATE GL glew glfw3)
 ENDIF()
+
+if (MSVC)
+    target_compile_options(subnettergui PRIVATE /W4 /WX)
+else()
+    target_compile_options(subnettergui PRIVATE -Wall -Werror -Wpedantic)
+endif()
 
 target_compile_definitions(subnettergui PRIVATE GLEW_STATIC)
 target_link_libraries(subnettergui PRIVATE imgui)
