@@ -25,7 +25,6 @@ string programName;
 bool binaryFlag = false;
 bool debugFlag = false;
 bool reverseFlag = false;
-int numberFlag = 0;
 extern ofstream exportFileStream;
 extern const int totalNumberOfWindows;
 extern bool windowsAreOpen[];
@@ -39,7 +38,7 @@ public:
     IPNumeric IPAddress;
     string IPString;
     string IPBinaryString;
-    bool unusualFormat = false;
+    bool invalidFormat = false;
     friend ostream &operator<<(ostream &stream, IP IPArg);
 
     IP(string stringArg) {
@@ -52,7 +51,7 @@ public:
         } else {
             this -> IPString = "0.0.0.0";
             this -> IPAddress.IP32 = 0;
-            this -> unusualFormat = true;
+            this -> invalidFormat = true;
         }
         this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
     }
@@ -193,7 +192,7 @@ public:
         this -> hostBits = fetchHostBits((int)this -> IPAddress.IP32);
         if (this -> hostBits == 32) {
             this -> blockSize = 4294967296ULL;
-        } else if (!unusualFormat) {
+        } else if (!invalidFormat) {
             this -> blockSize = 1ULL<<(unsigned long long)(this -> hostBits);
         } else {
             this -> blockSize = 0;
@@ -207,7 +206,7 @@ public:
 
     SubnetMask(int CIDRMask) : IP(~((1ULL<<(32-CIDRMask)) - 1)) {
         this -> hostBits = 32 - CIDRMask;
-        if (!unusualFormat) {
+        if (!invalidFormat) {
             this -> blockSize = 1ULL<<this -> hostBits;
             this -> networkBits = CIDRMask;
             this -> numberOfSubnets = 1ULL<<networkBits;
@@ -380,8 +379,8 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     } else {
         VLSMOutput = &nonExportOutput;
     }
-    if (IPAddr.unusualFormat || netMask1.unusualFormat || netMask2.unusualFormat) {
-        usage("Please provide a valid format for IP");
+    if (IPAddr.invalidFormat || netMask1.invalidFormat || netMask2.invalidFormat) {
+        usage("Please provide a valid format for the IP.");
         return;
     }
     if (netMask1.blockSize < netMask2.blockSize) {
@@ -417,9 +416,6 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
         startingIPToUse = veryFirstIP.IPString;
         netMask1StringToUse = netMask1.IPString;
         netMask2StringToUse = netMask2.IPString;
-    }
-    if (numberFlag < subnetsToGenerate && numberFlag != 0) {
-        subnetsToGenerate = numberFlag;
     }
     if (debugFlag) {VLSMOutput(("Added total in header: " + to_string(totalAddedToIP)).c_str());}
     VLSMOutput((to_string(totalSubnetsToGenerate) + " Subnet(s) Total, " + to_string(netMask2.blockSize) + " IP(s) Per Subnet\n").c_str());

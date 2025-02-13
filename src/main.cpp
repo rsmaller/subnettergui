@@ -40,7 +40,6 @@ bool windowsAreOpen[totalNumberOfWindows];
 //  1 - Export Window
 //  2 - Debug Window
 //  3 - Study Window
-bool aWindowIsOpen = true;
 ImVec4 plotBackGroundColor;
 unsigned long long int frameCount = 0;
 unsigned long long int dotCounter = 1;
@@ -70,7 +69,6 @@ bool currentlyInExportThread = false;
 
 // conditionals
 bool subnettingStarted = false;
-bool currentExportSuccessful = false;
 bool exportButtonPreviouslyPressed = false;
 bool graphData = false;
 bool nextButtonShown = false;
@@ -340,7 +338,7 @@ void studyWindow() {
 
 void mainWindow() {
     ImGui::Begin("Subnetter++", windowsAreOpen+0, ImGuiWindowFlags_MenuBar);
-    ImGui::BeginMenuBar();
+    ImGui::BeginMenuBar(); // Indented conditionals are part of the menu bar.
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Export")) {debugLog("Export Window Opened"); windowsAreOpen[1] = true;}
             if (ImGui::MenuItem("Study")) {windowsAreOpen[3] = true;}
@@ -417,121 +415,128 @@ void mainWindow() {
             currentIP = (unsigned int)((totalSubnetsToGenerate - 256) * netMaskArg2.blockSize);
         }
     }
-    if (subnettingStarted) {
-        ImGui::BeginChild("ScrollWheel");
-        SubnetMask swapMask;
-        IPArg = IP(mainInputBuffer1);
-        netMaskArg1 = SubnetMask(mainInputBuffer2);
-        netMaskArg2 = SubnetMask(mainInputBuffer3);
-        if (netMaskArg1.networkBits > netMaskArg2.networkBits) {
-            swapMask = netMaskArg1;
-            netMaskArg1 = netMaskArg2;
-            netMaskArg2 = swapMask;
-        }
-        networkMagnitudeDifference = netMaskArg1.hostBits - netMaskArg2.hostBits;
-        totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
-        if (debugFlag) {
-            ImGui::Text("%s", ("Added total in main: " + to_string(totalAddedToIP)).c_str()); 
-            ImGui::Text("%s", ("Subnets to generate: " + to_string(totalSubnetsToGenerate)).c_str()); 
-            ImGui::Text("%s", ("Magnitude difference: " + to_string(networkMagnitudeDifference)).c_str());
-            ImGui::Text("%s", ("Current IP: " + currentIP.IPString).c_str());
-        }
-        if (currentIP.IPAddress.IP32 == 0) {
-            currentIP = IPArg & netMaskArg1;
-        }
-        timedVLSM(currentIP, netMaskArg1, netMaskArg2, false);
-        ImGui::EndChild();
+    if (!subnettingStarted) {
+        ImGui::End();
+        return;
     }
+    ImGui::BeginChild("ScrollWheel");
+    SubnetMask swapMask;
+    IPArg = IP(mainInputBuffer1);
+    netMaskArg1 = SubnetMask(mainInputBuffer2);
+    netMaskArg2 = SubnetMask(mainInputBuffer3);
+    if (netMaskArg1.networkBits > netMaskArg2.networkBits) { // If netMaskArg1's CIDR mask is greater than netMaskArg2's, swap them to ensure that netMaskArg1's CIDR mask is >= to netMaskArg2's.
+        swapMask = netMaskArg1;
+        netMaskArg1 = netMaskArg2;
+        netMaskArg2 = swapMask;
+    }
+    networkMagnitudeDifference = netMaskArg1.hostBits - netMaskArg2.hostBits;
+    totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
+    if (debugFlag) {
+        ImGui::Text("%s", ("Added total in main: " + to_string(totalAddedToIP)).c_str()); 
+        ImGui::Text("%s", ("Subnets to generate: " + to_string(totalSubnetsToGenerate)).c_str()); 
+        ImGui::Text("%s", ("Magnitude difference: " + to_string(networkMagnitudeDifference)).c_str());
+        ImGui::Text("%s", ("Current IP: " + currentIP.IPString).c_str());
+    }
+    if (currentIP.IPAddress.IP32 == 0) {
+        currentIP = IPArg & netMaskArg1;
+    }
+    timedVLSM(currentIP, netMaskArg1, netMaskArg2, false);
+    ImGui::EndChild();
     ImGui::End();
 }
 
 void exportWindow() {
     ImGui::Begin("Export...", windowsAreOpen+1);
-    ImGui::InputText("Export Path", exportInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback);
+    ImGui::InputText("Export Path", exportInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback); // if this input is changed, reset the export success message.
     if (ImGui::Button("Export")) {
-        if (currentlyInExportThread) {
+        if (currentlyInExportThread) { // The export button does nothing if there is an ongoing export process.
             ImGui::End();
             return;
         }
-        unique_lock exportThreadLock(exportThreadMutex);
+        unique_lock exportThreadLock(exportThreadMutex); // Lock the exportThreadMutex so exportThreadComplete is not accessed by an ongoing thread while changing its value to false.
         exportThreadComplete = false;
         exportThreadLock.unlock();
-        currentExportSuccessful = false;
         exportButtonPreviouslyPressed = true;
         IPArg = IP(mainInputBuffer1);
         netMaskArg1 = SubnetMask(mainInputBuffer2);
         netMaskArg2 = SubnetMask(mainInputBuffer3);
-        if (currentIP.IPAddress.IP32 == 0) {
-            currentIP = IPArg & netMaskArg2;
-        }
         string exportString = string(exportInputBuffer);
         debugLog("Export Button pressed with path " + exportString);
         string mainPath = exportString.substr(0, exportString.find_last_of("\\/") + 1);
         string resultFile = exportString.substr(exportString.find_last_of("\\/") + 1, exportString.length() - 1);
-        if (filesystem::exists(filesystem::path(mainPath)) && resultFile.contains(".txt")) {
-            debugLog("Entered path exists");
+        if (!(filesystem::exists(filesystem::path(mainPath)) && resultFile.contains(".txt"))) { // Do not continue through the rest of the export process if the path is invalid.
+            exportThreadLock.lock();
+            exportThreadComplete = false;
+            exportThreadLock.unlock();
             debugLog("Main Path: " + mainPath);
             debugLog("Result File: " + resultFile);
-            exportFileStream.open(exportString);
-            debugLog("File created!");
-            thread exportThread = thread([]() -> void {currentlyInExportThread = true; timedVLSM(IPArg, netMaskArg1, netMaskArg2, true); unique_lock exportThreadLock(exportThreadMutex); exportThreadComplete = true; currentlyInExportThread = false;});
-            exportThread.detach();
-            debugLog("File exported!");
-            currentExportSuccessful = true;
-        } else {
-            currentExportSuccessful = false;
-            debugLog("Main Path: " + mainPath);
-            debugLog("Result File: " + resultFile);
+            ImGui::Text("File could not be exported. Is the path correct?");
+            ImGui::End();
+            return;
         }
+        debugLog("Entered path exists");
+        debugLog("Main Path: " + mainPath);
+        debugLog("Result File: " + resultFile);
+        exportFileStream.open(exportString);
+        debugLog("File created!");
+        thread exportThread = thread(
+            []() -> void { // Lambda function that runs in a detached thread
+                currentlyInExportThread = true;
+                timedVLSM(IPArg, netMaskArg1, netMaskArg2, true); 
+                unique_lock exportThreadLock(exportThreadMutex); 
+                exportThreadComplete = true; 
+                currentlyInExportThread = false;
+                exportThreadLock.unlock();
+            }
+        );
+        exportThread.detach();
+        debugLog("File exported!");
     }
-    if (!exportButtonPreviouslyPressed && !currentlyInExportThread) {
+    if (!exportButtonPreviouslyPressed && !currentlyInExportThread) { // Don't show the "Exporting..." message if the export button has not been pressed and there is no export thread.
         ImGui::End();
         return;
     }
-    if (currentExportSuccessful) {
-        unique_lock exportThreadLock(exportThreadMutex);
-        if (!exportThreadComplete) {
-            ImGui::Text("%s", ("Exporting" + string(dotCounter, '.')).c_str());
-        }
-        else {ImGui::Text("File exported!");}
+    unique_lock exportThreadLock(exportThreadMutex);
+    if (exportThreadComplete) {
+        ImGui::Text("File exported!");
     } else {
-        ImGui::Text("File could not be exported. Is the path correct?");
+        ImGui::Text("%s", ("Exporting" + string(dotCounter, '.')).c_str());
     }
     ImGui::End();
     return;
+   }
+
+
+void debugWindow() {
+    ImGui::Begin("Debug Log", windowsAreOpen+2);
+    ImGui::Text("%s", ("Frame Count: " + to_string(frameCount)).c_str());
+    ImGui::Text("%s", ("Dot Count: " + to_string(dotCounter)).c_str());
+    ImGui::BeginChild("ScrollWheel");
+    printDebugEntries();
+    ImGui::EndChild();
+    ImGui::End();
 }
 
-int Main() {
-    // window creation and context initialization
-    srand((unsigned int)time(NULL));
-    plotBackGroundColor = ImVec4(0.1137f, 0.1843f, 0.2863f, 1.0f);
-    ImGuiInit();
-    // float x, y;
-    // glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &x, &y);
-    // ImGui::GetStyle().ScaleAllSizes(x);
+int Main() { // the pseudo-main function that gets called either by WinMain() or main()
+    srand((unsigned int)time(NULL)); // initialize random number generator's counter
+    plotBackGroundColor = ImVec4(0.1137f, 0.1843f, 0.2863f, 1.0f); // color for the ImPlot3D background
+    ImGuiInit(); // window creation and context initialization
     windowsAreOpen[0] = true;
-    for (int i=1; i<sizeof(windowsAreOpen); i++) { // set windows that exist to false; only have main window open.
+    for (int i=1; i<sizeof(windowsAreOpen); i++) { // set non-main windows that exist to be closed; only have main window open.
         windowsAreOpen[i] = false;
     }
     currentQuestion = randomQuestion();
-    // debug();
     while (!glfwWindowShouldClose(windowBackend)) { // main event loop
         startImGuiFrame();
         if (!windowsAreOpen[0]) { // closing main window closes entire program
             windowTerminate();
         }
-        mainWindow();
+        mainWindow(); // render the main window
         if (windowsAreOpen[1]) {
             exportWindow();
         }
         if (windowsAreOpen[2]) {
-            ImGui::Begin("Debug Log", windowsAreOpen+2);
-            ImGui::Text("%s", ("Frame Count: " + to_string(frameCount)).c_str());
-            ImGui::Text("%s", ("Dot Count: " + to_string(dotCounter)).c_str());
-            ImGui::BeginChild("ScrollWheel");
-            printDebugEntries();
-            ImGui::EndChild();
-            ImGui::End();
+            debugWindow();
         }
         if (windowsAreOpen[3]) {
             studyWindow();
@@ -539,26 +544,19 @@ int Main() {
         if (graphData && subnettingStarted) {
             plotSubnetCubes();
         }
-        for (int i=0; i<sizeof(windowsAreOpen); i++) { // TODO: change how open windows are handled.
-            aWindowIsOpen = aWindowIsOpen || windowsAreOpen[i];
-        }
-        if (!aWindowIsOpen) {
-            windowTerminate();
-        }
-        aWindowIsOpen = false;
         endImGuiFrame();
         frameCount += 1;
-        if (frameCount % 25 == 0) {
+        if (frameCount % 25 == 0) { // cycle the dot counter from one to three every 25 frames.
             dotCounter++;
         }
-        if (dotCounter > 3ULL) {
+        if (dotCounter > 3ULL) { // reset the dot counter when it is more than 3.
             dotCounter = 1;
         }
     }
     return 0;
 }
 
-#ifdef _WIN32
+#ifdef _WIN32 // call WinMain() as the main function on Windows and main() on other platforms
 void WinMain() {
     Main();
 }
