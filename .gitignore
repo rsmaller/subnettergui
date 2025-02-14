@@ -14,3 +14,5 @@
 /ZERO_CHECK.vcxproj.filters
 /Makefile
 /CMakeFiles
+/bin
+/build
