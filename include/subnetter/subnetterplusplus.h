@@ -389,8 +389,8 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
         netMask2 = swapMask;
     }
     int networkMagnitudeDifference = netMask1.hostBits - netMask2.hostBits;
-    unsigned long long int totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
-    unsigned long long int subnetsToGenerate;
+    long long int totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
+    long long int subnetsToGenerate;
     if(exportFlag) {
         subnetsToGenerate = totalSubnetsToGenerate;
     } else {
@@ -398,7 +398,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     }
     IP localIPCopy = (IPAddr & netMask1) + ((unsigned int)(totalAddedToIP - 256) * (unsigned int)netMask2.blockSize);
     IP veryFirstIP = IPAddr & netMask1;
-    IP veryLastIP = (IPAddr & netMask1) + (unsigned int)(((unsigned long long)totalSubnetsToGenerate * netMask2.blockSize) - 1);
+    IP veryLastIP = (IPAddr & netMask1) + (unsigned int)(((long long)totalSubnetsToGenerate * netMask2.blockSize) - 1);
     string netMask1StringToUse;
     string netMask2StringToUse;
     string startingIPToUse;
