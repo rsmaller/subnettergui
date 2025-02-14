@@ -1,0 +1,16 @@
+/.vscode
+/ALL_BUILD.vcxproj
+/ALL_BUILD.vcxproj.filters
+/cmake_install.cmake
+/CMakeCache.txt
+/imgui.vcxproj
+/imgui.vcxproj.filters
+/implot3d.vcxproj
+/implot3d.vcxproj.filters
+/subnettergui.sln
+/subnettergui.vcxproj
+/subnettergui.vcxproj.filters
+/ZERO_CHECK.vcxproj
+/ZERO_CHECK.vcxproj.filters
+/Makefile
+/CMakeFiles
