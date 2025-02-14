@@ -3,10 +3,10 @@
 #include <time.h>
 #include <stdlib.h>
 
-unsigned int getRandomInteger(unsigned long long int start, unsigned long long int end) {
+unsigned int getRandomInteger(unsigned int start, unsigned int end) {
 	assert(end > start);
 	unsigned long long int range = end - start + 1;
-	return (unsigned int)(rand() % range);
+	return (unsigned int)(rand() % range + start);
 }
 
 unsigned int getRandomIPNumber() {
