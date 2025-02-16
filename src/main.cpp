@@ -7,7 +7,7 @@
 #include "implot3d.h"
 #include "implot3d_internal.h"
 #include "random.h"
-#include "subnetterplusplus.h"
+#include "subnetterplusplus.hpp"
 #include <iostream>
 #include <string>
 #include <cmath>
