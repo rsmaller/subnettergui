@@ -407,13 +407,9 @@ void mainWindow() {
         totalAddedToIP += 256;
     }
     ImGui::SameLine();
-    if (ImGui::Button("Go to End") && totalAddedToIP != totalSubnetsToGenerate) {
-        currentIP += (unsigned int)(totalSubnetsToGenerate - totalAddedToIP - 256) * (unsigned int)netMaskArg2.blockSize;
+    if (ImGui::Button("Go to End") && totalAddedToIP != totalSubnetsToGenerate && totalSubnetsToGenerate > 256) {
+        currentIP += (unsigned int)(totalSubnetsToGenerate- 256) * (unsigned int)netMaskArg2.blockSize;
         totalAddedToIP = totalSubnetsToGenerate - (totalSubnetsToGenerate % 256);
-        if (totalAddedToIP < 256) {
-            totalAddedToIP = 256;
-            currentIP = (unsigned int)((totalSubnetsToGenerate - 256) * netMaskArg2.blockSize);
-        }
     }
     if (!subnettingStarted) {
         ImGui::End();
