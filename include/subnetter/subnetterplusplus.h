@@ -184,10 +184,10 @@ public:
 
 class SubnetMask : public IP {
 public:
-    unsigned long long blockSize;
-    unsigned long long numberOfSubnets;
-    unsigned int hostBits;
-    unsigned int networkBits;
+    long long blockSize;
+    long long numberOfSubnets;
+    int hostBits;
+    int networkBits;
 
     SubnetMask(string stringArg) : IP(stringArg) {
         if (isCIDRMask(stringArg)) {
@@ -203,7 +203,7 @@ public:
         if (this -> hostBits == 32) {
             this -> blockSize = 4294967296ULL;
         } else if (!invalidFormat) {
-            this -> blockSize = 1ULL<<(unsigned long long)(this -> hostBits);
+            this -> blockSize = 1ULL<<(this -> hostBits);
         } else {
             this -> blockSize = 0;
         }
@@ -395,8 +395,8 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
         netMask2 = swapMask;
     }
     int networkMagnitudeDifference = netMask1.hostBits - netMask2.hostBits;
-    unsigned long long int totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
-    unsigned long long int subnetsToGenerate;
+    long long int totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
+    long long int subnetsToGenerate;
     #ifdef IMGUI_API // Limit generated subnets in graphical interface to 256 but not in CLI
     if(exportFlag) {
         subnetsToGenerate = totalSubnetsToGenerate;
@@ -408,7 +408,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     #endif
     IP localIPCopy = (IPAddr & netMask1) + ((unsigned int)(totalAddedToIP - 256) * (unsigned int)netMask2.blockSize);
     IP veryFirstIP = IPAddr & netMask1;
-    IP veryLastIP = (IPAddr & netMask1) + (unsigned int)(((unsigned long long)totalSubnetsToGenerate * netMask2.blockSize) - 1);
+    IP veryLastIP = (IPAddr & netMask1) + (unsigned int)((totalSubnetsToGenerate * netMask2.blockSize) - 1);
     string netMask1StringToUse;
     string netMask2StringToUse;
     string startingIPToUse;
@@ -440,7 +440,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     }
     VLSMOutput("-------------------------------------------------------------------\n");
     if (reverseFlag) {
-        localIPCopy += (unsigned int)netMask2.blockSize * ((unsigned int)subnetsToGenerate - 1);
+        localIPCopy += (unsigned int)netMask2.blockSize * (unsigned int)(subnetsToGenerate - 1);
         for (int i=0; i<subnetsToGenerate; i++) {
             if (!windowsAreOpen[0]) return;
             VLSMOutput((subnetStringConversionFunction(Subnet(localIPCopy, netMask2)) + "\n").c_str());

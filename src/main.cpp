@@ -195,7 +195,7 @@ void endImGuiFrame() {
 }
 
 void printDebugEntries() {
-    for (int i=0; i<debugEntries.size(); i++) {
+    for (unsigned long i=0; i<debugEntries.size(); i++) {
         ImGui::Text("%s", (">>> " + debugEntries[i]).c_str());
     }
 }
@@ -522,7 +522,7 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
     plotBackGroundColor = ImVec4(0.1137f, 0.1843f, 0.2863f, 1.0f); // color for the ImPlot3D background
     ImGuiInit(); // window creation and context initialization
     windowsAreOpen[0] = true;
-    for (int i=1; i<sizeof(windowsAreOpen); i++) { // set non-main windows that exist to be closed; only have main window open.
+    for (unsigned long i=1; i<sizeof(windowsAreOpen); i++) { // set non-main windows that exist to be closed; only have main window open.
         windowsAreOpen[i] = false;
     }
     currentQuestion = randomQuestion();
