@@ -17,3 +17,8 @@
 /bin
 /build
 /imgui.ini
+/imgui.dir
+/implot3d.dir
+/subnettergui.dir
+/x64
+/ARM64
