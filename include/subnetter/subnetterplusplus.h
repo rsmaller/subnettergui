@@ -19,11 +19,12 @@ string programName;
 bool binaryFlag = false;
 bool debugFlag = false;
 bool reverseFlag = false;
-extern ofstream exportFileStream;
+ofstream exportFileStream;
+
+#ifdef IMGUI_API // If ImGui included, use ImGui::Text to render output. Otherwise, send output to cout
 extern const int totalNumberOfWindows;
 extern bool windowsAreOpen[];
 
-#ifdef IMGUI_API // If ImGui included, use ImGui::Text to render output. Otherwise, send output to cout
 void nonExportOutput(const char *string) {
     ImGui::Text("%s", string);
 }
@@ -32,6 +33,7 @@ void usage(const char *message) {
     ImGui::Text("%s", message);
 }
 #else
+
 void nonExportOutput(const char *string) {
     cout << string << endl;
 }
@@ -428,7 +430,13 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
         netMask2StringToUse = netMask2.IPString;
     }
     if (debugFlag) {VLSMOutput(("Added total in header: " + to_string(totalAddedToIP)).c_str());}
-    VLSMOutput((to_string(totalSubnetsToGenerate) + " Subnet(s) Total, " + to_string(netMask2.blockSize) + " IP(s) Per Subnet\n").c_str());
+    if (exportFlag && debugFlag) {
+        VLSMOutput("\n");
+    }
+    VLSMOutput((to_string(totalSubnetsToGenerate) + " Subnet(s) Total, " + to_string(netMask2.blockSize) + " IP(s) Per Subnet").c_str());
+    if (exportFlag) {
+        VLSMOutput("\n");
+    }
     if (netMask1.blockSize != netMask2.blockSize) {
         VLSMOutput((netMask1StringToUse + "[/" + to_string(netMask1.networkBits) + "] -> " + netMask2StringToUse + "[/" + to_string(netMask2.networkBits) + "]\n" +
             startingIPToUse + "/" + to_string(netMask1.networkBits) + " -> " + changingIPToUse + "/" + to_string(netMask2.networkBits)).c_str());
@@ -438,18 +446,31 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     if (exportFlag) {
         VLSMOutput("\n");
     }
-    VLSMOutput("-------------------------------------------------------------------\n");
+    VLSMOutput("-------------------------------------------------------------------");
+    if (exportFlag) {
+        VLSMOutput("\n");
+    }
     if (reverseFlag) {
         localIPCopy += (unsigned int)netMask2.blockSize * (unsigned int)(subnetsToGenerate - 1);
         for (int i=0; i<subnetsToGenerate; i++) {
+            #ifdef IMGUI_API
             if (!windowsAreOpen[0]) return;
-            VLSMOutput((subnetStringConversionFunction(Subnet(localIPCopy, netMask2)) + "\n").c_str());
+            #endif
+            VLSMOutput((subnetStringConversionFunction(Subnet(localIPCopy, netMask2))).c_str());
+            if (exportFlag) {
+                VLSMOutput("\n");
+            }
             localIPCopy -= (unsigned int)netMask2.blockSize;
         }
     } else {
         for (int i=0; i<subnetsToGenerate; i++) {
+            #ifdef IMGUI_API
             if (!windowsAreOpen[0]) return;
-            VLSMOutput((subnetStringConversionFunction(Subnet(localIPCopy, netMask2)) + "\n").c_str());
+            #endif
+            VLSMOutput((subnetStringConversionFunction(Subnet(localIPCopy, netMask2))).c_str());
+            if (exportFlag) {
+                VLSMOutput("\n");
+            }
             localIPCopy += (unsigned int)netMask2.blockSize;
         }
     }
@@ -463,7 +484,6 @@ void timedVLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportF
     double timeTotal = (double)(endingClock - startingClock) / CLOCKS_PER_SEC;
     if (debugFlag && exportFlag) {
         exportOutput((to_string(timeTotal) + " seconds to run").c_str());
-        exportFileStream.close();
     } else if (debugFlag) {
         nonExportOutput((to_string(timeTotal) + " seconds to run").c_str());
     }

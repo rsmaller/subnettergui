@@ -62,7 +62,7 @@ question currentQuestion = {IP(0), SubnetMask(0), "", "", "", "", "", ""}; // th
 
 //  export input
 char *exportInputBuffer = (char *)calloc(512, 1); // main input for export path
-ofstream exportFileStream;
+extern ofstream exportFileStream;
 bool exportThreadComplete = false;
 mutex exportThreadMutex;
 bool currentlyInExportThread = false;
@@ -482,7 +482,8 @@ void exportWindow() {
         thread exportThread = thread(
             []() -> void { // Lambda function that runs in a detached thread
                 currentlyInExportThread = true;
-                timedVLSM(IPArg, netMaskArg1, netMaskArg2, true); 
+                timedVLSM(IPArg, netMaskArg1, netMaskArg2, true);
+                exportFileStream.close();
                 unique_lock exportThreadLock(exportThreadMutex); 
                 exportThreadComplete = true; 
                 currentlyInExportThread = false;
