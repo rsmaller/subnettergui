@@ -1,10 +1,4 @@
 #pragma once
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-#include "GLFW/glfw3native.h"
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 #include <iostream>
 #include <string.h>
 #include <cmath>
@@ -29,9 +23,25 @@ extern ofstream exportFileStream;
 extern const int totalNumberOfWindows;
 extern bool windowsAreOpen[];
 
+#ifdef IMGUI_API // If ImGui included, use ImGui::Text to render output. Otherwise, send output to cout
+void nonExportOutput(const char *string) {
+    ImGui::Text("%s", string);
+}
+
 void usage(const char *message) {
     ImGui::Text("%s", message);
 }
+#else
+void nonExportOutput(const char *string) {
+    cout << string << endl;
+}
+
+void usage(const char *message) {
+    cout << message << endl; 
+    exit(0);
+}
+#endif
+
 
 class IP {
 public:
@@ -364,10 +374,6 @@ public:
     }
 };
 
-void nonExportOutput(const char *string) {
-    ImGui::Text("%s", string);
-}
-
 void exportOutput(const char *string) {
     exportFileStream << string;
 }
@@ -391,11 +397,15 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     int networkMagnitudeDifference = netMask1.hostBits - netMask2.hostBits;
     unsigned long long int totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
     unsigned long long int subnetsToGenerate;
+    #ifdef IMGUI_API // Limit generated subnets in graphical interface to 256 but not in CLI
     if(exportFlag) {
         subnetsToGenerate = totalSubnetsToGenerate;
     } else {
         subnetsToGenerate = (totalSubnetsToGenerate < 256) ? totalSubnetsToGenerate : 256;
     }
+    #else
+        subnetsToGenerate = totalSubnetsToGenerate;
+    #endif
     IP localIPCopy = (IPAddr & netMask1) + ((unsigned int)(totalAddedToIP - 256) * (unsigned int)netMask2.blockSize);
     IP veryFirstIP = IPAddr & netMask1;
     IP veryLastIP = (IPAddr & netMask1) + (unsigned int)(((unsigned long long)totalSubnetsToGenerate * netMask2.blockSize) - 1);
@@ -451,12 +461,10 @@ void timedVLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportF
     VLSM(IPAddr, netMask1, netMask2, exportFlag);
     endingClock = clock();
     double timeTotal = (double)(endingClock - startingClock) / CLOCKS_PER_SEC;
-    if (debugFlag && !exportFlag) {
-        ImGui::Text("%s", (to_string(timeTotal) + " seconds to run\n").c_str());
-    } else if (debugFlag && exportFlag) {
-        exportFileStream << to_string(timeTotal) + " seconds to run\n";
-    }
-    if (exportFlag) {
+    if (debugFlag && exportFlag) {
+        exportOutput((to_string(timeTotal) + " seconds to run").c_str());
         exportFileStream.close();
+    } else if (debugFlag) {
+        nonExportOutput((to_string(timeTotal) + " seconds to run").c_str());
     }
 }
