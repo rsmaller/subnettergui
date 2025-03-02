@@ -14,12 +14,14 @@ typedef union IPNumeric {
     unsigned char octets[4];
 } IPNumeric;
 
-char **globalArgumentVector;
+char **globalArgumentVector; // Flags and vectors
 string programName;
 bool binaryFlag = false;
 bool debugFlag = false;
 bool reverseFlag = false;
 ofstream exportFileStream;
+
+bool subnettingSuccessful = false; // other conditionals
 
 #ifdef IMGUI_API // If ImGui included, use ImGui::Text to render output. Otherwise, send output to cout
 extern const int totalNumberOfWindows;
@@ -389,7 +391,10 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     }
     if (IPAddr.invalidFormat || netMask1.invalidFormat || netMask2.invalidFormat) {
         usage("Please provide a valid format for the IP.");
+        subnettingSuccessful = false;
         return;
+    } else {
+        subnettingSuccessful = true;
     }
     if (netMask1.blockSize < netMask2.blockSize) {
         SubnetMask swapMask = netMask1;

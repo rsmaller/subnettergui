@@ -69,6 +69,7 @@ bool currentlyInExportThread = false;
 
 // conditionals
 bool subnettingStarted = false;
+extern bool subnettingSuccessful;
 bool exportButtonPreviouslyPressed = false;
 bool graphData = false;
 bool nextButtonShown = false;
@@ -538,7 +539,7 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         if (windowsAreOpen[3]) {
             studyWindow();
         }
-        if (graphData && subnettingStarted) {
+        if (graphData && subnettingStarted && subnettingSuccessful) {
             plotSubnetCubes();
         }
         endImGuiFrame();
