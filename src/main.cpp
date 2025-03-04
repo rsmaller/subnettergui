@@ -469,8 +469,16 @@ void mainWindow() {
     ImGui::BeginChild("ScrollWheel");
     SubnetMask swapMask;
     IPArg = IP(mainInputBuffer1);
-    netMaskArg1 = SubnetMask(mainInputBuffer2);
-    netMaskArg2 = SubnetMask(mainInputBuffer3);
+    if (strcmp(mainInputBuffer2, "") && !strcmp(mainInputBuffer3, "")) {
+        netMaskArg1 = SubnetMask(mainInputBuffer2);
+        netMaskArg2 = SubnetMask(mainInputBuffer2);
+    } else if (!strcmp(mainInputBuffer2, "") && strcmp(mainInputBuffer3, "")) {
+        netMaskArg1 = SubnetMask(mainInputBuffer3);
+        netMaskArg2 = SubnetMask(mainInputBuffer3);
+    } else {
+        netMaskArg1 = SubnetMask(mainInputBuffer2);
+        netMaskArg2 = SubnetMask(mainInputBuffer3);
+    }
     if (netMaskArg1.networkBits > netMaskArg2.networkBits) { // If netMaskArg1's CIDR mask is greater than netMaskArg2's, swap them to ensure that netMaskArg1's CIDR mask is >= to netMaskArg2's.
         swapMask = netMaskArg1;
         netMaskArg1 = netMaskArg2;
