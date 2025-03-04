@@ -2,7 +2,7 @@
 
 ## Overview
 
-SubnetterGUI is a graphical interface for Subnetting and VLSM calculations written in C++.
+SubnetterGUI is a graphical interface for Subnetting and VLSM calculations written in C++. This tool has a variety of tools for learning how to subnet and calculating subnets.
 
 ## Dependencies
 
@@ -15,7 +15,7 @@ Note: `xorg-dev` is also required when using the X11 window system.
 
 ## Compatibility
 
-SubnetterGUI is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW and GLEW are statically linked into this program with pre-compiled libraries. Other operating systems/architectures are not currently supported and their binaries are not included.
+SubnetterGUI is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW and GLEW are statically linked into this program with pre-compiled libraries. Due to limitations in GLFW's and GLEW's build process, other operating systems/architectures are not currently supported, and their library files are not included.
 
 ## Compiling
 
@@ -32,3 +32,12 @@ cmake --build .
 ```
 
 The binary will be dropped in the `build` folder under the name `subnettergui`.
+
+## How To Use The Program
+
+### Subnet Calculator
+
+This program's primary function is to calculate subnets. This can be done from the main menu.
+
+Enter an IP address and at least one subnet mask[^1] into the `IP`, `Netmask 1`, and `Netmask 2` input text fields respectively.
+[^1]: If one subnet mask is entered, a single subnet will be calculated. If two subnet masks are entered, VLSM will be calculated with the two subnet masks.
