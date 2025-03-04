@@ -136,10 +136,10 @@ bool sameLineInIf() {
     return true;
 }
 
-bool textInIf(const char *stringArg) {
-    ImGui::Text("%s", stringArg);
-    return true;
-}
+// bool textInIf(const char *stringArg) {
+//     ImGui::Text("%s", stringArg);
+//     return true;
+// }
 
 int argumentResetFunc() {
     currentIP.IPAddress.IP32 = 0;
