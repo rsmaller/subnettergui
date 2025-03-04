@@ -362,7 +362,7 @@ void studyWindow() {
         ImGui::InputText("Broadcast Address", studyInputBuffer6, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
         ImGui::InputText(("Binary for " + currentQuestion.questionIP.IPString).c_str(), studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
         ImGui::InputText(("Binary for /" + to_string(currentQuestion.questionNetMask.networkBits) + " Mask").c_str(), studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, questionChangedCallback);
-        if (ImGui::Button("Submit Answers")) {checkAnswers();}
+        if (ImGui::Button("Check Answers")) {checkAnswers();}
         ImGui::SameLine();
         if (ImGui::Button("Show Answers")) {showAnswers();}
         ImGui::SameLine();
