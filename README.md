@@ -2,7 +2,7 @@
 
 ## Overview
 
-Subnetter++ is a graphical interface for Subnetting and VLSM calculations written in C++. This tool has a variety of tools for learning how to subnet and calculating subnets.
+Subnetter++ is a graphical interface for Subnetting and VLSM calculations written in C++. This tool has a variety of tools for calculating subnets and learning how to subnet.
 
 ## Dependencies
 
