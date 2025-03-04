@@ -250,6 +250,13 @@ void plotSubnetCubes() {
     float cube2SideLength = (float)cbrt(netMaskArg2.blockSize);
     float vertex2DistanceFromOrigin = (float)cube2SideLength / 2;
     float vertexDifference = vertex1DistanceFromOrigin - vertex2DistanceFromOrigin;
+    bool plotSmallCube = netMaskArg1.blockSize != netMaskArg2.blockSize;
+    string bigCubeName;
+    if (plotSmallCube)  {
+        bigCubeName = "Big Subnet";
+    } else {
+        bigCubeName = "Subnet";
+    }
     ImPlot3DPoint big_cube_vtx[8] = {
         {-vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin}, // 0: Bottom-back-left
         { vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin}, // 1: Bottom-back-right
@@ -273,25 +280,35 @@ void plotSubnetCubes() {
     ImGui::PushStyleColor(ImGuiCol_WindowBg, plotMenuBackgroundColor);
     ImGui::Begin("3D Subnet Plot", &graphData);
     ImGui::PopStyleColor();
-    if (ImPlot3D::BeginPlot(("Big Subnet Cube Side Length: " + to_string(cube1SideLength) + "\nSmall Subnet Cube Side Length: " + to_string(cube2SideLength) + "\n" + to_string(netMaskArg1.blockSize / netMaskArg2.blockSize) + " Small Cubes can fit inside the Big Cube").c_str())) {
+    string headerText;
+    if (plotSmallCube) {
+        headerText = ("Big Subnet Cube Side Length: " + to_string(cube1SideLength) + "\nSmall Subnet Cube Side Length: " + to_string(cube2SideLength) + "\n" + to_string(netMaskArg1.blockSize / netMaskArg2.blockSize) + " Small Cubes can fit inside the Big Cube");
+    } else {
+        headerText = "Subnet Cube Side Length: " + to_string(cube1SideLength);
+    }
+    if (ImPlot3D::BeginPlot(headerText.c_str())) {
         ImPlot3D::SetupAxes("x", "y", "z");
         ImPlot3D::SetupAxesLimits(-vertex1DistanceFromOrigin, vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin, vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin, vertex1DistanceFromOrigin, ImPlot3DCond_Always);
         ImPlot3D::PushStyleColor(ImPlot3DCol_PlotBorder, ImVec4(axisColor[0], axisColor[1], axisColor[2], axisColor[3]));
         ImPlot3D::PushStyleColor(ImPlot3DCol_PlotBg, ImVec4(plotBackgroundColor[0], plotBackgroundColor[1], plotBackgroundColor[2], plotBackgroundColor[3]));
         ImPlot3D::PushStyleColor(ImPlot3DCol_Fill, ImVec4(bigCubeColor[0], bigCubeColor[1], bigCubeColor[2], bigCubeColor[3]));
         ImPlot3D::PushStyleColor(ImPlot3DCol_Line, ImVec4(bigCubeEdgeColor[0], bigCubeEdgeColor[1], bigCubeEdgeColor[2], bigCubeEdgeColor[3]));
-        ImPlot3D::PlotMesh(("Big Subnet [/" + to_string(netMaskArg1.networkBits) + "]").c_str(), big_cube_vtx, ImPlot3D::cube_idx, ImPlot3D::CUBE_VTX_COUNT, ImPlot3D::CUBE_IDX_COUNT);
+        ImPlot3D::PlotMesh((bigCubeName + " [/" + to_string(netMaskArg1.networkBits) + "]").c_str(), big_cube_vtx, ImPlot3D::cube_idx, ImPlot3D::CUBE_VTX_COUNT, ImPlot3D::CUBE_IDX_COUNT);
         ImPlot3D::PopStyleColor();
-        ImPlot3D::PushStyleColor(ImPlot3DCol_Fill, ImVec4(smallCubeColor[0], smallCubeColor[1], smallCubeColor[2], smallCubeColor[3]));
-        ImPlot3D::PushStyleColor(ImPlot3DCol_Line, ImVec4(smallCubeEdgeColor[0], smallCubeEdgeColor[1], smallCubeEdgeColor[2], smallCubeEdgeColor[3]));
-        ImPlot3D::PlotMesh(("Small Subnet [/" + to_string(netMaskArg2.networkBits) + "]").c_str(), small_cube_vtx, ImPlot3D::cube_idx, ImPlot3D::CUBE_VTX_COUNT, ImPlot3D::CUBE_IDX_COUNT);
-        ImPlot3D::PopStyleColor();
+        if (plotSmallCube) {
+            ImPlot3D::PushStyleColor(ImPlot3DCol_Fill, ImVec4(smallCubeColor[0], smallCubeColor[1], smallCubeColor[2], smallCubeColor[3]));
+            ImPlot3D::PushStyleColor(ImPlot3DCol_Line, ImVec4(smallCubeEdgeColor[0], smallCubeEdgeColor[1], smallCubeEdgeColor[2], smallCubeEdgeColor[3]));
+            ImPlot3D::PlotMesh(("Small Subnet [/" + to_string(netMaskArg2.networkBits) + "]").c_str(), small_cube_vtx, ImPlot3D::cube_idx, ImPlot3D::CUBE_VTX_COUNT, ImPlot3D::CUBE_IDX_COUNT);
+            ImPlot3D::PopStyleColor();
+        }
         ImPlot3D::EndPlot();
     }
-    ImGui::ColorEdit4("Big Subnet Cube Color", bigCubeColor);
-    ImGui::ColorEdit4("Big Subnet Cube Edge Color", bigCubeEdgeColor);
-    ImGui::ColorEdit4("Small Subnet Cube Color", smallCubeColor);
-    ImGui::ColorEdit4("Small Subnet Cube Edge Color", smallCubeEdgeColor);
+    ImGui::ColorEdit4((bigCubeName + " Cube Color").c_str(), bigCubeColor);
+    ImGui::ColorEdit4((bigCubeName + " Cube Edge Color").c_str(), bigCubeEdgeColor);
+    if (plotSmallCube) {
+        ImGui::ColorEdit4("Small Subnet Cube Color", smallCubeColor);
+        ImGui::ColorEdit4("Small Subnet Cube Edge Color", smallCubeEdgeColor);
+    }
     ImGui::ColorEdit4("Axis Color", axisColor);
     ImGui::ColorEdit4("Background Color", plotBackgroundColor);
     if (ImGui::Button("Reset Colors")) resetPlotColors();
