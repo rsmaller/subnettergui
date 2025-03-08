@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Subnetter++
+Exec=/usr/local/bin/subnettergui
+Icon=/usr/share/icons/subnettergui/subnettergui.svg

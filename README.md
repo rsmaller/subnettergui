@@ -15,7 +15,7 @@ Note: `xorg-dev` is also required when using the X11 window system.
 
 ## Compatibility
 
-SubnetterGUI is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW and GLEW are statically linked into this program with pre-compiled libraries. Due to limitations in GLFW's and GLEW's build process, other operating systems/architectures are not currently supported, and their library files are not included.
+Subnetter++ is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW and GLEW are statically linked into this program with pre-compiled libraries. Due to limitations in GLFW's and GLEW's build process, other operating systems/architectures are not currently supported, and their library files are not included.
 
 ## Compiling
 
@@ -33,9 +33,15 @@ cmake --build .
 
 The binary will be dropped in the `build` folder under the name `subnettergui`.
 
+## Installing on Linux
+
+After building the project, an installer script named `install.sh` can be used to install the built binary like a normal application.
+
+Note that the install script will install Subnetter++ for all users. To undo this, run `uninstall.sh`.
+
 ## How To Use The Program
 
-Subnetter++ can be opened just like any other standalone executable program.
+Subnetter++ can be opened just like any other standalone executable program, either via the command line or a graphical interface. If it is installed with the install script, it should be available to open like any other Linux application.
 
 ### Subnet Calculator
 
