@@ -4,7 +4,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ./bin)
 project(subnettergui VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 23)
 
-include_directories(include include/random include/GLFW include/GL include/imgui include/implot3d include/subnetter)
+include_directories(include include/random include/GLFW include/GL include/imgui include/implot3d include/subnetter include/ipv6tools)
 
 add_library(glew STATIC IMPORTED)
 add_library(glfw3 STATIC IMPORTED)
