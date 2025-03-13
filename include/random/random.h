@@ -13,6 +13,15 @@ unsigned int getRandomIPNumber() {
 	return ((char)rand() << 24) + ((char)rand() << 16) + ((char)rand() << 8) + (char)rand();
 }
 
+unsigned short *getRandomIPv6Number() { // returns size 8 array for IPv6 number
+	unsigned short *returnArray = (unsigned short *)calloc(8, 2);
+	rand();
+	for (int i=0; i<8; i++) {
+		returnArray[i] = (unsigned short)(rand() % 0xffffU);
+	}
+	return returnArray;
+}
+
 bool chance(unsigned int numerator, unsigned int denominator) {
 	unsigned int generatedNumber = getRandomInteger(1, denominator);
 	return generatedNumber <= numerator;

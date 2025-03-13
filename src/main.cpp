@@ -8,6 +8,7 @@
 #include "implot3d_internal.h"
 #include "random.h"
 #include "subnetterplusplus.hpp"
+#include "ipv6tools.hpp"
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -31,9 +32,9 @@ typedef struct question {
     string answer8;
 } question;
 
-GLFWwindow *windowBackend = nullptr; // invisible GLFW window that allows ImGui to appear. currently the GLFW window itself cannot render new frames.
+GLFWwindow *windowBackend = nullptr;
 
-const int totalNumberOfWindows = 4; // control variables to properly exit the program when windows are closed.
+const int totalNumberOfWindows = 5; // control variables to properly exit the program when windows are closed.
 bool windowsAreOpen[totalNumberOfWindows];
 //  Indices:
 //  0 - Main Window
@@ -65,6 +66,10 @@ extern ofstream exportFileStream;
 bool exportThreadComplete = false;
 mutex exportThreadMutex;
 bool currentlyInExportThread = false;
+
+// IPv6 Tools
+char *IPv6InputBuffer = (char *)calloc(256, 1);
+IPv6 currentIPv6Addr;
 
 // conditionals
 bool subnettingStarted = false;
@@ -141,25 +146,30 @@ bool sameLineInIf() {
 //     return true;
 // }
 
-int argumentResetFunc() {
+int argumentChangedCallback(ImGuiInputTextCallbackData *data) {
+    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
     currentIP.IPAddress.IP32 = 0;
     totalAddedToIP = 256;
     return 1;
 }
 
-int questionResetFunc() {
+int questionChangedCallback(ImGuiInputTextCallbackData *data) {
+    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
     currentQuestionAnswered = false;
     return 1;
 }
 
-int exportResetFunc() {
+int exportChangedCallback(ImGuiInputTextCallbackData *data) {
+    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
     exportButtonPreviouslyPressed = false;
     return 1;
 }
 
-int (*argumentChangedCallback)(ImGuiInputTextCallbackData *data) = (int (*)(ImGuiInputTextCallbackData *))&argumentResetFunc;
-int (*questionChangedCallback)(ImGuiInputTextCallbackData *data) = (int (*)(ImGuiInputTextCallbackData *))&questionResetFunc;
-int (*exportChangedCallback)(ImGuiInputTextCallbackData *data) = (int (*)(ImGuiInputTextCallbackData *))&exportResetFunc;
+int IPv6ChangedCallback(ImGuiInputTextCallbackData *data) {
+    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
+    currentIPv6Addr = IPv6(IPv6InputBuffer);
+    return 1;
+}
 
 void glfwErrorCallback(int error, const char *msg) {
     if (error != 65544) printf("Error %d: %s\n", error, msg);
@@ -392,8 +402,9 @@ void mainWindow() {
     ImGui::BeginMenuBar(); // Indented conditionals are part of the menu bar.
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Export")) {debugLog("Export Window Opened"); windowsAreOpen[1] = true;}
-            if (ImGui::MenuItem("Study")) {windowsAreOpen[3] = true;}
-            if (ImGui::MenuItem("Open Debug Window")) {windowsAreOpen[2] = true;}
+            if (ImGui::MenuItem("Study")) windowsAreOpen[3] = true;
+            if (ImGui::MenuItem("IPv6 Tools")) windowsAreOpen[4] = true;
+            if (ImGui::MenuItem("Open Debug Window")) windowsAreOpen[2] = true;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Options")) {
@@ -500,9 +511,25 @@ void mainWindow() {
     ImGui::End();
 }
 
+void IPv6Window() {
+    ImGui::Begin("IPv6 Tools", windowsAreOpen+4);
+    ImGui::InputText("IPv6 Address", IPv6InputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, IPv6ChangedCallback);
+    if (ImGui::Button("Generate Random IP Address")) {
+        currentIPv6Addr = IPv6(getRandomIPv6Number());
+        memcpy(IPv6InputBuffer, currentIPv6Addr.IPv6String.c_str(), 39);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Clear")) {
+        memcpy(IPv6InputBuffer, "", 39);
+    }
+    ImGui::Text("%s", ("Shorthand: " + IPv6(string(IPv6InputBuffer)).shortenedIPv6String).c_str());
+    ImGui::Text("%s", ("Full: " + IPv6(string(IPv6InputBuffer)).IPv6String).c_str());
+    ImGui::End();
+}
+
 void exportWindow() {
     ImGui::Begin("Export...", windowsAreOpen+1);
-    ImGui::InputText("Export Path", exportInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback); // if this input is changed, reset the export success message.
+    ImGui::InputText("Export Path", exportInputBuffer, 511, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback); // if this input is changed, reset the export success message.
     if (ImGui::Button("Export")) {
         if (currentlyInExportThread) { // The export button does nothing if there is an ongoing export process.
             ImGui::End();
@@ -595,6 +622,9 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         }
         if (windowsAreOpen[3]) {
             studyWindow();
+        }
+        if (windowsAreOpen[4]) {
+            IPv6Window();
         }
         if (graphData && subnettingStarted && subnettingSuccessful) {
             plotSubnetCubes();
