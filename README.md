@@ -68,7 +68,7 @@ Subnetter++ also supports exporting subnets calculated in the main window. To do
 
 ### Practicing Subnetting
 
-You can also practice calculating subnets on your own. Go to `File > Study` to get started.
+You can also practice calculating subnets on your own. Go to `Tools > Study Subnetting` to get started.
 
 The study tab asks for various pieces of information about any single subnet. It provides a CIDR mask and an IP address.
 
