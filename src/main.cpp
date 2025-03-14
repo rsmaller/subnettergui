@@ -1,3 +1,7 @@
+// ----------------------------------------------------------------------------------------------
+// SECTION: Includes and Type Definitions
+// ----------------------------------------------------------------------------------------------
+
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
@@ -41,23 +45,28 @@ typedef struct classesQuestion {
     string answer3; // not used yet
 } classesQuestion;
 
+// ----------------------------------------------------------------------------------------------
+// SECTION: Global Variables
+// ----------------------------------------------------------------------------------------------
+
+//  window and window control variables to properly exit the program when windows are closed.
 GLFWwindow *windowBackend = nullptr;
-
-const int totalNumberOfWindows = 6; // control variables to properly exit the program when windows are closed.
+const int totalNumberOfWindows = 6;
 bool windowsAreOpen[totalNumberOfWindows];
-//  Indices:
-//  0 - Main Window
-//  1 - Export Window
-//  2 - Debug Window
-//  3 - Study Window
-//  4 - IPv6 Window
-//  5 - IP Classes Window
+    //  Indices:
+    //  0 - Main Window
+    //  1 - Export Window
+    //  2 - Debug Window
+    //  3 - Study Window
+    //  4 - IPv6 Window
+    //  5 - IP Classes Window
 
-// Debug variables
+//  Debug variables
 unsigned long long int frameCount = 0;
 unsigned long long int dotCounter = 1;
+vector<string> debugEntries;
 
-//  buffers for input data
+//  buffers for primary window input data
 char *mainInputBuffer1 = (char *)calloc(256, 1); // main IP input
 char *mainInputBuffer2 = (char *)calloc(256, 1); // netmask 1 input
 char *mainInputBuffer3 = (char *)calloc(256, 1); // netmask 2 input
@@ -72,35 +81,33 @@ char *studyInputBuffer6 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer7 = (char *)calloc(256, 1); // reserved input
 char *studyInputBuffer8 = (char *)calloc(256, 1); // reserved input
 subnettingQuestion currentSubnetQuestion = {IP(0), SubnetMask(0), "", "", "", "", "", ""}; // the subnetting question currently displayed on the screen
+bool currentSubnetQuestionAnswered = false;
 
-// buffers for class input data
+//  buffers for class input data
 char *classInputBuffer1 = (char *)calloc(256, 1);
 char *classInputBuffer2 = (char *)calloc(256, 1);
 char *classInputBuffer3 = (char *)calloc(256, 1);
 classesQuestion currentClassQuestion = {IP(0), SubnetMask(0), "", "", "", ""}; // the classes question currently displayed on the screen
+bool currentClassQuestionAnswered = false;
 
-//  export input
+//  buffers for export input data
 char *exportInputBuffer = (char *)calloc(512, 1); // main input for export path
 extern ofstream exportFileStream;
 bool exportThreadComplete = false;
 mutex exportThreadMutex;
 bool currentlyInExportThread = false;
 
-// IPv6 Tools
+//  IPv6 Tools
 char *IPv6InputBuffer = (char *)calloc(256, 1);
 IPv6 currentIPv6Addr;
 
-// conditionals
+//  Primary conditionals
 bool subnettingStarted = false;
 extern bool subnettingSuccessful;
 bool exportButtonPreviouslyPressed = false;
 bool graphData = false;
 bool nextButtonShown = false;
 bool prevButtonShown = false;
-bool currentSubnetQuestionAnswered = false;
-bool currentClassQuestionAnswered = false;
-int networkMagnitudeDifference = 0;
-unsigned long long int totalSubnetsToGenerate = 0;
 
 // subnet cube variables
 ImVec4 plotMenuBackgroundColor(0.1137f, 0.1843f, 0.2863f, 1.0f); // The background of the ImPlot3D menu, not the plot's background!!
@@ -111,55 +118,135 @@ float bigCubeEdgeColor[4] = {0.331f, 0.331f, 0.331f, 1.0f};
 float smallCubeColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 float smallCubeEdgeColor[4] = {0.779f, 0.779f, 0.779f, 1.0f};
 
-IP currentIP(0); // IP cursor variables
-// subnet and cube prototypes
-IP IPArg;
+// IP cursor variables and arguments
+IP IPArg; 
 SubnetMask netMaskArg1;
 SubnetMask netMaskArg2;
+IP currentIP(0); 
 extern unsigned long long totalAddedToIP;
+int networkMagnitudeDifference = 0;
+unsigned long long int totalSubnetsToGenerate = 0;
 
-vector<string> debugEntries;
+// ----------------------------------------------------------------------------------------------
+// SECTION: Debugging
+// ----------------------------------------------------------------------------------------------
 
 void debugLog(string lineToAdd) {
     debugEntries.push_back(lineToAdd);
 }
 
-void windowTerminate() {
-    glfwTerminate();
-    exit(0);
+void debug() {
+    debugLog("debugging function ran");
+    return;
 }
 
-void resetPlotColors() {
-    plotBackgroundColor[0] = 0.0f; 
-    plotBackgroundColor[1] = 0.0f; 
-    plotBackgroundColor[2] = 0.0f; 
-    plotBackgroundColor[3] = 1.0f;
-    axisColor[0] = 0.0f; 
-    axisColor[1] = 0.0f; 
-    axisColor[2] = 0.0f; 
-    axisColor[3] = 1.0f;
-    bigCubeColor[0] = 0.2f; 
-    bigCubeColor[1] = 0.2f; 
-    bigCubeColor[2] = 0.2f; 
-    bigCubeColor[3] = 1.0f;
-    bigCubeEdgeColor[0] = 0.331f; 
-    bigCubeEdgeColor[1] = 0.331f; 
-    bigCubeEdgeColor[2] = 0.331f; 
-    bigCubeEdgeColor[3] = 1.0f;
-    smallCubeColor[0] = 1.0f; 
-    smallCubeColor[1] = 1.0f; 
-    smallCubeColor[2] = 1.0f; 
-    smallCubeColor[3] = 1.0f;
-    smallCubeEdgeColor[0] = 0.779f; 
-    smallCubeEdgeColor[1] = 0.779f; 
-    smallCubeEdgeColor[2] = 0.779f; 
-    smallCubeEdgeColor[3] = 1.0f;
+void printDebugEntries() {
+    for (unsigned long i=0; i<debugEntries.size(); i++) {
+        ImGui::Text("%s", (">>> " + debugEntries[i]).c_str());
+    }
 }
 
-bool sameLineInIf() {
-    ImGui::SameLine();
-    return true;
+// ----------------------------------------------------------------------------------------------
+// SECTION: IP Object Wrappers
+// ----------------------------------------------------------------------------------------------
+
+IP constructRandomIP() {
+    return IP(getRandomIPNumber());
 }
+
+SubnetMask constructRandomSubnetMask() {
+    return SubnetMask(getRandomInteger(0, 32));
+}
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: Question Object Wrappers and Conditionals
+// ----------------------------------------------------------------------------------------------
+
+subnettingQuestion randomSubnetQuestion() {
+    subnettingQuestion returnValue;
+    IP generatedIP = constructRandomIP();
+    SubnetMask generatedSubnetMask = constructRandomSubnetMask();
+    IP networkIP = generatedIP & generatedSubnetMask;
+    returnValue.questionString = "Find all subnet information for a /" + to_string(generatedSubnetMask.networkBits) + " subnet containing the IP address " + generatedIP.IPString + ".";
+    returnValue.questionIP = generatedIP;
+    returnValue.questionNetMask = generatedSubnetMask;
+    returnValue.answer1 = generatedSubnetMask.IPString;
+    returnValue.answer2 = to_string(generatedSubnetMask.blockSize);
+    returnValue.answer3 = networkIP.IPString;
+    returnValue.answer4 = (networkIP + 1).IPString;
+    returnValue.answer5 = (networkIP + (int)(generatedSubnetMask.blockSize - 2ULL)).IPString;
+    returnValue.answer6 = (networkIP + (int)(generatedSubnetMask.blockSize - 1ULL)).IPString;
+    returnValue.answer7 = generatedIP.IPBinaryString;
+    returnValue.answer8 = generatedSubnetMask.IPBinaryString;
+    return returnValue;
+}
+
+classesQuestion randomClassQuestion() {
+    classesQuestion returnValue;
+    IP generatedIP = constructRandomIP();
+    returnValue.questionString = "What class and subnet mask are associated with the IP address " + generatedIP.IPString + " (Enter \"N/A\" if not applicable)?";
+    returnValue.answer1 = string(1, generatedIP.IPClass);
+    if (generatedIP.IPClass == 'A') {
+        returnValue.answer2 = "255.0.0.0";
+    } else if (generatedIP.IPClass == 'B') {
+        returnValue.answer2 = "255.255.0.0";
+    } else if (generatedIP.IPClass == 'C') {
+        returnValue.answer2 = "255.255.255.0";
+    } else {
+        returnValue.answer2 = "N/A";
+    }
+    return returnValue;
+}
+
+void resetCurrentSubnetQuestion() {
+    memcpy(studyInputBuffer1, "", 255);
+    memcpy(studyInputBuffer2, "", 255);
+    memcpy(studyInputBuffer3, "", 255);
+    memcpy(studyInputBuffer4, "", 255);
+    memcpy(studyInputBuffer5, "", 255);
+    memcpy(studyInputBuffer6, "", 255);
+    memcpy(studyInputBuffer7, "", 255);
+    memcpy(studyInputBuffer8, "", 255);
+    currentSubnetQuestionAnswered = false;
+}
+
+void showSubnetAnswers() { 
+    memcpy(studyInputBuffer1, currentSubnetQuestion.answer1.c_str(), 255);
+    memcpy(studyInputBuffer2, currentSubnetQuestion.answer2.c_str(), 255);
+    memcpy(studyInputBuffer3, currentSubnetQuestion.answer3.c_str(), 255);
+    memcpy(studyInputBuffer4, currentSubnetQuestion.answer4.c_str(), 255);
+    memcpy(studyInputBuffer5, currentSubnetQuestion.answer5.c_str(), 255);
+    memcpy(studyInputBuffer6, currentSubnetQuestion.answer6.c_str(), 255);
+    memcpy(studyInputBuffer7, currentSubnetQuestion.answer7.c_str(), 255);
+    memcpy(studyInputBuffer8, currentSubnetQuestion.answer8.c_str(), 255);
+    currentSubnetQuestionAnswered = false;
+}
+
+void checkSubnetAnswers() {
+    currentSubnetQuestionAnswered = true;
+}
+
+void resetCurrentClassQuestion() {
+    memcpy(classInputBuffer1, "", 255);
+    memcpy(classInputBuffer2, "", 255);
+    memcpy(classInputBuffer3, "", 255);
+    currentClassQuestionAnswered = false;
+}
+
+void showClassAnswers() {
+    memcpy(classInputBuffer1, currentClassQuestion.answer1.c_str(), 255);
+    memcpy(classInputBuffer2, currentClassQuestion.answer2.c_str(), 255);
+    // memcpy(classInputBuffer3, currentSubnetQuestion.answer3.c_str(), 255);
+    currentClassQuestionAnswered = false;
+}
+
+void checkClassAnswers() {
+    currentClassQuestionAnswered = true;
+}
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: ImGui Callbacks
+// ----------------------------------------------------------------------------------------------
 
 int argumentChangedCallback(ImGuiInputTextCallbackData *data) {
     (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
@@ -192,8 +279,26 @@ int IPv6ChangedCallback(ImGuiInputTextCallbackData *data) {
     return 1;
 }
 
+// ----------------------------------------------------------------------------------------------
+// SECTION: ImGui Wrapper Functions
+// ----------------------------------------------------------------------------------------------
+
+bool sameLineInIf() {
+    ImGui::SameLine();
+    return true;
+}
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: GLFW, OpenGL Initializaiton, and Rendering
+// ----------------------------------------------------------------------------------------------
+
 void glfwErrorCallback(int error, const char *msg) {
     if (error != 65544) printf("Error %d: %s\n", error, msg);
+}
+
+void windowTerminate() {
+    glfwTerminate();
+    exit(0);
 }
 
 void ImGuiInit() {
@@ -261,18 +366,35 @@ void endImGuiFrame() {
     }
 }
 
-void printDebugEntries() {
-    for (unsigned long i=0; i<debugEntries.size(); i++) {
-        ImGui::Text("%s", (">>> " + debugEntries[i]).c_str());
-    }
-}
+// ----------------------------------------------------------------------------------------------
+// SECTION: 3D Plotting
+// ----------------------------------------------------------------------------------------------
 
-IP constructRandomIP() {
-    return IP(getRandomIPNumber());
-}
-
-SubnetMask constructRandomSubnetMask() {
-    return SubnetMask(getRandomInteger(0, 32));
+void resetPlotColors() {
+    plotBackgroundColor[0] = 0.0f; 
+    plotBackgroundColor[1] = 0.0f; 
+    plotBackgroundColor[2] = 0.0f; 
+    plotBackgroundColor[3] = 1.0f;
+    axisColor[0] = 0.0f; 
+    axisColor[1] = 0.0f; 
+    axisColor[2] = 0.0f; 
+    axisColor[3] = 1.0f;
+    bigCubeColor[0] = 0.2f; 
+    bigCubeColor[1] = 0.2f; 
+    bigCubeColor[2] = 0.2f; 
+    bigCubeColor[3] = 1.0f;
+    bigCubeEdgeColor[0] = 0.331f; 
+    bigCubeEdgeColor[1] = 0.331f; 
+    bigCubeEdgeColor[2] = 0.331f; 
+    bigCubeEdgeColor[3] = 1.0f;
+    smallCubeColor[0] = 1.0f; 
+    smallCubeColor[1] = 1.0f; 
+    smallCubeColor[2] = 1.0f; 
+    smallCubeColor[3] = 1.0f;
+    smallCubeEdgeColor[0] = 0.779f; 
+    smallCubeEdgeColor[1] = 0.779f; 
+    smallCubeEdgeColor[2] = 0.779f; 
+    smallCubeEdgeColor[3] = 1.0f;
 }
 
 void plotSubnetCubes() {
@@ -329,154 +451,9 @@ void plotSubnetCubes() {
     ImGui::End();
 }
 
-subnettingQuestion randomSubnetQuestion() {
-    subnettingQuestion returnValue;
-    IP generatedIP = constructRandomIP();
-    SubnetMask generatedSubnetMask = constructRandomSubnetMask();
-    IP networkIP = generatedIP & generatedSubnetMask;
-    returnValue.questionString = "Find all subnet information for a /" + to_string(generatedSubnetMask.networkBits) + " subnet containing the IP address " + generatedIP.IPString + ".";
-    returnValue.questionIP = generatedIP;
-    returnValue.questionNetMask = generatedSubnetMask;
-    returnValue.answer1 = generatedSubnetMask.IPString;
-    returnValue.answer2 = to_string(generatedSubnetMask.blockSize);
-    returnValue.answer3 = networkIP.IPString;
-    returnValue.answer4 = (networkIP + 1).IPString;
-    returnValue.answer5 = (networkIP + (int)(generatedSubnetMask.blockSize - 2ULL)).IPString;
-    returnValue.answer6 = (networkIP + (int)(generatedSubnetMask.blockSize - 1ULL)).IPString;
-    returnValue.answer7 = generatedIP.IPBinaryString;
-    returnValue.answer8 = generatedSubnetMask.IPBinaryString;
-    return returnValue;
-}
-
-classesQuestion randomClassQuestion() {
-    classesQuestion returnValue;
-    IP generatedIP = constructRandomIP();
-    returnValue.questionString = "What class and subnet mask are associated with the IP address " + generatedIP.IPString + " (Enter \"N/A\" if not applicable)?";
-    returnValue.answer1 = string(1, generatedIP.IPClass);
-    if (generatedIP.IPClass == 'A') {
-        returnValue.answer2 = "255.0.0.0";
-    } else if (generatedIP.IPClass == 'B') {
-        returnValue.answer2 = "255.255.0.0";
-    } else if (generatedIP.IPClass == 'C') {
-        returnValue.answer2 = "255.255.255.0";
-    } else {
-        returnValue.answer2 = "N/A";
-    }
-    return returnValue;
-}
-
-void debug() {
-    debugLog("debugging function ran");
-    return;
-}
-
-void resetCurrentSubnetQuestion() {
-    memcpy(studyInputBuffer1, "", 255);
-    memcpy(studyInputBuffer2, "", 255);
-    memcpy(studyInputBuffer3, "", 255);
-    memcpy(studyInputBuffer4, "", 255);
-    memcpy(studyInputBuffer5, "", 255);
-    memcpy(studyInputBuffer6, "", 255);
-    memcpy(studyInputBuffer7, "", 255);
-    memcpy(studyInputBuffer8, "", 255);
-    currentSubnetQuestionAnswered = false;
-}
-
-void showSubnetAnswers() { 
-    memcpy(studyInputBuffer1, currentSubnetQuestion.answer1.c_str(), 255);
-    memcpy(studyInputBuffer2, currentSubnetQuestion.answer2.c_str(), 255);
-    memcpy(studyInputBuffer3, currentSubnetQuestion.answer3.c_str(), 255);
-    memcpy(studyInputBuffer4, currentSubnetQuestion.answer4.c_str(), 255);
-    memcpy(studyInputBuffer5, currentSubnetQuestion.answer5.c_str(), 255);
-    memcpy(studyInputBuffer6, currentSubnetQuestion.answer6.c_str(), 255);
-    memcpy(studyInputBuffer7, currentSubnetQuestion.answer7.c_str(), 255);
-    memcpy(studyInputBuffer8, currentSubnetQuestion.answer8.c_str(), 255);
-    currentSubnetQuestionAnswered = false;
-}
-
-void checkSubnetAnswers() {
-    currentSubnetQuestionAnswered = true;
-}
-
-void resetCurrentClassQuestion() {
-    memcpy(classInputBuffer1, "", 255);
-    memcpy(classInputBuffer2, "", 255);
-    memcpy(classInputBuffer3, "", 255);
-    currentClassQuestionAnswered = false;
-}
-
-void showClassAnswers() {
-    memcpy(classInputBuffer1, currentClassQuestion.answer1.c_str(), 255);
-    memcpy(classInputBuffer2, currentClassQuestion.answer2.c_str(), 255);
-    // memcpy(classInputBuffer3, currentSubnetQuestion.answer3.c_str(), 255);
-    currentClassQuestionAnswered = false;
-}
-
-void checkClassAnswers() {
-    currentClassQuestionAnswered = true;
-}
-
-void studyWindow() {
-    ImGui::Begin("Study", windowsAreOpen+3);
-    if (currentSubnetQuestion.questionString.compare("")) { 
-        ImGui::Text("%s", currentSubnetQuestion.questionString.c_str());
-        ImGui::InputText("Subnet Mask", studyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        ImGui::InputText("Block Size", studyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        ImGui::InputText("Network Address", studyInputBuffer3, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        ImGui::InputText("First Usable Address in Subnet", studyInputBuffer4, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        ImGui::InputText("Last Usable Address in Subnet", studyInputBuffer5, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        ImGui::InputText("Broadcast Address", studyInputBuffer6, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        ImGui::InputText(("Binary for " + currentSubnetQuestion.questionIP.IPString).c_str(), studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        ImGui::InputText(("Binary for /" + to_string(currentSubnetQuestion.questionNetMask.networkBits) + " Mask").c_str(), studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
-        if (ImGui::Button("Check Answers")) {checkSubnetAnswers();}
-        ImGui::SameLine();
-        if (ImGui::Button("Show Answers")) {showSubnetAnswers();}
-        ImGui::SameLine();
-        if (ImGui::Button("Hide Answers")) {resetCurrentSubnetQuestion();}
-        ImGui::SameLine();
-    }
-    if (ImGui::Button("Generate New Question")) {
-        currentSubnetQuestion = randomSubnetQuestion();
-        resetCurrentSubnetQuestion();
-    }
-    if (currentSubnetQuestionAnswered) {
-        if (!currentSubnetQuestion.answer1.compare(studyInputBuffer1)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");}
-        if (!currentSubnetQuestion.answer2.compare(studyInputBuffer2)) {ImGui::Text("Block Size is correct!");} else {ImGui::Text("Block Size is incorrect.");}
-        if (!currentSubnetQuestion.answer3.compare(studyInputBuffer3)) {ImGui::Text("Network Address is correct!");} else {ImGui::Text("Network Address is incorrect.");}
-        if (!currentSubnetQuestion.answer4.compare(studyInputBuffer4)) {ImGui::Text("First Usable Address is correct!");} else {ImGui::Text("First Usable Address is incorrect.");}
-        if (!currentSubnetQuestion.answer5.compare(studyInputBuffer5)) {ImGui::Text("Last Usable Address is correct!");} else {ImGui::Text("Last Usable Address is incorrect.");}
-        if (!currentSubnetQuestion.answer6.compare(studyInputBuffer6)) {ImGui::Text("Broadcast Address is correct!");} else {ImGui::Text("Broadcast Address is incorrect.");}
-        if (!currentSubnetQuestion.answer7.compare(studyInputBuffer7)) {ImGui::Text("Binary for Provided IP is correct!");} else {ImGui::Text("Binary for Provided IP is incorrect.");}
-        if (!currentSubnetQuestion.answer8.compare(studyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is correct!");} else {ImGui::Text("Binary for Subnet Mask is incorrect.");}
-    }
-    ImGui::End();
-    return;
-}
-
-void IPClassWindow() {
-    ImGui::Begin("IP Classes", windowsAreOpen+5);
-    if (currentClassQuestion.questionString.compare("")) {
-        ImGui::Text("%s", currentClassQuestion.questionString.c_str());
-        ImGui::InputText("IP Class", classInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
-        ImGui::InputText("Subnet Mask", classInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
-    }
-    if (ImGui::Button("Check Answers")) {checkClassAnswers();}
-    ImGui::SameLine();
-    if (ImGui::Button("Show Answers")) {showClassAnswers();}
-    ImGui::SameLine();
-    if (ImGui::Button("Hide Answers")) {resetCurrentClassQuestion();}
-    ImGui::SameLine();
-    if (ImGui::Button("Generate New Question")) {
-        currentClassQuestion = randomClassQuestion();
-        resetCurrentClassQuestion();
-    }
-    if (currentClassQuestionAnswered) {
-        if (!currentClassQuestion.answer1.compare(classInputBuffer1)) {ImGui::Text("IP Class is correct!");} else {ImGui::Text("IP Class is incorrect.");}
-        if (!currentClassQuestion.answer2.compare(classInputBuffer2)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");} 
-    }
-    ImGui::End();
-    return;
-}
+// ----------------------------------------------------------------------------------------------
+// SECTION: Main Window
+// ----------------------------------------------------------------------------------------------
 
 void mainWindow() {
     ImGui::Begin("Subnetter++", windowsAreOpen+0, ImGuiWindowFlags_MenuBar);
@@ -591,6 +568,72 @@ void mainWindow() {
     ImGui::End();
 }
 
+// ----------------------------------------------------------------------------------------------
+// SECTION: Individual Window Functions
+// ----------------------------------------------------------------------------------------------
+
+void studyWindow() {
+    ImGui::Begin("Study", windowsAreOpen+3);
+    if (currentSubnetQuestion.questionString.compare("")) { 
+        ImGui::Text("%s", currentSubnetQuestion.questionString.c_str());
+        ImGui::InputText("Subnet Mask", studyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        ImGui::InputText("Block Size", studyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        ImGui::InputText("Network Address", studyInputBuffer3, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        ImGui::InputText("First Usable Address in Subnet", studyInputBuffer4, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        ImGui::InputText("Last Usable Address in Subnet", studyInputBuffer5, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        ImGui::InputText("Broadcast Address", studyInputBuffer6, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        ImGui::InputText(("Binary for " + currentSubnetQuestion.questionIP.IPString).c_str(), studyInputBuffer7, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        ImGui::InputText(("Binary for /" + to_string(currentSubnetQuestion.questionNetMask.networkBits) + " Mask").c_str(), studyInputBuffer8, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
+        if (ImGui::Button("Check Answers")) {checkSubnetAnswers();}
+        ImGui::SameLine();
+        if (ImGui::Button("Show Answers")) {showSubnetAnswers();}
+        ImGui::SameLine();
+        if (ImGui::Button("Hide Answers")) {resetCurrentSubnetQuestion();}
+        ImGui::SameLine();
+    }
+    if (ImGui::Button("Generate New Question")) {
+        currentSubnetQuestion = randomSubnetQuestion();
+        resetCurrentSubnetQuestion();
+    }
+    if (currentSubnetQuestionAnswered) {
+        if (!currentSubnetQuestion.answer1.compare(studyInputBuffer1)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");}
+        if (!currentSubnetQuestion.answer2.compare(studyInputBuffer2)) {ImGui::Text("Block Size is correct!");} else {ImGui::Text("Block Size is incorrect.");}
+        if (!currentSubnetQuestion.answer3.compare(studyInputBuffer3)) {ImGui::Text("Network Address is correct!");} else {ImGui::Text("Network Address is incorrect.");}
+        if (!currentSubnetQuestion.answer4.compare(studyInputBuffer4)) {ImGui::Text("First Usable Address is correct!");} else {ImGui::Text("First Usable Address is incorrect.");}
+        if (!currentSubnetQuestion.answer5.compare(studyInputBuffer5)) {ImGui::Text("Last Usable Address is correct!");} else {ImGui::Text("Last Usable Address is incorrect.");}
+        if (!currentSubnetQuestion.answer6.compare(studyInputBuffer6)) {ImGui::Text("Broadcast Address is correct!");} else {ImGui::Text("Broadcast Address is incorrect.");}
+        if (!currentSubnetQuestion.answer7.compare(studyInputBuffer7)) {ImGui::Text("Binary for Provided IP is correct!");} else {ImGui::Text("Binary for Provided IP is incorrect.");}
+        if (!currentSubnetQuestion.answer8.compare(studyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is correct!");} else {ImGui::Text("Binary for Subnet Mask is incorrect.");}
+    }
+    ImGui::End();
+    return;
+}
+
+void IPClassWindow() {
+    ImGui::Begin("IP Classes", windowsAreOpen+5);
+    if (currentClassQuestion.questionString.compare("")) {
+        ImGui::Text("%s", currentClassQuestion.questionString.c_str());
+        ImGui::InputText("IP Class", classInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
+        ImGui::InputText("Subnet Mask", classInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
+    }
+    if (ImGui::Button("Check Answers")) {checkClassAnswers();}
+    ImGui::SameLine();
+    if (ImGui::Button("Show Answers")) {showClassAnswers();}
+    ImGui::SameLine();
+    if (ImGui::Button("Hide Answers")) {resetCurrentClassQuestion();}
+    ImGui::SameLine();
+    if (ImGui::Button("Generate New Question")) {
+        currentClassQuestion = randomClassQuestion();
+        resetCurrentClassQuestion();
+    }
+    if (currentClassQuestionAnswered) {
+        if (!currentClassQuestion.answer1.compare(classInputBuffer1)) {ImGui::Text("IP Class is correct!");} else {ImGui::Text("IP Class is incorrect.");}
+        if (!currentClassQuestion.answer2.compare(classInputBuffer2)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");} 
+    }
+    ImGui::End();
+    return;
+}
+
 void IPv6Window() {
     ImGui::Begin("IPv6 Tools", windowsAreOpen+4);
     ImGui::InputText("IPv6 Address", IPv6InputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, IPv6ChangedCallback);
@@ -679,6 +722,10 @@ void debugWindow() {
     ImGui::EndChild();
     ImGui::End();
 }
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: Entry Point Functions
+// ----------------------------------------------------------------------------------------------
 
 int Main() { // the pseudo-main function that gets called either by WinMain() or main()
     srand((unsigned int)time(NULL)); // initialize random number generator's counter
