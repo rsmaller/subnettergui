@@ -52,6 +52,8 @@ bool windowsAreOpen[totalNumberOfWindows];
 //  3 - Study Window
 //  4 - IPv6 Window
 //  5 - IP Classes Window
+
+// Debug variables
 unsigned long long int frameCount = 0;
 unsigned long long int dotCounter = 1;
 
