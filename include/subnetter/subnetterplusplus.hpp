@@ -52,6 +52,11 @@ public:
     IPNumeric IPAddress;
     string IPString;
     string IPBinaryString;
+    char IPClass;
+    static const unsigned int classBStartBinary = 2147483648; // binary maps for classful address resolution.
+    static const unsigned int classCStartBinary = 3221225472;
+    static const unsigned int classDStartBinary = 3758096384;
+    static const unsigned int classEStartBinary = 4026531840;
     bool invalidFormat = false;
     friend ostream &operator<<(ostream &stream, IP IPArg);
 
@@ -68,15 +73,31 @@ public:
             this -> invalidFormat = true;
         }
         this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
+        setIPClass(this);
     }
 
     IP(unsigned int IPArg) {
         this -> IPAddress.IP32 = IPArg;
         this -> IPString = intToIPString(this -> IPAddress);
         this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
+        setIPClass(this);
     }
 
     IP() {} // necessary for prototypes to work.
+
+    void setIPClass(IP *constructedObject) {
+        if (constructedObject -> IPAddress.IP32 < classBStartBinary) {
+            constructedObject -> IPClass = 'A';
+        } else if (constructedObject -> IPAddress.IP32 < classCStartBinary) {
+            constructedObject -> IPClass = 'B';
+        } else if (constructedObject -> IPAddress.IP32 < classDStartBinary) {
+            constructedObject -> IPClass = 'C';
+        } else if (constructedObject -> IPAddress.IP32 < classEStartBinary) {
+            constructedObject -> IPClass = 'D';
+        } else {
+            constructedObject -> IPClass = 'E';
+        }
+    }
 
     static bool isIPFormat(string testString) {
         smatch matches;
