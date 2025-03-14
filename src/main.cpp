@@ -161,11 +161,6 @@ bool sameLineInIf() {
     return true;
 }
 
-// bool textInIf(const char *stringArg) {
-//     ImGui::Text("%s", stringArg);
-//     return true;
-// }
-
 int argumentChangedCallback(ImGuiInputTextCallbackData *data) {
     (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
     currentIP.IPAddress.IP32 = 0;
