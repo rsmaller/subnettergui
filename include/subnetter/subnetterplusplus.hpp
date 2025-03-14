@@ -1,3 +1,7 @@
+// ----------------------------------------------------------------------------------------------
+// SECTION: Includes and Type Definitions
+// ----------------------------------------------------------------------------------------------
+
 #pragma once
 #include <iostream>
 #include <string.h>
@@ -5,14 +9,18 @@
 #include <regex>
 #include <time.h>
 #include <fstream>
-
 using namespace std;
-unsigned long long totalAddedToIP = 256;
 
 typedef union IPNumeric {
     unsigned int IP32;
     unsigned char octets[4];
 } IPNumeric;
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: Global Variables
+// ----------------------------------------------------------------------------------------------
+
+unsigned long long totalAddedToIP = 256; // IP cursor
 
 char **globalArgumentVector; // Flags and vectors
 string programName;
@@ -22,6 +30,10 @@ bool reverseFlag = false;
 ofstream exportFileStream;
 
 bool subnettingSuccessful = false; // other conditionals
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: ImGui Conditionals Preprocessing for Windows and Exports
+// ----------------------------------------------------------------------------------------------
 
 #ifdef IMGUI_API // If ImGui included, use ImGui::Text to render output. Otherwise, send output to cout
 extern const int totalNumberOfWindows;
@@ -46,6 +58,13 @@ void usage(const char *message) {
 }
 #endif
 
+void exportOutput(const char *string) {
+    exportFileStream << string;
+}
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: IP Class
+// ----------------------------------------------------------------------------------------------
 
 class IP {
 public:
@@ -207,6 +226,10 @@ public:
 
 };
 
+// ----------------------------------------------------------------------------------------------
+// SECTION: SubnetMask Class
+// ----------------------------------------------------------------------------------------------
+
 class SubnetMask : public IP {
 public:
     long long blockSize;
@@ -293,6 +316,10 @@ public:
     }
 };
 
+// ----------------------------------------------------------------------------------------------
+// SECTION: ChangingIP Class
+// ----------------------------------------------------------------------------------------------
+
 class ChangingIP {
 public:
     string IPString;
@@ -352,9 +379,12 @@ public:
     }
 };
 
+// ----------------------------------------------------------------------------------------------
+// SECTION: Subnet Class
+// ----------------------------------------------------------------------------------------------
+
 class Subnet {
 public:
-
     IP networkIP;
     IP startIP;
     IP endIP;
@@ -399,9 +429,9 @@ public:
     }
 };
 
-void exportOutput(const char *string) {
-    exportFileStream << string;
-}
+// ----------------------------------------------------------------------------------------------
+// SECTION: Functions for Client Code
+// ----------------------------------------------------------------------------------------------
 
 void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) {
     void (*VLSMOutput)(const char *string);
