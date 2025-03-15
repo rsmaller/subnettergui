@@ -13,6 +13,7 @@
 #include "random.h"
 #include "subnetterplusplus.hpp"
 #include "ipv6tools.hpp"
+#include "memsafety.h"
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -67,38 +68,38 @@ unsigned long long int dotCounter = 1;
 vector<string> debugEntries;
 
 //  buffers for primary window input data
-char *mainInputBuffer1 = (char *)calloc(256, 1); // main IP input
-char *mainInputBuffer2 = (char *)calloc(256, 1); // netmask 1 input
-char *mainInputBuffer3 = (char *)calloc(256, 1); // netmask 2 input
+char *mainInputBuffer1 = (char *)smartCalloc(256, 1); // main IP input
+char *mainInputBuffer2 = (char *)smartCalloc(256, 1); // netmask 1 input
+char *mainInputBuffer3 = (char *)smartCalloc(256, 1); // netmask 2 input
 
 //  buffers for study input data
-char *studyInputBuffer1 = (char *)calloc(256, 1); // main study network IP input
-char *studyInputBuffer2 = (char *)calloc(256, 1); // reserved input
-char *studyInputBuffer3 = (char *)calloc(256, 1); // reserved input
-char *studyInputBuffer4 = (char *)calloc(256, 1); // reserved input
-char *studyInputBuffer5 = (char *)calloc(256, 1); // reserved input
-char *studyInputBuffer6 = (char *)calloc(256, 1); // reserved input
-char *studyInputBuffer7 = (char *)calloc(256, 1); // reserved input
-char *studyInputBuffer8 = (char *)calloc(256, 1); // reserved input
+char *studyInputBuffer1 = (char *)smartCalloc(256, 1); // main study network IP input
+char *studyInputBuffer2 = (char *)smartCalloc(256, 1); // reserved input
+char *studyInputBuffer3 = (char *)smartCalloc(256, 1); // reserved input
+char *studyInputBuffer4 = (char *)smartCalloc(256, 1); // reserved input
+char *studyInputBuffer5 = (char *)smartCalloc(256, 1); // reserved input
+char *studyInputBuffer6 = (char *)smartCalloc(256, 1); // reserved input
+char *studyInputBuffer7 = (char *)smartCalloc(256, 1); // reserved input
+char *studyInputBuffer8 = (char *)smartCalloc(256, 1); // reserved input
 subnettingQuestion currentSubnetQuestion = {IP(0), SubnetMask(0), "", "", "", "", "", ""}; // the subnetting question currently displayed on the screen
 bool currentSubnetQuestionAnswered = false;
 
 //  buffers for class input data
-char *classInputBuffer1 = (char *)calloc(256, 1);
-char *classInputBuffer2 = (char *)calloc(256, 1);
-char *classInputBuffer3 = (char *)calloc(256, 1);
+char *classInputBuffer1 = (char *)smartCalloc(256, 1);
+char *classInputBuffer2 = (char *)smartCalloc(256, 1);
+char *classInputBuffer3 = (char *)smartCalloc(256, 1);
 classesQuestion currentClassQuestion = {IP(0), SubnetMask(0), "", "", "", ""}; // the classes question currently displayed on the screen
 bool currentClassQuestionAnswered = false;
 
 //  buffers for export input data
-char *exportInputBuffer = (char *)calloc(512, 1); // main input for export path
+char *exportInputBuffer = (char *)smartCalloc(512, 1); // main input for export path
 extern ofstream exportFileStream;
 bool exportThreadComplete = false;
 mutex exportThreadMutex;
 bool currentlyInExportThread = false;
 
 //  IPv6 Tools
-char *IPv6InputBuffer = (char *)calloc(256, 1);
+char *IPv6InputBuffer = (char *)smartCalloc(256, 1);
 IPv6 currentIPv6Addr;
 
 //  Primary conditionals
@@ -768,6 +769,7 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
             dotCounter = 1;
         }
     }
+    memSafetyCleanUp();
     return 0;
 }
 
