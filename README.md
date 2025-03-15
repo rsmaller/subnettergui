@@ -33,6 +33,14 @@ cmake --build .
 
 The binary will be dropped in the `build` folder under the name `subnettergui`.
 
+## Installing Subnetter++ As An Application on Linux
+
+There is an install script called `install.sh` that will install the subnettergui binary for the user that runs it.
+
+The program must be compiled before running this script.
+
+`uninstall.sh` will conversely uninstall the binary that was installed with the former script.
+
 ## How To Use The Program
 
 Subnetter++ can be opened just like any other standalone executable program.
