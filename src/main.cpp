@@ -311,7 +311,6 @@ void ImGuiInit() {
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
     #endif
     windowBackend = glfwCreateWindow(100, 100, "backend", NULL, NULL);
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwMakeContextCurrent(windowBackend);
     float x, y;
     glfwGetMonitorContentScale(monitor, &x, &y);
