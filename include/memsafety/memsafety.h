@@ -42,9 +42,22 @@ void *smartRealloc(void *oldMallocedPointer, size_t size) {
 
 void freeFromArray(void **arrayToFree) {
 	for (int i=0; i<currentFreeArrayIndex; i++) {
-		free(arrayToFree[i]);
+		if (arrayToFree[i] != NULL) free(arrayToFree[i]);
 	}
 	free(arrayToFree);
+}
+
+void freeOnePointerFromArray(void **arrayToFree, void *pointerToFree) {
+	for (int i=0; i<currentFreeArrayIndex; i++) {
+		if (arrayToFree[i] == pointerToFree) {
+			free(pointerToFree);
+			arrayToFree[i] = NULL;
+		}
+	}
+}
+
+void smartFree(void *pointerToFree) {
+	freeOnePointerFromArray(mallocedPointerArray, pointerToFree);
 }
 
 void memSafetyCleanUp() { // this must be called at the end of the main function

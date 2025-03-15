@@ -298,7 +298,9 @@ void glfwErrorCallback(int error, const char *msg) {
 }
 
 void windowTerminate() {
+    glfwDestroyWindow(windowBackend);
     glfwTerminate();
+    memSafetyCleanUp();
     exit(0);
 }
 
@@ -317,6 +319,7 @@ void ImGuiInit() {
     glfwGetMonitorContentScale(monitor, &x, &y);
     glfwHideWindow(windowBackend);
     glewInit();
+    ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)&smartMalloc, (ImGuiMemFreeFunc)&smartFree);
     ImGui::SetCurrentContext(ImGui::CreateContext());
     ImGuiIO &ioRef = ImGui::GetIO();
     ioRef.DisplayFramebufferScale.x = 1.0f;
@@ -638,8 +641,10 @@ void IPv6Window() {
     ImGui::Begin("IPv6 Tools", windowsAreOpen+4);
     ImGui::InputText("IPv6 Address", IPv6InputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, IPv6ChangedCallback);
     if (ImGui::Button("Generate Random IP Address")) {
-        currentIPv6Addr = IPv6(getRandomIPv6Number());
+        unsigned short *randomIPV6Num = getRandomIPv6Number();
+        currentIPv6Addr = IPv6(randomIPV6Num);
         memcpy(IPv6InputBuffer, currentIPv6Addr.IPv6String.c_str(), 39);
+        free(randomIPV6Num);
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear")) {
@@ -769,7 +774,7 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
             dotCounter = 1;
         }
     }
-    memSafetyCleanUp();
+    windowTerminate();
     return 0;
 }
 

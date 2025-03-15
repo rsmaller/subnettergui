@@ -132,7 +132,7 @@ public:
         unsigned short *hextets = (unsigned short *)calloc(8, 2);
         for (int i=0; i<8; i++) {
             currentString = "";
-            while (stringArg[currentIndex] != ':' && currentIndex < stringArg.length()) {
+            while (stringArg[currentIndex] != ':' && (size_t)currentIndex < stringArg.length()) {
                 currentString += stringArg[currentIndex];
                 currentIndex++;
             }
