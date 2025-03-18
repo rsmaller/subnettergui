@@ -1,65 +1,102 @@
 #pragma once
+#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-// memory management variables
-int currentFreeArrayIndex = 0;
-int freeArraySize = 4;
-void **mallocedPointerArray = (void **)malloc(sizeof(void *) * (unsigned long)freeArraySize);
-void *(smartMalloc)(size_t);
-void *(smartCalloc)(size_t, size_t);
+typedef struct memoryNode {
+    void *pointer;
+    struct memoryNode *nextNode;
+} memoryNode;
 
-//  memory safe allocator functions
-void *smartMalloc(size_t size) {
-	void *mallocedPointer = malloc(size);
-    if (currentFreeArrayIndex >= (int)(freeArraySize / 2)) {
-        freeArraySize *= 2;
-        mallocedPointerArray = (void **)realloc(mallocedPointerArray, sizeof(void *) * (unsigned long)freeArraySize);
+static memoryNode *startingNode = NULL;
+
+memoryNode *constructMemoryNode(void *pointer) {
+    memoryNode *returnValue = (memoryNode *)malloc(sizeof(memoryNode));
+    returnValue -> nextNode = NULL;
+    returnValue -> pointer = pointer;
+    return returnValue;
+}
+
+void printOutNodePointers() {
+    if (!startingNode) return;
+    memoryNode *currentNode = startingNode;
+    while (currentNode -> nextNode != NULL) {
+        printf("%p\n", currentNode -> pointer);
+        currentNode = currentNode -> nextNode;
     }
-	mallocedPointerArray[currentFreeArrayIndex++] = mallocedPointer;
-	return mallocedPointer;
+    printf("%p\n", currentNode -> pointer);
+    return;
+}
+
+void *smartMalloc(size_t size) {
+    void *pointer = malloc(size);
+    if (!startingNode) { // if starting node has not been created, create it with the first allocated pointer.
+        startingNode = constructMemoryNode(pointer);
+        return pointer;
+    }
+    memoryNode *currentNodeToAllocate = startingNode;
+    while (currentNodeToAllocate -> nextNode) {
+        currentNodeToAllocate = currentNodeToAllocate -> nextNode;
+    }
+    currentNodeToAllocate -> nextNode = constructMemoryNode(pointer);
+    return pointer;
 }
 
 void *smartCalloc(size_t size1, size_t size2) {
-	void *callocedPointer = calloc(size1, size2);
-    if (currentFreeArrayIndex >= (int)(freeArraySize / 2)) {
-        freeArraySize *= 2;
-        mallocedPointerArray = (void **)realloc(mallocedPointerArray, sizeof(void *) * (unsigned long)freeArraySize);
+    void *pointer = calloc(size1, size2);
+    if (!startingNode) { // if starting node has not been created, create it with the first allocated pointer.
+        startingNode = constructMemoryNode(pointer);
+        return pointer;
     }
-	mallocedPointerArray[currentFreeArrayIndex++] = callocedPointer;
-	return callocedPointer;
+    memoryNode *currentNodeToAllocate = startingNode;
+    while (currentNodeToAllocate -> nextNode) {
+        currentNodeToAllocate = currentNodeToAllocate -> nextNode;
+    }
+    currentNodeToAllocate -> nextNode = constructMemoryNode(pointer);
+    return pointer;
 }
 
-void *smartRealloc(void *oldMallocedPointer, size_t size) {
-	void *newMallocedPointer = realloc(oldMallocedPointer, size);
-	for (int i=0; i<freeArraySize; i++) {
-		if (mallocedPointerArray[i] == oldMallocedPointer) {
-			mallocedPointerArray[i] = newMallocedPointer;
-		}
-	}
-	return newMallocedPointer;
+void *smartRealloc(void *pointer, size_t size) {
+    if (!startingNode) return pointer;
+    void *returnPointer = pointer;
+    memoryNode *currentNodeToReallocate = startingNode;
+    while (currentNodeToReallocate -> pointer != pointer && currentNodeToReallocate -> nextNode) {
+        currentNodeToReallocate = currentNodeToReallocate -> nextNode;
+    }
+    if (currentNodeToReallocate -> pointer == pointer) {
+        returnPointer = realloc(pointer, size);
+        currentNodeToReallocate -> pointer = returnPointer;
+    }
+    return returnPointer;
 }
 
-void freeFromArray(void **arrayToFree) {
-	for (int i=0; i<currentFreeArrayIndex; i++) {
-		if (arrayToFree[i] != NULL) free(arrayToFree[i]);
-	}
-	free(arrayToFree);
+void smartFree(void *pointer) {
+    if (!startingNode) return;
+    memoryNode *currentNodeToFree = startingNode;
+    memoryNode *previousNode = NULL;
+    memoryNode *nextNode = NULL;
+    while (currentNodeToFree -> pointer != pointer && currentNodeToFree -> nextNode) {
+        previousNode = currentNodeToFree;
+        currentNodeToFree = currentNodeToFree -> nextNode;
+        nextNode = currentNodeToFree -> nextNode;
+    }
+    if (currentNodeToFree -> pointer == pointer) {
+        free(pointer);
+    }
+    free(currentNodeToFree);
+    previousNode -> nextNode = nextNode;
+    return;
 }
 
-void freeOnePointerFromArray(void **arrayToFree, void *pointerToFree) {
-	for (int i=0; i<currentFreeArrayIndex; i++) {
-		if (arrayToFree[i] == pointerToFree) {
-			free(pointerToFree);
-			arrayToFree[i] = NULL;
-		}
-	}
-}
-
-void smartFree(void *pointerToFree) {
-	freeOnePointerFromArray(mallocedPointerArray, pointerToFree);
-}
-
-void memSafetyCleanUp() { // this must be called at the end of the main function
-    freeFromArray(mallocedPointerArray);
+void memoryCleanup() { // call this at the end of main to ensure any dangling pointers are handled.
+    if (!startingNode) return;
+    memoryNode *currentNodeToFree = startingNode;
+    memoryNode *swapperNode = NULL;
+    while (currentNodeToFree -> nextNode) {
+        swapperNode = currentNodeToFree -> nextNode;
+        free(currentNodeToFree -> pointer);
+        free(currentNodeToFree);
+        currentNodeToFree = swapperNode;
+    }
+    free(currentNodeToFree -> pointer);
+    free(currentNodeToFree);
 }

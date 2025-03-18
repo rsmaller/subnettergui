@@ -300,7 +300,7 @@ void glfwErrorCallback(int error, const char *msg) {
 void windowTerminate() {
     glfwDestroyWindow(windowBackend);
     glfwTerminate();
-    memSafetyCleanUp();
+    memoryCleanup();
     exit(0);
 }
 
