@@ -642,6 +642,7 @@ void IPClassWindow() {
 }
 
 void IPv6Window() {
+    IPv6 enteredIPv6Addr;
     ImGui::Begin("IPv6 Tools", windowsAreOpen+4);
     ImGui::InputText("IPv6 Address", IPv6InputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, IPv6ChangedCallback);
     if (ImGui::Button("Generate Random IP Address")) {
@@ -654,8 +655,10 @@ void IPv6Window() {
     if (ImGui::Button("Clear")) {
         memcpy(IPv6InputBuffer, "", 39);
     }
-    ImGui::Text("%s", ("Shorthand: " + IPv6(string(IPv6InputBuffer)).shortenedIPv6String).c_str());
-    ImGui::Text("%s", ("Full: " + IPv6(string(IPv6InputBuffer)).IPv6String).c_str());
+    enteredIPv6Addr = IPv6(string(IPv6InputBuffer));
+    ImGui::Text("%s", ("Shorthand: " + enteredIPv6Addr.shortenedIPv6String).c_str());
+    ImGui::Text("%s", ("Full: " + enteredIPv6Addr.IPv6String).c_str());
+    ImGui::Text("%s", ("This IPv6 address is a(n) " + enteredIPv6Addr.type() + " address.").c_str());
     ImGui::End();
 }
 
