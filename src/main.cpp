@@ -53,6 +53,7 @@ typedef struct classesQuestion {
 //  window and window control variables to properly exit the program when windows are closed.
 GLFWwindow *windowBackend = nullptr;
 const int totalNumberOfWindows = 6;
+ImGuiContext *currentImGuiContext;
 bool windowsAreOpen[totalNumberOfWindows];
     //  Indices:
     //  0 - Main Window
@@ -298,6 +299,9 @@ void glfwErrorCallback(int error, const char *msg) {
 }
 
 void windowTerminate() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext(currentImGuiContext);
     glfwDestroyWindow(windowBackend);
     glfwTerminate();
     memoryCleanup();
@@ -319,8 +323,8 @@ void ImGuiInit() {
     glfwGetMonitorContentScale(monitor, &x, &y);
     glfwHideWindow(windowBackend);
     glewInit();
-    ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)&smartMalloc, (ImGuiMemFreeFunc)&smartFree);
-    ImGui::SetCurrentContext(ImGui::CreateContext());
+    currentImGuiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(currentImGuiContext);
     ImGuiIO &ioRef = ImGui::GetIO();
     ioRef.DisplayFramebufferScale.x = 1.0f;
     ioRef.DisplayFramebufferScale.y = 1.0f;
