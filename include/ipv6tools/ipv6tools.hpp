@@ -152,4 +152,75 @@ public:
         }
         return hextets;
     }
+
+    string type() {
+        cout << hex << (this -> hextets[0] & (unsigned short)0b1111111111000000) << endl;
+        cout << hex << (this -> hextets[0] & (unsigned short)0b1110000000000000) << endl;
+        cout << hex << this -> hextets[0] << endl;
+
+        if (
+            ((this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[1] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[2] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[3] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[4] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[5] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[6] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[7] & (unsigned short)0xfffe) == (unsigned short)0)
+        ) {
+            return "loopback";
+        }
+
+        if (
+            ((this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0xff02) &&
+            ((this -> hextets[1] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[2] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[3] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[4] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[5] & (unsigned short)0xffff) == (unsigned short)0x0001) &&
+            ((this -> hextets[6] & (unsigned short)0xff00) == (unsigned short)0xff00)
+        ) {
+            return "solicited node multicast";
+        }
+
+        if (
+            ((this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[1] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[2] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[3] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[4] & (unsigned short)0xffff) == (unsigned short)0) &&
+            ((this -> hextets[5] & (unsigned short)0xffff) == (unsigned short)0)
+        ) {
+            return "IPv4 backwards compatible";
+        }
+
+
+        if (
+            (this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0x2001 ||
+            (this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0x2002 ||
+            (this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0x3ffe
+        ) {
+            return "aggregatable global unicast or anycast";
+        }
+
+        if ((this -> hextets[0] & (unsigned short)0b1111111111000000) == (unsigned short)0xfe80) {
+            return "link-local unicast or anycast";
+        }
+        if ((this -> hextets[0] & (unsigned short)0b1111111111000000) == (unsigned short)0xfec0) {
+            return "site-local unicast or anycast";
+        }
+        if ((this -> hextets[0] & (unsigned short)0b1111111100000000) == (unsigned short)0xff00) {
+            return "assigned multicast";
+        }
+        
+        if ((this -> hextets[0] & (unsigned short)0b1111111000000000) == (unsigned short)0xfc00) {
+            return "unique local unicast";
+        }
+        
+
+        if ((this -> hextets[0] & (unsigned short)0b1110000000000000) == (unsigned short)0x2000) {
+            return "generic global unicast";
+        }
+        return "unspecified";
+    }
 };
