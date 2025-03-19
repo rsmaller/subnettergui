@@ -106,16 +106,10 @@ public:
         sanitizedString = truncatedString;
 
         while (regex_search(sanitizedString, greedyZeroMatch, greedyZeroRegex)) { // truncate the longest block of zeroes into a double colon
-            // cout << "Current String: " << sanitizedString << endl;
-            // cout << "Current match: " << greedyZeroMatch[0] << endl;
-            // cout << "Current match length: " << greedyZeroMatch[0].length() << endl;
             if ((int)greedyZeroMatch[0].length() > (int)greediestMatch.length()) {
                 greediestMatch = greedyZeroMatch[0];
             }
             sanitizedString = sanitizedString.substr(0, greedyZeroMatch.position()) + ":" + sanitizedString.substr(greedyZeroMatch.position() + greedyZeroMatch.length(), sanitizedString.length() - 1);
-            // cout << "Greediest Match So Far: " << greediestMatch << endl;
-            // cout << "Greediest Match So Far length: " << greediestMatch.length() << endl;
-            // cout << endl;
         }
         if (greediestMatch.compare("")) {
             index = (int)truncatedString.find(greediestMatch);
