@@ -91,9 +91,9 @@ public:
             stringToManipulate = stringToManipulate.substr(0, doubleColonMatch.position() + 1) + zeroBlockString + stringToManipulate.substr(doubleColonMatch.position() + 1, stringToManipulate.length() - 1);
         }
 
-        // if (!regex_search(stringToManipulate, IPv6FormatMatch, IPv6FormatRegex)) {
-        //     return "0000:0000:0000:0000:0000:0000:0000:0000";
-        // }
+        if (!regex_search(stringToManipulate, IPv6FormatMatch, IPv6FormatRegex)) {
+            return "0000:0000:0000:0000:0000:0000:0000:0000";
+        }
         return stringToManipulate;
     }
 
