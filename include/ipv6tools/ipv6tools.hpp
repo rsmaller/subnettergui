@@ -109,6 +109,9 @@ public:
     }
 
     static string IPv6Truncate(string stringArg) {
+        int loopMaximum = 100;
+        int currentLoopIteration = 0;
+
         if (!stringArg.compare("0000:0000:0000:0000:0000:0000:0000:0000")) {
             return "::";
         }
@@ -133,7 +136,10 @@ public:
 
         while (regex_search(truncatedString, leadingZeroMatch, leadingZeroRegex)) {
             truncatedString = truncatedString.substr(0, leadingZeroMatch.position()+1) + truncatedString.substr(leadingZeroMatch.position() + leadingZeroMatch.length(), truncatedString.length() - 1);
+            if (currentLoopIteration > loopMaximum) return "::";
+            currentLoopIteration++; 
         }
+        currentLoopIteration = 0;
         sanitizedString = truncatedString;
 
         while (regex_search(sanitizedString, greedyZeroMatch, greedyZeroRegex)) { // truncate the longest block of zeroes into a double colon
@@ -141,6 +147,8 @@ public:
                 greediestMatch = greedyZeroMatch[0];
             }
             sanitizedString = sanitizedString.substr(0, greedyZeroMatch.position()) + ":" + sanitizedString.substr(greedyZeroMatch.position() + greedyZeroMatch.length(), sanitizedString.length() - 1);
+            if (currentLoopIteration > loopMaximum) return "::";
+            currentLoopIteration++;
         }
         if (greediestMatch.compare("")) {
             index = (int)truncatedString.find(greediestMatch);
