@@ -41,10 +41,13 @@ public:
         string zeroBlockString = "";
 
         smatch zeroHextetMatch;
-        regex IPv6ZeroHextetRegex("\\:0\\:");
+        regex IPv6ZeroHextetRegex("\\:0{1,3}\\:");
 
         smatch leadingZeroMatch;
-        regex IPv6LeadingZeroRegex("\\:[1-9a-fA-F]{1,3}\\:");
+        regex IPv6LeadingZeroRegex("\\:[0-9a-fA-F]{1,3}\\:");
+
+        smatch endOfStringLeadingZeroMatch;
+        regex endOfStringLeadingZeroRegex("\\:[0-9a-fA-F]{1,3}$");
 
         smatch doubleColonMatch;
         regex IPv6DoubleColonRegex("\\:\\:");
@@ -80,6 +83,9 @@ public:
         if (!regex_search(stringToManipulate, IPv6FormatMatch, IPv6FormatRegex)) {
             return "0000:0000:0000:0000:0000:0000:0000:0000";
         }
+        while (regex_search(stringToManipulate, endOfStringLeadingZeroMatch, endOfStringLeadingZeroRegex)) {
+            stringToManipulate = stringToManipulate.substr(0, endOfStringLeadingZeroMatch.position() + 1) + "0" + stringToManipulate.substr(endOfStringLeadingZeroMatch.position() + 1, stringToManipulate.length()  - 1);
+        }
         return stringToManipulate;
     }
 
@@ -98,6 +104,12 @@ public:
         smatch leadingZeroMatch;
         regex leadingZeroRegex("\\:[0]{1,3}(?!:)(?!$)"); // zero preceded by a colon but not followed by a colon
 
+        smatch cutOffZeroMatch;
+        regex cutOffZeroRegex("[0-9a-fA-F]\\:$");
+
+        smatch extraZeroAfterDoubleColonMatch;
+        regex extraZeroAfterDoubleColonRegex("\\:{2}0$");
+
         int index;
 
         while (regex_search(truncatedString, leadingZeroMatch, leadingZeroRegex)) {
@@ -115,6 +127,12 @@ public:
             index = (int)truncatedString.find(greediestMatch);
             truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
         } // end of zero block truncation
+        if (regex_search(truncatedString, cutOffZeroMatch, cutOffZeroRegex)) { // account for very end's leading zero possibly being cut off due to truncation
+            truncatedString = truncatedString + "0";
+        }
+        if (regex_search(truncatedString, extraZeroAfterDoubleColonMatch, extraZeroAfterDoubleColonRegex)) {
+            truncatedString = truncatedString.substr(0, truncatedString.length() - 1);
+        }
         return truncatedString;
     }
 
