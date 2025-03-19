@@ -37,6 +37,9 @@ public:
     }
 
     static string IPv6Sanitize(string stringArg) {
+        int loopMaximum = 100;
+        int currentLoopIteration = 0;
+
         if (!stringArg.compare("")) {
             return "0000:0000:0000:0000:0000:0000:0000:0000";
         }
@@ -61,16 +64,22 @@ public:
 
         while (regex_search(stringToManipulate, zeroHextetMatch, IPv6ZeroHextetRegex)) {
             stringToManipulate = stringToManipulate.substr(0, zeroHextetMatch.position()) + ":0000:" + stringToManipulate.substr(zeroHextetMatch.position() + zeroHextetMatch.length(), stringToManipulate.length() - 1);
+            if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
+            currentLoopIteration++; 
         }
-
+        currentLoopIteration = 0;
         while (regex_search(stringToManipulate, leadingZeroMatch, IPv6LeadingZeroRegex)) {
             stringToManipulate = stringToManipulate.substr(0, leadingZeroMatch.position()) + ":" + string(6 - leadingZeroMatch.length(), '0') + stringToManipulate.substr(leadingZeroMatch.position() + 1, stringToManipulate.length() - 1);
+            if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
+            currentLoopIteration++; 
         }
-
+        currentLoopIteration = 0;
         while (regex_search(stringToManipulate, endOfStringLeadingZeroMatch, endOfStringLeadingZeroRegex)) {
             stringToManipulate = stringToManipulate.substr(0, endOfStringLeadingZeroMatch.position() + 1) + "0" + stringToManipulate.substr(endOfStringLeadingZeroMatch.position() + 1, stringToManipulate.length()  - 1);
+            if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
+            currentLoopIteration++; 
         }
-
+        currentLoopIteration = 0;
         cout << stringToManipulate << endl;
 
         if (regex_search(stringToManipulate, doubleColonMatch, IPv6DoubleColonRegex)) {
@@ -87,6 +96,8 @@ public:
                     numberOfColonsToAdd--;
                 }
                 numberOfZeroesToAdd -= 4;
+                if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
+                currentLoopIteration++; 
             }
             stringToManipulate = stringToManipulate.substr(0, doubleColonMatch.position() + 1) + zeroBlockString + stringToManipulate.substr(doubleColonMatch.position() + 1, stringToManipulate.length() - 1);
         }
