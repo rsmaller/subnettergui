@@ -96,7 +96,7 @@ public:
         regex greedyZeroRegex("\\:[0:]+\\:");
 
         smatch leadingZeroMatch;
-        regex leadingZeroRegex("\\:[0]{1,3}(?!:)"); // zero preceded by a colon but not followed by a colon
+        regex leadingZeroRegex("\\:[0]{1,3}(?!:)(?!$)"); // zero preceded by a colon but not followed by a colon
 
         int index;
 
@@ -121,7 +121,6 @@ public:
             index = (int)truncatedString.find(greediestMatch);
             truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
         } // end of zero block truncation
-
         return truncatedString;
     }
 
