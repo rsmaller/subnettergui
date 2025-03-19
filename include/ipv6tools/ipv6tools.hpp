@@ -37,6 +37,10 @@ public:
     }
 
     static string IPv6Sanitize(string stringArg) {
+        if (!stringArg.compare("")) {
+            return "0000:0000:0000:0000:0000:0000:0000:0000";
+        }
+
         string stringToManipulate = stringArg;
         string zeroBlockString = "";
 
@@ -63,10 +67,15 @@ public:
             stringToManipulate = stringToManipulate.substr(0, leadingZeroMatch.position()) + ":" + string(6 - leadingZeroMatch.length(), '0') + stringToManipulate.substr(leadingZeroMatch.position() + 1, stringToManipulate.length() - 1);
         }
 
+        while (regex_search(stringToManipulate, endOfStringLeadingZeroMatch, endOfStringLeadingZeroRegex)) {
+            stringToManipulate = stringToManipulate.substr(0, endOfStringLeadingZeroMatch.position() + 1) + "0" + stringToManipulate.substr(endOfStringLeadingZeroMatch.position() + 1, stringToManipulate.length()  - 1);
+        }
+
         if (regex_search(stringToManipulate, doubleColonMatch, IPv6DoubleColonRegex)) {
             int lengthDifference = 39 - (int)stringToManipulate.length();
             int numberOfZeroesToAdd = lengthDifference - (lengthDifference % 4);
             int numberOfColonsToAdd = numberOfZeroesToAdd / 4 - 1;
+            cout << numberOfZeroesToAdd << endl;
             while (numberOfZeroesToAdd) {
                 for (int i=0; i<4; i++) {
                     zeroBlockString += "0";
@@ -82,9 +91,6 @@ public:
 
         if (!regex_search(stringToManipulate, IPv6FormatMatch, IPv6FormatRegex)) {
             return "0000:0000:0000:0000:0000:0000:0000:0000";
-        }
-        while (regex_search(stringToManipulate, endOfStringLeadingZeroMatch, endOfStringLeadingZeroRegex)) {
-            stringToManipulate = stringToManipulate.substr(0, endOfStringLeadingZeroMatch.position() + 1) + "0" + stringToManipulate.substr(endOfStringLeadingZeroMatch.position() + 1, stringToManipulate.length()  - 1);
         }
         return stringToManipulate;
     }
