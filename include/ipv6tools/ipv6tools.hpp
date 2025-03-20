@@ -128,7 +128,7 @@ public:
         string greediestMatch = "";
 
         smatch greedyZeroMatch;
-        regex greedyZeroRegex("\\:[0:]+\\:");
+        regex greedyZeroRegex("(\\:[0:]+\\:?)|(\\:?[0:]+\\:)");
 
         smatch leadingZeroMatch;
         regex leadingZeroRegex("\\:[0]{1,3}(?!:)(?!$)"); // zero preceded by a colon but not followed by a colon
@@ -152,31 +152,35 @@ public:
 
         while (regex_search(truncatedString, leadingZeroMatch, leadingZeroRegex)) {
             truncatedString = truncatedString.substr(0, leadingZeroMatch.position()+1) + truncatedString.substr(leadingZeroMatch.position() + leadingZeroMatch.length(), truncatedString.length() - 1);
-            if (currentLoopIteration > loopMaximum) return "::";
+            if (currentLoopIteration > loopMaximum) break;
             currentLoopIteration++; 
         }
         currentLoopIteration = 0;
         sanitizedString = truncatedString;
+
+        if (regex_search(sanitizedString, leadingZeroesAtBeginningMatch, leadingZeroesAtBeginningRegex)) {
+            sanitizedString = sanitizedString.substr(0, leadingZeroesAtBeginningMatch.position()) + sanitizedString.substr(leadingZeroesAtBeginningMatch.position() + leadingZeroesAtBeginningMatch.length(), sanitizedString.length() - 1);
+        }
 
         while (regex_search(sanitizedString, greedyZeroMatch, greedyZeroRegex)) { // truncate the longest block of zeroes into a double colon
             if ((int)greedyZeroMatch[0].length() > (int)greediestMatch.length()) {
                 greediestMatch = greedyZeroMatch[0];
             }
             sanitizedString = sanitizedString.substr(0, greedyZeroMatch.position()) + ":" + sanitizedString.substr(greedyZeroMatch.position() + greedyZeroMatch.length(), sanitizedString.length() - 1);
-            if (currentLoopIteration > loopMaximum) return "::";
+            if (currentLoopIteration > loopMaximum) break;
             currentLoopIteration++;
         }
         currentLoopIteration = 0;
-        while (regex_search(truncatedString, leadingZeroesAtBeginningMatch, leadingZeroesAtBeginningRegex)) {
-            truncatedString = truncatedString.substr(1, truncatedString.length());
-            if (currentLoopIteration > loopMaximum) return "::";
-            currentLoopIteration++;
-        }
         currentLoopIteration = 0;
         if (greediestMatch.compare("")) {
             index = (int)truncatedString.find(greediestMatch);
             truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
         } // end of zero block truncation
+        while (regex_search(truncatedString, leadingZeroesAtBeginningMatch, leadingZeroesAtBeginningRegex)) {
+            truncatedString = truncatedString.substr(1, truncatedString.length());
+            if (currentLoopIteration > loopMaximum) break;
+            currentLoopIteration++;
+        }
         if (regex_search(truncatedString, cutOffZeroMatch, cutOffZeroRegex)) { // account for very end's leading zero possibly being cut off due to truncation
             truncatedString = truncatedString + "0";
         }
@@ -184,8 +188,11 @@ public:
             truncatedString = truncatedString.substr(0, truncatedString.length() - 1);
         }
         if (regex_search(truncatedString, hangingZeroAtBeginningMatch, hangingZeroAtBeginningRegex) && !regex_search(truncatedString, doubleColonMatch, doubleColonRegex)) {
-            truncatedString = ":" + truncatedString;
-        } else if (regex_search(truncatedString, hangingZeroAtBeginningMatch, hangingZeroAtBeginningRegex)) {
+            // truncatedString = ":" + truncatedString;
+        } else if (regex_search(truncatedString, hangingZeroAtBeginningMatch, hangingZeroAtBeginningRegex) && truncatedString[0] != ':' && truncatedString[1] != ':') {
+            truncatedString = "0" + truncatedString;
+        }
+        if (truncatedString[0] == ':' && truncatedString[1] != ':') {
             truncatedString = "0" + truncatedString;
         }
         return truncatedString;
