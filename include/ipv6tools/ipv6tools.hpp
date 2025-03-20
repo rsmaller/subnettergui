@@ -53,6 +53,9 @@ public:
         smatch leadingZeroMatch;
         regex IPv6LeadingZeroRegex("\\:[0-9a-fA-F]{1,3}\\:");
 
+        smatch beginningOfStringLeadingZeroMatch;
+        regex beginningOfStringLeadingZeroRegex("^[0-9a-fA-F]{1,3}\\:");
+
         smatch endOfStringLeadingZeroMatch;
         regex endOfStringLeadingZeroRegex("\\:[0-9a-fA-F]{1,3}$");
 
@@ -62,6 +65,12 @@ public:
         smatch IPv6FormatMatch;
         regex IPv6FormatRegex("^[0-9a-fA-F]{1,4}\\:[0-9a-fA-F]{1,4}\\:[0-9a-fA-F]{1,4}\\:[0-9a-fA-F]{1,4}\\:[0-9a-fA-F]{1,4}\\:[0-9a-fA-F]{1,4}\\:[0-9a-fA-F]{1,4}\\:[0-9a-fA-F]{1,4}$");
 
+        while (regex_search(stringToManipulate, beginningOfStringLeadingZeroMatch, beginningOfStringLeadingZeroRegex)) {
+            stringToManipulate = "0" + stringToManipulate;
+            if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
+            currentLoopIteration++; 
+        }
+        currentLoopIteration = 0;
         while (regex_search(stringToManipulate, zeroHextetMatch, IPv6ZeroHextetRegex)) {
             stringToManipulate = stringToManipulate.substr(0, zeroHextetMatch.position()) + ":0000:" + stringToManipulate.substr(zeroHextetMatch.position() + zeroHextetMatch.length(), stringToManipulate.length() - 1);
             if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
@@ -80,11 +89,9 @@ public:
             currentLoopIteration++; 
         }
         currentLoopIteration = 0;
-        cout << stringToManipulate << endl;
 
         if (regex_search(stringToManipulate, doubleColonMatch, IPv6DoubleColonRegex)) {
             int lengthDifference = 39 - (int)stringToManipulate.length();
-            cout << lengthDifference << endl;
             int numberOfColonsToAdd = (lengthDifference / 5);
             int numberOfZeroesToAdd = lengthDifference - numberOfColonsToAdd;
             while (numberOfZeroesToAdd) {
@@ -132,6 +139,15 @@ public:
         smatch extraZeroAfterDoubleColonMatch;
         regex extraZeroAfterDoubleColonRegex("\\:{2}0$");
 
+        smatch leadingZeroesAtBeginningMatch;
+        regex leadingZeroesAtBeginningRegex("^0{1,3}");
+
+        smatch hangingZeroAtBeginningMatch;
+        regex hangingZeroAtBeginningRegex("^\\:");
+
+        smatch doubleColonMatch;
+        regex doubleColonRegex("\\:\\:");
+
         int index;
 
         while (regex_search(truncatedString, leadingZeroMatch, leadingZeroRegex)) {
@@ -150,6 +166,13 @@ public:
             if (currentLoopIteration > loopMaximum) return "::";
             currentLoopIteration++;
         }
+        currentLoopIteration = 0;
+        while (regex_search(truncatedString, leadingZeroesAtBeginningMatch, leadingZeroesAtBeginningRegex)) {
+            truncatedString = truncatedString.substr(1, truncatedString.length());
+            if (currentLoopIteration > loopMaximum) return "::";
+            currentLoopIteration++;
+        }
+        currentLoopIteration = 0;
         if (greediestMatch.compare("")) {
             index = (int)truncatedString.find(greediestMatch);
             truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
@@ -160,6 +183,11 @@ public:
         if (regex_search(truncatedString, extraZeroAfterDoubleColonMatch, extraZeroAfterDoubleColonRegex)) {
             truncatedString = truncatedString.substr(0, truncatedString.length() - 1);
         }
+        if (regex_search(truncatedString, hangingZeroAtBeginningMatch, hangingZeroAtBeginningRegex) && !regex_search(truncatedString, doubleColonMatch, doubleColonRegex)) {
+            truncatedString = ":" + truncatedString;
+        } else if (regex_search(truncatedString, hangingZeroAtBeginningMatch, hangingZeroAtBeginningRegex)) {
+            truncatedString = "0" + truncatedString;
+        }
         return truncatedString;
     }
 
@@ -167,7 +195,7 @@ public:
         stringArg = IPv6Sanitize(stringArg);
         int currentIndex = 0;
         string currentString = "";
-        unsigned short *hextets = (unsigned short *)calloc(8, 2);
+        unsigned short *hextets = (unsigned short *)calloc(8, sizeof(short));
         for (int i=0; i<8; i++) {
             currentString = "";
             while (stringArg[currentIndex] != ':' && (size_t)currentIndex < stringArg.length()) {
@@ -180,10 +208,74 @@ public:
         return hextets;
     }
 
+    static unsigned short *MACStringToHextets(string stringArg) {
+        unsigned short *hextets = (unsigned short *)calloc(3, sizeof(short));
+        smatch MACMatch;
+        regex MACRegex("^[0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}$");
+        if (!regex_search(stringArg, MACMatch, MACRegex)) {
+            memset(hextets, 0, 3*sizeof(short));
+            return hextets;
+        }
+        string calculationString = "";
+        for (int i=0; i<stringArg.length(); i++) {
+            if (i != 2 && i != 8 && i != 14) {
+                calculationString += stringArg[i];
+            }
+        }
+        int currentIndex = 0;
+        string currentString = "";
+        for (int i=0; i<3; i++) {
+            currentString = "";
+            while (calculationString[currentIndex] != ':' && calculationString[currentIndex] != '-' && (size_t)currentIndex < calculationString.length()) {
+                currentString += calculationString[currentIndex];
+                currentIndex++;
+            }
+            currentIndex++;
+            hextets[i] = (unsigned short)stoi("0x" + currentString, nullptr, 16);
+        }
+        return hextets;
+    }
+
+    static unsigned short *MACHextetsToEUIHextets(unsigned short *MACHextets) {
+        unsigned short *EUIHextets = (unsigned short *)calloc(4, sizeof(short));
+        EUIHextets[0] = MACHextets[0] ^ (unsigned short)0b00000010;
+        EUIHextets[1] = (MACHextets[1] & (unsigned short)0xff00) + 0x00ff;
+        EUIHextets[2] = (MACHextets[1] & (unsigned short)0x00ff) + 0xfe00;
+        EUIHextets[3] = MACHextets[2];
+        return EUIHextets;
+    }
+
+    static string MACStringToEUIString(string MACString) {
+        smatch MACMatch;
+        regex MACRegex("^[0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}$");
+        if (!regex_search(MACString, MACMatch, MACRegex)) {
+            return "0000:00ff:fe00:0000";
+        }
+        stringstream EUIString;
+        unsigned short *MACHextets = MACStringToHextets(MACString);
+        unsigned short *EUIHextets = MACHextetsToEUIHextets(MACHextets);
+        free(MACHextets);
+        for (int i=0; i<4; i++) {
+            EUIString << hex << setfill('0') << setw(4) << EUIHextets[i];
+            EUIString << ":";
+        }
+        free(EUIHextets);
+        return EUIString.str().substr(0, EUIString.str().length() - 1);
+    }
+
+    static string MACHextetsToString(unsigned short *hextets) {
+        stringstream MACString;
+        unsigned char *macOctets = (unsigned char *)hextets;
+        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[1] << ":";
+        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[0] << ":";
+        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[3] << ":";
+        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[2] << ":";
+        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[5] << ":";
+        MACString << hex << setfill('0') << setw(2) <<  (unsigned short)macOctets[4];
+        return MACString.str();
+    }
+
     string type() {
-        cout << hex << (this -> hextets[0] & (unsigned short)0b1111111111000000) << endl;
-        cout << hex << (this -> hextets[0] & (unsigned short)0b1110000000000000) << endl;
-        cout << hex << this -> hextets[0] << endl;
 
         if (
             ((this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0) &&

@@ -101,7 +101,9 @@ bool currentlyInExportThread = false;
 
 //  IPv6 Tools
 char *IPv6InputBuffer = (char *)smartCalloc(256, 1);
+char *MACInputBuffer = (char *)smartCalloc(256, 1);
 IPv6 currentIPv6Addr;
+unsigned short *currentMACAddr;
 
 //  Primary conditionals
 bool subnettingStarted = false;
@@ -278,6 +280,12 @@ int exportChangedCallback(ImGuiInputTextCallbackData *data) {
 int IPv6ChangedCallback(ImGuiInputTextCallbackData *data) {
     (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
     currentIPv6Addr = IPv6(IPv6InputBuffer);
+    return 1;
+}
+
+int MACChangedCallback(ImGuiInputTextCallbackData *data) {
+    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
+    currentMACAddr = IPv6::MACStringToHextets(MACInputBuffer);
     return 1;
 }
 
@@ -642,23 +650,35 @@ void IPClassWindow() {
 }
 
 void IPv6Window() {
-    IPv6 enteredIPv6Addr;
+    string EUIString = IPv6::MACStringToEUIString(MACInputBuffer);
+    string fullIPv6EUIString = IPv6::IPv6Sanitize("fe80:0000:0000:0000:" + EUIString);
+    currentIPv6Addr = IPv6(IPv6InputBuffer);
     ImGui::Begin("IPv6 Tools", windowsAreOpen+4);
     ImGui::InputText("IPv6 Address", IPv6InputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, IPv6ChangedCallback);
     if (ImGui::Button("Generate Random IP Address")) {
         unsigned short *randomIPV6Num = getRandomIPv6Number();
         currentIPv6Addr = IPv6(randomIPV6Num);
-        memcpy(IPv6InputBuffer, currentIPv6Addr.IPv6String.c_str(), 39);
+        memcpy(IPv6InputBuffer, currentIPv6Addr.IPv6String.c_str(), 255);
         free(randomIPV6Num);
     }
     ImGui::SameLine();
-    if (ImGui::Button("Clear")) {
-        memcpy(IPv6InputBuffer, "", 39);
+    if (ImGui::Button("Clear IPv6")) {
+        memcpy(IPv6InputBuffer, "", 255);
     }
-    enteredIPv6Addr = IPv6(string(IPv6InputBuffer));
-    ImGui::Text("%s", ("Shorthand: " + enteredIPv6Addr.shortenedIPv6String).c_str());
-    ImGui::Text("%s", ("Full: " + enteredIPv6Addr.IPv6String).c_str());
-    ImGui::Text("%s", ("This IPv6 address is a(n) " + enteredIPv6Addr.type() + " address.").c_str());
+    ImGui::Text("%s", ("Shorthand: " + currentIPv6Addr.shortenedIPv6String).c_str());
+    ImGui::Text("%s", ("Full: " + currentIPv6Addr.IPv6String).c_str());
+    ImGui::Text("%s", ("This IPv6 address is a(n) " + currentIPv6Addr.type() + " address.").c_str());
+    ImGui::Text("");
+    ImGui::InputText("MAC Address", MACInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, MACChangedCallback);
+    if (ImGui::Button("Generate Random MAC Address")) {
+        memcpy(MACInputBuffer, IPv6::MACHextetsToString(getRandomMACNumber()).c_str(), 255);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Clear MAC")) {
+        memcpy(MACInputBuffer, "", 255);
+    }
+    ImGui::Text("%s", ("EUI64 Component: " + EUIString).c_str());
+    ImGui::Text("%s", ("Full IPv6 EUI64 Example: " + fullIPv6EUIString).c_str());
     ImGui::End();
 }
 

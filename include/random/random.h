@@ -22,6 +22,15 @@ unsigned short *getRandomIPv6Number() { // returns size 8 array for IPv6 number
 	return returnArray;
 }
 
+unsigned short *getRandomMACNumber() { // returns size 8 array for IPv6 number
+	unsigned short *returnArray = (unsigned short *)calloc(3, 2);
+	rand();
+	for (int i=0; i<3; i++) {
+		returnArray[i] = (unsigned short)(rand() % 0xffffU);
+	}
+	return returnArray;
+}
+
 bool chance(unsigned int numerator, unsigned int denominator) {
 	unsigned int generatedNumber = getRandomInteger(1, denominator);
 	return generatedNumber <= numerator;
