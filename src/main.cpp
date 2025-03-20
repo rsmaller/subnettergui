@@ -104,7 +104,7 @@ char *IPv6InputBuffer = (char *)smartCalloc(256, 1);
 char *MACInputBuffer = (char *)smartCalloc(256, 1);
 IPv6 currentIPv6Addr;
 unsigned short *currentMACAddr;
-stringstream randomHextetStream;
+stringstream randomThreeHextetStream;
 
 //  Primary conditionals
 bool subnettingStarted = false;
@@ -287,12 +287,12 @@ int IPv6ChangedCallback(ImGuiInputTextCallbackData *data) {
 int MACChangedCallback(ImGuiInputTextCallbackData *data) {
     (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
     currentMACAddr = IPv6::MACStringToHextets(MACInputBuffer);
-    randomHextetStream.str("");
-    randomHextetStream << hex << setfill('0') << setw(4) << getRandomShort();
-    randomHextetStream << ":";
-    randomHextetStream << hex << setfill('0') << setw(4) << getRandomShort();
-    randomHextetStream << ":";
-    randomHextetStream << hex << setfill('0') << setw(4) << getRandomShort();
+    randomThreeHextetStream.str("");
+    randomThreeHextetStream << hex << setfill('0') << setw(4) << getRandomShort();
+    randomThreeHextetStream << ":";
+    randomThreeHextetStream << hex << setfill('0') << setw(4) << getRandomShort();
+    randomThreeHextetStream << ":";
+    randomThreeHextetStream << hex << setfill('0') << setw(4) << getRandomShort();
     return 1;
 }
 
@@ -658,7 +658,7 @@ void IPClassWindow() {
 
 void IPv6Window() {
     string EUIString = IPv6::MACStringToEUIString(MACInputBuffer);
-    string fullIPv6EUIString = IPv6::IPv6Sanitize("fe80:" + randomHextetStream.str() + ":" + EUIString);
+    string fullIPv6EUIString = IPv6::IPv6Sanitize("fe80:" + randomThreeHextetStream.str() + ":" + EUIString);
     currentIPv6Addr = IPv6(IPv6InputBuffer);
     ImGui::Begin("IPv6 Tools", windowsAreOpen+4);
     ImGui::InputText("IPv6 Address", IPv6InputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, IPv6ChangedCallback);
@@ -680,16 +680,17 @@ void IPv6Window() {
     ImGui::Text("%s", ("Interface ID:                     " + currentIPv6Addr.IPv6String.substr(20, 19)).c_str());
     ImGui::Text("%s", ("Address Type: " + currentIPv6Addr.type()).c_str());
     ImGui::Text("");
-    ImGui::Text("Link-local IPv6 interface IDs can be generated via a device's MAC address via a process called EUI64.");
+    ImGui::Text("Link-local IPv6 interface IDs can be generated using a device's MAC address via a process called EUI64.");
     ImGui::InputText("MAC Address", MACInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, MACChangedCallback);
     if (ImGui::Button("Generate Random MAC Address")) {
-        MACChangedCallback(NULL);
         memcpy(MACInputBuffer, IPv6::MACHextetsToString(getRandomMACNumber()).c_str(), 255);
+        MACChangedCallback(NULL);
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear MAC")) {
-        randomHextetStream.str("0000:0000:0000");
         memcpy(MACInputBuffer, "", 255);
+        MACChangedCallback(NULL);
+        randomThreeHextetStream.str("0000:0000:0000");
     }
     ImGui::Text("%s", ("EUI64 Interface ID:                          " + EUIString).c_str());
     ImGui::Text("%s", ("Full IPv6 EUI64 Example: " + fullIPv6EUIString).c_str());
