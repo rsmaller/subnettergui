@@ -9,6 +9,10 @@ unsigned int getRandomInteger(unsigned int start, unsigned int end) {
 	return (unsigned int)(rand() % range + start);
 }
 
+unsigned short getRandomShort() {
+	return (unsigned short)(rand() % 0xffffU);
+}
+
 unsigned int getRandomIPNumber() {
 	return ((char)rand() << 24) + ((char)rand() << 16) + ((char)rand() << 8) + (char)rand();
 }
