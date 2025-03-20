@@ -52,7 +52,7 @@ typedef struct classesQuestion {
 
 //  window and window control variables to properly exit the program when windows are closed.
 GLFWwindow *windowBackend = nullptr;
-const int totalNumberOfWindows = 6;
+const int totalNumberOfWindows = 7;
 ImGuiContext *currentImGuiContext;
 bool windowsAreOpen[totalNumberOfWindows];
     //  Indices:
@@ -62,6 +62,8 @@ bool windowsAreOpen[totalNumberOfWindows];
     //  3 - Study Window
     //  4 - IPv6 Window
     //  5 - IP Classes Window
+    //  6 - IPv6 Info Window
+    //  7 - IP Class Info Window
 
 //  Debug variables
 unsigned long long int frameCount = 0;
@@ -672,6 +674,10 @@ void IPv6Window() {
     if (ImGui::Button("Clear IPv6")) {
         memcpy(IPv6InputBuffer, "", 255);
     }
+    ImGui::SameLine();
+    if (ImGui::Button("Explain IPv6")) {
+        windowsAreOpen[6] = true;
+    }
     ImGui::Text("%s", ("Shorthand:    " + currentIPv6Addr.shortenedIPv6String).c_str());
     ImGui::Text("%s", ("Full:         " + currentIPv6Addr.IPv6String).c_str());
     
@@ -694,6 +700,12 @@ void IPv6Window() {
     }
     ImGui::Text("%s", ("EUI64 Interface ID:                          " + EUIString).c_str());
     ImGui::Text("%s", ("Full IPv6 EUI64 Example: " + fullIPv6EUIString).c_str());
+    ImGui::End();
+}
+
+void IPv6InfoWindow() {
+    ImGui::Begin("IPv6 Info", windowsAreOpen+6);
+    ImGui::Text("woah");
     ImGui::End();
 }
 
@@ -803,6 +815,9 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         }
         if (windowsAreOpen[5]) {
             IPClassWindow();
+        }
+        if (windowsAreOpen[6]) {
+            IPv6InfoWindow();
         }
         if (graphData && subnettingStarted && subnettingSuccessful) {
             plotSubnetCubes();
