@@ -128,7 +128,7 @@ public:
         string greediestMatch = "";
 
         smatch greedyZeroMatch;
-        regex greedyZeroRegex("(\\:[0:]+\\:?)|(\\:?[0:]+\\:)");
+        regex greedyZeroRegex("(\\:[0:]+$)|(^[0:]+\\:)|(\\:[0:]+\\:)"); // THIS is the correct way to match for double colons.
 
         smatch leadingZeroMatch;
         regex leadingZeroRegex("\\:[0]{1,3}(?!:)(?!$)"); // zero preceded by a colon but not followed by a colon
@@ -173,6 +173,7 @@ public:
         currentLoopIteration = 0;
         currentLoopIteration = 0;
         if (greediestMatch.compare("")) {
+            cout << greediestMatch << endl;
             index = (int)truncatedString.find(greediestMatch);
             truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
         } // end of zero block truncation
@@ -224,7 +225,7 @@ public:
             return hextets;
         }
         string calculationString = "";
-        for (int i=0; i<stringArg.length(); i++) {
+        for (int i=0; i<(int)stringArg.length(); i++) {
             if (i != 2 && i != 8 && i != 14) {
                 calculationString += stringArg[i];
             }

@@ -685,7 +685,7 @@ void IPv6Window() {
     ImGui::Text("%s", ("Subnet ID:                   " + currentIPv6Addr.IPv6String.substr(15, 4)).c_str());
     ImGui::Text("%s", ("Interface ID:                     " + currentIPv6Addr.IPv6String.substr(20, 19)).c_str());
     ImGui::Text("%s", ("Address Type: " + currentIPv6Addr.type()).c_str());
-    ImGui::Text("");
+    ImGui::Text(" ");
     ImGui::Text("Link-local IPv6 interface IDs can be generated using a device's MAC address via a process called EUI64.");
     ImGui::InputText("MAC Address", MACInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, MACChangedCallback);
     if (ImGui::Button("Generate Random MAC Address")) {
@@ -705,7 +705,8 @@ void IPv6Window() {
 
 void IPv6InfoWindow() {
     ImGui::Begin("IPv6 Info", windowsAreOpen+6);
-    ImGui::Text("woah");
+    ImGui::Text("IPv6 addresses are 128-bit addresses which are split into groups called hextets; hextets are 16 bits each.");
+    ImGui::Text("Therefore, an IPv6 address has 8 hextets in it. Each hextet is represented as a 4 digit hexadecimal number.");
     ImGui::End();
 }
 
