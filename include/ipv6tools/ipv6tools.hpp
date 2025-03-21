@@ -173,7 +173,6 @@ public:
         currentLoopIteration = 0;
         currentLoopIteration = 0;
         if (greediestMatch.compare("")) {
-            cout << greediestMatch << endl;
             index = (int)truncatedString.find(greediestMatch);
             truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
         } // end of zero block truncation

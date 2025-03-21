@@ -707,6 +707,13 @@ void IPv6InfoWindow() {
     ImGui::Begin("IPv6 Info", windowsAreOpen+6);
     ImGui::Text("IPv6 addresses are 128-bit addresses which are split into groups called hextets; hextets are 16 bits each.");
     ImGui::Text("Therefore, an IPv6 address has 8 hextets in it. Each hextet is represented as a 4 digit hexadecimal number.");
+    ImGui::Text("Furthermore, each hextet is separated by a colon, meaning there are 7 colons in a full-length IPv6 address.");
+    ImGui::Text("   For example: a0f0:0000:0000:43a2:02d8:2b0f:764c:f47a");
+    ImGui::Text("However, IPv6 addresses can be shortened. Each hextet can ignore any leading zeroes.");
+    ImGui::Text("   Any number can be written with or without leading zeroes in any number system. 0100 is always the same as 100.");
+    ImGui::Text("   For example: a0f0:0:0:43a2:2d8:2b0f:764c:f47a");
+    ImGui::Text("The longest chain of hextets which only contain zeroes can also be replaced with a double colon.");
+    ImGui::Text("   For example: a0f0::43a2:2d8:2b0f:764c:f47a");
     ImGui::End();
 }
 
