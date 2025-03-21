@@ -709,11 +709,22 @@ void IPv6InfoWindow() {
     ImGui::Text("Therefore, an IPv6 address has 8 hextets in it. Each hextet is represented as a 4 digit hexadecimal number.");
     ImGui::Text("Furthermore, each hextet is separated by a colon, meaning there are 7 colons in a full-length IPv6 address.");
     ImGui::Text("   For example: a0f0:0000:0000:43a2:02d8:2b0f:764c:f47a");
+    ImGui::Text(" ");
+    ImGui::Text("IPv6 sections are split up into three sections: the prefix, the subnet ID, and the interface ID.");
+    ImGui::Text("The prefix is the first three hextets of an IPv6 address. The prefix for the above address is a0f0:0000:0000.");
+    ImGui::Text("The subnet ID is the fourth hextet of the address. The subnet ID for the above address is 43a2.");
+    ImGui::Text("The interface ID is the last four hextets of the address, or 02d8:2b0f:764c:f47a.");
+    ImGui::Text("The prefix determines the type of the IPv6 address (see below).");
+    ImGui::Text("The subnet ID determines network to which the IPv6 address belongs.");
+    ImGui::Text("The interface ID is the identifier portion which is unique to a device on the subnet.");
+    ImGui::Text(" ");
     ImGui::Text("However, IPv6 addresses can be shortened. Each hextet can ignore any leading zeroes.");
     ImGui::Text("   Any number can be written without leading zeroes in any number system. 0100 is always the same as 100.");
     ImGui::Text("   For example: a0f0:0:0:43a2:2d8:2b0f:764c:f47a");
     ImGui::Text("The longest chain of hextets which only contain zeroes can also be replaced with a double colon.");
     ImGui::Text("   For example: a0f0::43a2:2d8:2b0f:764c:f47a");
+    ImGui::Text(" ");
+    ImGui::Text("There are also various types of IPv6 addresses.");
     ImGui::End();
 }
 
