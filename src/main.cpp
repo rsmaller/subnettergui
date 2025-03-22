@@ -52,7 +52,7 @@ typedef struct classesQuestion {
 
 //  window and window control variables to properly exit the program when windows are closed.
 GLFWwindow *windowBackend = nullptr;
-const int totalNumberOfWindows = 7;
+const int totalNumberOfWindows = 10;
 ImGuiContext *currentImGuiContext;
 bool windowsAreOpen[totalNumberOfWindows];
     //  Indices:
@@ -64,6 +64,8 @@ bool windowsAreOpen[totalNumberOfWindows];
     //  5 - IP Classes Window
     //  6 - IPv6 Info Window
     //  7 - IP Class Info Window
+    //  8 - IP Info Window
+    //  9 - Subnet Mask Info Window
 
 //  Debug variables
 unsigned long long int frameCount = 0;
@@ -554,6 +556,9 @@ void mainWindow() {
         currentIP += (unsigned int)(totalSubnetsToGenerate- 256) * (unsigned int)netMaskArg2.blockSize;
         totalAddedToIP = totalSubnetsToGenerate - (totalSubnetsToGenerate % 256);
     }
+    if (ImGui::Button("Explain IP Addresses")) {
+        windowsAreOpen[8] = true;
+    }
     if (!subnettingStarted) {
         ImGui::End();
         return;
@@ -650,6 +655,10 @@ void IPClassWindow() {
         currentClassQuestion = randomClassQuestion();
         resetCurrentClassQuestion();
     }
+    ImGui::SameLine();
+    if (ImGui::Button("Explain IP Classes")) {
+        windowsAreOpen[7] = true;
+    }
     if (currentClassQuestionAnswered) {
         if (!currentClassQuestion.answer1.compare(classInputBuffer1)) {ImGui::Text("IP Class is correct!");} else {ImGui::Text("IP Class is incorrect.");}
         if (!currentClassQuestion.answer2.compare(classInputBuffer2)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");} 
@@ -705,6 +714,7 @@ void IPv6Window() {
 
 void IPv6InfoWindow() {
     ImGui::Begin("IPv6 Info", windowsAreOpen+6);
+    ImGui::BeginChild("ScrollWheel");
     ImGui::Text("IPv6 addresses are 128-bit addresses which are split into groups called hextets; hextets are 16 bits each.");
     ImGui::Text("Therefore, an IPv6 address has 8 hextets in it. Each hextet is represented as a 4 digit hexadecimal number.");
     ImGui::Text("Furthermore, each hextet is separated by a colon, meaning there are 7 colons in a full-length IPv6 address.");
@@ -724,7 +734,128 @@ void IPv6InfoWindow() {
     ImGui::Text("The longest chain of hextets which only contain zeroes can also be replaced with a double colon.");
     ImGui::Text("   For example: a0f0::43a2:2d8:2b0f:764c:f47a");
     ImGui::Text(" ");
-    ImGui::Text("There are also various types of IPv6 addresses.");
+    ImGui::Text("There are also various types of IPv6 addresses. The types of IPv6 addresses each fall into an address range.");
+    ImGui::Text("Each address type is either unicast, multicast, or anycast.");
+    ImGui::Text("   Unicast addresses are used to communicate with a single device.");
+    ImGui::Text("   Multicast addresses are used to communicate with many devices.");
+    ImGui::Text("   Anycast addresses are used to communicate with the closest reachable device in a multicast group.");
+    ImGui::Text(" ");
+    ImGui::Text("Each address range is in shortened form and with the address block written in CIDR notation.");
+    ImGui::Text("More information about CIDR can be found in the IP classes info block.");
+    ImGui::Text("The address ranges are as follows: ");
+    ImGui::Text("   Assigned multicast - FF00:: (/8)");
+    ImGui::Text("   Solicited-node multicast - FF02::1:FF00:0 (/104)");
+    ImGui::Text("   Loopback Unicast - :: (/127)");
+    ImGui::Text("   Link-local Unicast/Anycast - FE80:: (/10)");
+    ImGui::Text("   Site-local Unicast/Anycast - FEC0:: (/10)");
+    ImGui::Text("   Aggregatable Global Unicast - 2001:: (/16) or 2002:: (/16) or 3FFE:: (/16)");
+    ImGui::Text(" ");
+    ImGui::Text("Also, IPv4 addresses can be written in an IPv6 format. Because IPv4 addresses are 32 bits,");
+    ImGui::Text("They can be stored in the last two hextets of an IPv6 address.");
+    ImGui::Text("To make it clear that an IPv4 address is being stored there, the preceding six hextets must be zero.");
+    ImGui::Text("Therefore, the address range for IPv4-compatible IPv6 addresses is :: (/96).");
+    ImGui::Text(" ");
+    ImGui::EndChild();
+    ImGui::End();
+}
+
+void IPClassInfoWindow() {
+    ImGui::Begin("IP Class Info", windowsAreOpen+7);
+    ImGui::BeginChild("ScrollWheel");
+    ImGui::Text("In the older days of IPv4 addressing, a method of organization called classful addressing was used.");
+    ImGui::Text("IP classes were a way of delegating subnets groups of IP addresses into categories with designated subnet masks.");
+    ImGui::Text("There were three main classes used in everyday addressing: A, B, and C.");
+    ImGui::Text("   Class A addresses were assigned a subnet mask of 255.0.0.0 or /8 in CIDR notation.");
+    ImGui::Text("   Class B addresses were assigned a subnet mask of 255.255.0.0 or /16 in CIDR notation.");
+    ImGui::Text("   Class C addresses were assigned a subnet mask of 255.255.255.0 or /24 in CIDR notation.");
+    ImGui::Text("   There are also class D addresses, used for multicast, and experimental class E addresses.");
+    ImGui::Text(" ");
+    ImGui::Text("Because IP classes are organized groups of IP addresses, they can be written as subnets!!");
+    ImGui::Text("The groups of IP addresses for each IP class is as follows:");
+    ImGui::Text("   Class A addresses range from 0.0.0.0 to 127.255.255.255. This would be 0.0.0.0/1 as a subnet.");
+    ImGui::Text("   Class B addresses range from 128.0.0.0 to 191.255.255.255. This would be 128.0.0.0/2 as a subnet.");
+    ImGui::Text("   Class C addresses range from 192.0.0.0 to 223.255.255.255. This owuld be 192.0.0.0/3 as a subnet.");
+    ImGui::Text("   Class D addresses range from 224.0.0.0 to 239.255.255.255. This would be 224.0.0.0/4 as a subnet.");
+    ImGui::Text("   Class E addresses range from 240.0.0.0 to 255.255.255.255. This would be 240.0.0.0/4 as a subnet.");
+    ImGui::Text(" ");
+    ImGui::Text("While it is important to understand IP classes and how they work, they are not used much anymore.");
+    ImGui::Text("IP classes have been replaced by CIDR, or Classless Inter-Domain Routing.");
+    ImGui::Text("CIDR is a subnet notation for IP addresses where any IP address can be part of a network with any subnet mask.");
+    ImGui::Text("CIDR introduced a new notation for subnet masks as well. Instead of writing them like IP addresses,");
+    ImGui::Text("They can be written as a slash followed by the count of the number of network bits in the subnet mask.");
+    ImGui::Text("   For example, the subnet mask 255.255.255.0 can be written in binary as 11111111.11111111.11111111.00000000.");
+    ImGui::Text("   There are 24 ones in that mask that represent the network portion of the subnet mask.");
+    ImGui::Text("   In CIDR notation, 255.255.255.0 would therefore be written as /24.");
+    ImGui::Text("The IP class address groups and the IPv6 type groups both use this notation to represent groups of IP addresses.");
+    ImGui::EndChild();
+    ImGui::End();
+}
+
+void IPInfoWindow() {
+    ImGui::Begin("IP Info", windowsAreOpen+8);
+    ImGui::BeginChild("ScrollWheel");
+    ImGui::Text("IP addresses are very similar to an address you might find for a home. 30 1st Street in New York City shows you");
+    ImGui::Text("the general area of the destination's location, New York City, as well as the local area, 1st Street,");
+    ImGui::Text("and its exact location on that street, 30.");
+    ImGui::Text("IP addresses function the same way. The IP address 112.14.8.2 might not seem meaningful, but it is a roadmap to a");
+    ImGui::Text("device on some network. IP addresses contain a network portion, which is analogous to a city or a street, and a");
+    ImGui::Text("host portion, which is analogous to the exact location of a house on a street. Both pieces of information are");
+    ImGui::Text("necessary to locate a device.");
+    ImGui::Text("More information on network and host portions can be found in the subnet mask info block. This info block will discuss");
+    ImGui::Text("the nature and format of IP addresses.");
+    ImGui::Text(" ");
+    ImGui::Text("An IP address is just a number. It is a number that is usually written as four numbers separated by dots, but in reality, it is");
+    ImGui::Text("simply one number between 0 and 4,294,967,295.");
+    ImGui::Text("The reason for this oddly specific number is that IP addresses are located on computers and must be used in ways a computer can understand.");
+    ImGui::Text(" ");
+    ImGui::Text("Computers do not use the number system we humans are familiar with; computers use a binary system, or base 2 system, instead of the");
+    ImGui::Text("decimal system most of the world uses, otherwise known as the base 10 system.");
+    ImGui::Text("The word 'base' has a few different characteristics that make it significant.");
+    ImGui::Text("   Firstly, the base refers to how many different numbers can be put in a single digit in any number system.");
+    ImGui::Text("   In base 10, the numbers are 0 through 9. 0 through 9 makes up 10 numbers in total.");
+    ImGui::Text("   Secondly, the base also determines the values of 'places', or digits, of numbers in a number system.");
+    ImGui::Text("   In base 10, we have the 1's place, the 10's place, the 100's place, the 1,000's place, and so on.");
+    ImGui::Text("Conversely:");
+    ImGui::Text("   In base 2, the numbers 0 through 1 are used, making up 2 numbers in total.");
+    ImGui::Text("   Furthermore, the 'places' binary uses are exponents of 2 instead of exponents of 10.");
+    ImGui::Text("   Binary has the 1's place, 2's place, 4's place, 8's place, 16's place, and so on.");
+    ImGui::Text("   The value of each digit essentially doubles.");
+    ImGui::Text(" ");
+    ImGui::Text("Fortunately, everything else about the binary number system is the exact same as the decimal number system. They follow all the same conventions,");
+    ImGui::Text("and only the base is different.");
+    ImGui::Text("Below are examples of how numbers would be read in both the regular decimal system and binary system.");
+    ImGui::Text("Keep in mind for both decimal and binary, the 1's place is the rightmost digit.");
+    ImGui::Text("The decimal number 142:");
+    ImGui::Text("   The 1's place is 2. That means the value at the 1's place is the place * 2, or 1 * 2 => 2.");
+    ImGui::Text("   The 10's place is 4. That means the value at the 10's place is the place * 4, or 10 * 4 => 40.");
+    ImGui::Text("   The 100's place is 1. That means the value as the 100's place is the place * 1, or 100 * 1 => 100.");
+    ImGui::Text("   These values are then added together to get 100 + 40 + 2, or 142.");
+    ImGui::Text("   In everyday life, we usually skip this calculation because we would speak it.");
+    ImGui::Text("   \"One hundred forty-two\" is the same as 100 + 40 + 2.");
+    ImGui::Text("In binary, we cannot write the same number as \"142\". It would instead have to be written as \"10001110\":");
+    ImGui::Text("   The 1's place is 0. That means the value at the 1's place is the place * 0, or 1 * 0 => 0.");
+    ImGui::Text("   The 2's place is 1. The calculation for that digit would be 2 * 1 => 2.");
+    ImGui::Text("   The 4's place is 1. The calculation would be 4 * 1 => 4.");
+    ImGui::Text("   The 8's place is also 1. The calculation would be 8 * 1 => 8.");
+    ImGui::Text("   The 16's place is 0. The calculation would be 16 * 0 => 0.");
+    ImGui::Text("   The 32's place is 0. The calculation would be 32 * 0 => 0.");
+    ImGui::Text("   The 64's place is 0. The calculation would be 64 * 0 => 0.");
+    ImGui::Text("   The 128's place is 1. The calculation would be 128 * 1 => 128.");
+    ImGui::Text("   Just like in decimal, these values are added together to get 128 + 8 + 4 + 2, which is 142.");
+    ImGui::Text("   Based on this calculation, it could be said that \"10001110\" is the binary representation of \"142\".");
+    ImGui::Text(" ");
+    ImGui::Text("IP addresses are binary numbers. They are stored in 32 \"bits\", meaning 32 binary digits.");
+    ImGui::Text("Therefore, an IP address can be anything from \"00000000000000000000000000000000\" to \"11111111111111111111111111111111\".");
+    ImGui::Text("The above numbers converted to decimal are 0 to 4,294,967,295.");
+    ImGui::Text(" ");
+    ImGui::Text("But how can a 32-bit binary number be written as something like 112.14.8.2?");
+    ImGui::Text("Simply put, each 32-bit address is separated into four 8-bit sections, each section separated by a dot.");
+    ImGui::Text("Each section is then converted into our decimal number system.");
+    ImGui::Text("The IP address 112.114.8.2 would originally be stored in a computer as \"01110000000011100000100000000010\".");
+    ImGui::Text("Being separated into four 8-bit sections, it would become: \"01110000.00001110.00001000.00000010\".");
+    ImGui::Text("Finally, converting each 8-bit section into decimal would result in the IP address shown to us as 112.14.8.2.");
+    ImGui::Text(" ");
+    ImGui::EndChild();
     ImGui::End();
 }
 
@@ -837,6 +968,12 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         }
         if (windowsAreOpen[6]) {
             IPv6InfoWindow();
+        }
+        if (windowsAreOpen[7]) {
+            IPClassInfoWindow();
+        }
+        if (windowsAreOpen[8]) {
+            IPInfoWindow();
         }
         if (graphData && subnettingStarted && subnettingSuccessful) {
             plotSubnetCubes();
