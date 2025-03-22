@@ -54,6 +54,7 @@ typedef struct classesQuestion {
 GLFWwindow *windowBackend = nullptr;
 const int totalNumberOfWindows = 10;
 ImGuiContext *currentImGuiContext;
+ImGuiID outsideGLFWWindowID;
 bool windowsAreOpen[totalNumberOfWindows];
     //  Indices:
     //  0 - Main Window
@@ -361,7 +362,7 @@ void ImGuiInit() {
         debugLog("OpenGL error in ImGuiInit():" + to_string(error));
         printf("OpenGL Error!: %d\n", error);
     }
-    ImGui::SetNextWindowViewport(ImGui::GetCurrentContext()->Viewports[0]->ID); // detach viewport from window
+    ImGui::SetNextWindowViewport(primaryViewPort->ID); // detach viewport from window
 }
 
 void startImGuiFrame() {
