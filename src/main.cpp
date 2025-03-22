@@ -337,7 +337,7 @@ void ImGuiInit() {
     #ifdef __APPLE__
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
     #endif
-    windowBackend = glfwCreateWindow(900, 700, "SubnetterGUI", NULL, NULL);
+    windowBackend = glfwCreateWindow(900, 700, "Subnetter++", NULL, NULL);
     glfwMakeContextCurrent(windowBackend);
     float x, y;
     glfwGetMonitorContentScale(monitor, &x, &y);
@@ -354,7 +354,6 @@ void ImGuiInit() {
     ImGui_ImplOpenGL3_Init("#version 330");
     ImGuiViewport* primaryViewPort = ImGui::GetMainViewport();
     primaryViewPort -> PlatformHandle = (void *)windowBackend;
-    primaryViewPort -> Size = ImVec2(1000, 800);
     ImPlot3D::CreateContext();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -451,6 +450,7 @@ void plotSubnetCubes() {
         {-vertex2DistanceFromOrigin - vertexDifference,  vertex2DistanceFromOrigin + vertexDifference,  vertex2DistanceFromOrigin - vertexDifference}, // 7: Top-front-left
     };
     ImGui::PushStyleColor(ImGuiCol_WindowBg, plotMenuBackgroundColor);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("3D Subnet Plot", &graphData);
     ImGui::PopStyleColor();
     if (ImPlot3D::BeginPlot(("Big Subnet Cube Side Length: " + to_string(cube1SideLength) + "\nSmall Subnet Cube Side Length: " + to_string(cube2SideLength) + "\n" + to_string(netMaskArg1.blockSize / netMaskArg2.blockSize) + " Small Cubes can fit inside the Big Cube").c_str())) {
@@ -483,7 +483,8 @@ void plotSubnetCubes() {
 // ----------------------------------------------------------------------------------------------
 
 void mainWindow() {
-    ImGui::Begin("Subnetter++", windowsAreOpen+0, ImGuiWindowFlags_MenuBar);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
+    ImGui::Begin("Subnetter", windowsAreOpen+0, ImGuiWindowFlags_MenuBar);
     ImGui::BeginMenuBar(); // Indented conditionals are part of the menu bar.
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Export")) {debugLog("Export Window Opened"); windowsAreOpen[1] = true;}
@@ -494,6 +495,13 @@ void mainWindow() {
             if (ImGui::MenuItem("Study Subnetting")) windowsAreOpen[3] = true;
             if (ImGui::MenuItem("IP Classes")) windowsAreOpen[5] = true;
             if (ImGui::MenuItem("IPv6 Tools")) windowsAreOpen[4] = true;
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Help")) {
+            if (ImGui::MenuItem("IP Info")) windowsAreOpen[8] = true;
+            if (ImGui::MenuItem("IP Class Info")) windowsAreOpen[7] = true;
+            if (ImGui::MenuItem("IPv6 Info")) windowsAreOpen[6] = true;
+            if (ImGui::MenuItem("Subnet Mask Info")) windowsAreOpen[9] = true;
             ImGui::EndMenu();
         }
     ImGui::EndMenuBar();
@@ -557,9 +565,6 @@ void mainWindow() {
         currentIP += (unsigned int)(totalSubnetsToGenerate- 256) * (unsigned int)netMaskArg2.blockSize;
         totalAddedToIP = totalSubnetsToGenerate - (totalSubnetsToGenerate % 256);
     }
-    if (ImGui::Button("Explain IP Addresses")) {
-        windowsAreOpen[8] = true;
-    }
     if (!subnettingStarted) {
         ImGui::End();
         return;
@@ -603,6 +608,7 @@ void mainWindow() {
 // ----------------------------------------------------------------------------------------------
 
 void studyWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("Study", windowsAreOpen+3);
     if (currentSubnetQuestion.questionString.compare("")) { 
         ImGui::Text("%s", currentSubnetQuestion.questionString.c_str());
@@ -640,6 +646,7 @@ void studyWindow() {
 }
 
 void IPClassWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("IP Classes", windowsAreOpen+5);
     if (currentClassQuestion.questionString.compare("")) {
         ImGui::Text("%s", currentClassQuestion.questionString.c_str());
@@ -656,10 +663,6 @@ void IPClassWindow() {
         currentClassQuestion = randomClassQuestion();
         resetCurrentClassQuestion();
     }
-    ImGui::SameLine();
-    if (ImGui::Button("Explain IP Classes")) {
-        windowsAreOpen[7] = true;
-    }
     if (currentClassQuestionAnswered) {
         if (!currentClassQuestion.answer1.compare(classInputBuffer1)) {ImGui::Text("IP Class is correct!");} else {ImGui::Text("IP Class is incorrect.");}
         if (!currentClassQuestion.answer2.compare(classInputBuffer2)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");} 
@@ -669,6 +672,7 @@ void IPClassWindow() {
 }
 
 void IPv6Window() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     string EUIString = IPv6::MACStringToEUIString(MACInputBuffer);
     string fullIPv6EUIString = IPv6::IPv6Sanitize("fe80:" + randomThreeHextetStream.str() + ":" + EUIString);
     currentIPv6Addr = IPv6(IPv6InputBuffer);
@@ -684,13 +688,8 @@ void IPv6Window() {
     if (ImGui::Button("Clear IPv6")) {
         memcpy(IPv6InputBuffer, "", 255);
     }
-    ImGui::SameLine();
-    if (ImGui::Button("Explain IPv6")) {
-        windowsAreOpen[6] = true;
-    }
     ImGui::Text("%s", ("Shorthand:    " + currentIPv6Addr.shortenedIPv6String).c_str());
     ImGui::Text("%s", ("Full:         " + currentIPv6Addr.IPv6String).c_str());
-    
     ImGui::Text("%s", ("Prefix:       " + currentIPv6Addr.IPv6String.substr(0, 14)).c_str());
     ImGui::Text("%s", ("Subnet ID:                   " + currentIPv6Addr.IPv6String.substr(15, 4)).c_str());
     ImGui::Text("%s", ("Interface ID:                     " + currentIPv6Addr.IPv6String.substr(20, 19)).c_str());
@@ -714,6 +713,7 @@ void IPv6Window() {
 }
 
 void IPv6InfoWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("IPv6 Info", windowsAreOpen+6);
     ImGui::BeginChild("ScrollWheel");
     ImGui::Text("IPv6 addresses are 128-bit addresses which are split into groups called hextets; hextets are 16 bits each.");
@@ -761,6 +761,7 @@ void IPv6InfoWindow() {
 }
 
 void IPClassInfoWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("IP Class Info", windowsAreOpen+7);
     ImGui::BeginChild("ScrollWheel");
     ImGui::Text("In the older days of IPv4 addressing, a method of organization called classful addressing was used.");
@@ -793,6 +794,7 @@ void IPClassInfoWindow() {
 }
 
 void IPInfoWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("IP Info", windowsAreOpen+8);
     ImGui::BeginChild("ScrollWheel");
     ImGui::Text("IP addresses are very similar to an address you might find for a home. 30 1st Street in New York City shows you");
@@ -860,7 +862,19 @@ void IPInfoWindow() {
     ImGui::End();
 }
 
+
+void subnetMaskInfoWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
+    ImGui::Begin("Subnet Mask Info", windowsAreOpen+9);
+    ImGui::BeginChild("ScrollWheel");
+    ImGui::Text("Subnet Info To Be Determined");
+    ImGui::EndChild();
+    ImGui::End();
+}
+
+
 void exportWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("Export...", windowsAreOpen+1);
     ImGui::InputText("Export Path", exportInputBuffer, 511, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback); // if this input is changed, reset the export success message.
     if (ImGui::Button("Export")) {
@@ -920,10 +934,10 @@ void exportWindow() {
     }
     ImGui::End();
     return;
-   }
-
+}
 
 void debugWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("Debug Log", windowsAreOpen+2);
     ImGui::Text("%s", ("Frame Count: " + to_string(frameCount)).c_str());
     ImGui::Text("%s", ("Dot Count: " + to_string(dotCounter)).c_str());
@@ -975,6 +989,9 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         }
         if (windowsAreOpen[8]) {
             IPInfoWindow();
+        }
+        if (windowsAreOpen[9]) {
+            subnetMaskInfoWindow();
         }
         if (graphData && subnettingStarted && subnettingSuccessful) {
             plotSubnetCubes();
