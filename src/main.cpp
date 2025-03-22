@@ -604,7 +604,7 @@ void mainWindow() {
 }
 
 // ----------------------------------------------------------------------------------------------
-// SECTION: Individual Window Functions
+// SECTION: Primary Window Functions
 // ----------------------------------------------------------------------------------------------
 
 void studyWindow() {
@@ -711,6 +711,84 @@ void IPv6Window() {
     ImGui::Text("%s", ("Full IPv6 EUI64 Example: " + fullIPv6EUIString).c_str());
     ImGui::End();
 }
+
+void exportWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
+    ImGui::Begin("Export...", windowsAreOpen+1);
+    ImGui::InputText("Export Path", exportInputBuffer, 511, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback); // if this input is changed, reset the export success message.
+    if (ImGui::Button("Export")) {
+        if (currentlyInExportThread) { // The export button does nothing if there is an ongoing export process.
+            ImGui::End();
+            return;
+        }
+        unique_lock exportThreadLock(exportThreadMutex); // Lock the exportThreadMutex so exportThreadComplete is not accessed by an ongoing thread while changing its value to false.
+        exportThreadComplete = false;
+        exportThreadLock.unlock();
+        exportButtonPreviouslyPressed = true;
+        IPArg = IP(mainInputBuffer1);
+        netMaskArg1 = SubnetMask(mainInputBuffer2);
+        netMaskArg2 = SubnetMask(mainInputBuffer3);
+        string exportString = string(exportInputBuffer);
+        debugLog("Export Button pressed with path " + exportString);
+        string mainPath = exportString.substr(0, exportString.find_last_of("\\/") + 1);
+        string resultFile = exportString.substr(exportString.find_last_of("\\/") + 1, exportString.length() - 1);
+        if (!(filesystem::exists(filesystem::path(mainPath)) && resultFile.contains(".txt"))) { // Do not continue through the rest of the export process if the path is invalid.
+            exportThreadLock.lock();
+            exportThreadComplete = false;
+            exportThreadLock.unlock();
+            debugLog("Main Path: " + mainPath);
+            debugLog("Result File: " + resultFile);
+            ImGui::Text("File could not be exported. Is the path correct?");
+            ImGui::End();
+            return;
+        }
+        debugLog("Entered path exists");
+        debugLog("Main Path: " + mainPath);
+        debugLog("Result File: " + resultFile);
+        exportFileStream.open(exportString);
+        debugLog("File created!");
+        thread exportThread = thread(
+            []() -> void { // Lambda function that runs in a detached thread
+                currentlyInExportThread = true;
+                timedVLSM(IPArg, netMaskArg1, netMaskArg2, true);
+                exportFileStream.close();
+                unique_lock exportThreadLock(exportThreadMutex); 
+                exportThreadComplete = true; 
+                currentlyInExportThread = false;
+                exportThreadLock.unlock();
+            }
+        );
+        exportThread.detach();
+        debugLog("File exported!");
+    }
+    if (!exportButtonPreviouslyPressed && !currentlyInExportThread) { // Don't show the "Exporting..." message if the export button has not been pressed and there is no export thread.
+        ImGui::End();
+        return;
+    }
+    unique_lock exportThreadLock(exportThreadMutex);
+    if (exportThreadComplete) {
+        ImGui::Text("File exported!");
+    } else {
+        ImGui::Text("%s", ("Exporting" + string(dotCounter, '.')).c_str());
+    }
+    ImGui::End();
+    return;
+}
+
+void debugWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
+    ImGui::Begin("Debug Log", windowsAreOpen+2);
+    ImGui::Text("%s", ("Frame Count: " + to_string(frameCount)).c_str());
+    ImGui::Text("%s", ("Dot Count: " + to_string(dotCounter)).c_str());
+    ImGui::BeginChild("ScrollWheel");
+    printDebugEntries();
+    ImGui::EndChild();
+    ImGui::End();
+}
+
+// ----------------------------------------------------------------------------------------------
+// SECTION: Info Window Functions
+// ----------------------------------------------------------------------------------------------
 
 void IPv6InfoWindow() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
@@ -862,87 +940,11 @@ void IPInfoWindow() {
     ImGui::End();
 }
 
-
 void subnetMaskInfoWindow() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("Subnet Mask Info", windowsAreOpen+9);
     ImGui::BeginChild("ScrollWheel");
     ImGui::Text("Subnet Info To Be Determined");
-    ImGui::EndChild();
-    ImGui::End();
-}
-
-
-void exportWindow() {
-    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
-    ImGui::Begin("Export...", windowsAreOpen+1);
-    ImGui::InputText("Export Path", exportInputBuffer, 511, ImGuiInputTextFlags_CallbackEdit, exportChangedCallback); // if this input is changed, reset the export success message.
-    if (ImGui::Button("Export")) {
-        if (currentlyInExportThread) { // The export button does nothing if there is an ongoing export process.
-            ImGui::End();
-            return;
-        }
-        unique_lock exportThreadLock(exportThreadMutex); // Lock the exportThreadMutex so exportThreadComplete is not accessed by an ongoing thread while changing its value to false.
-        exportThreadComplete = false;
-        exportThreadLock.unlock();
-        exportButtonPreviouslyPressed = true;
-        IPArg = IP(mainInputBuffer1);
-        netMaskArg1 = SubnetMask(mainInputBuffer2);
-        netMaskArg2 = SubnetMask(mainInputBuffer3);
-        string exportString = string(exportInputBuffer);
-        debugLog("Export Button pressed with path " + exportString);
-        string mainPath = exportString.substr(0, exportString.find_last_of("\\/") + 1);
-        string resultFile = exportString.substr(exportString.find_last_of("\\/") + 1, exportString.length() - 1);
-        if (!(filesystem::exists(filesystem::path(mainPath)) && resultFile.contains(".txt"))) { // Do not continue through the rest of the export process if the path is invalid.
-            exportThreadLock.lock();
-            exportThreadComplete = false;
-            exportThreadLock.unlock();
-            debugLog("Main Path: " + mainPath);
-            debugLog("Result File: " + resultFile);
-            ImGui::Text("File could not be exported. Is the path correct?");
-            ImGui::End();
-            return;
-        }
-        debugLog("Entered path exists");
-        debugLog("Main Path: " + mainPath);
-        debugLog("Result File: " + resultFile);
-        exportFileStream.open(exportString);
-        debugLog("File created!");
-        thread exportThread = thread(
-            []() -> void { // Lambda function that runs in a detached thread
-                currentlyInExportThread = true;
-                timedVLSM(IPArg, netMaskArg1, netMaskArg2, true);
-                exportFileStream.close();
-                unique_lock exportThreadLock(exportThreadMutex); 
-                exportThreadComplete = true; 
-                currentlyInExportThread = false;
-                exportThreadLock.unlock();
-            }
-        );
-        exportThread.detach();
-        debugLog("File exported!");
-    }
-    if (!exportButtonPreviouslyPressed && !currentlyInExportThread) { // Don't show the "Exporting..." message if the export button has not been pressed and there is no export thread.
-        ImGui::End();
-        return;
-    }
-    unique_lock exportThreadLock(exportThreadMutex);
-    if (exportThreadComplete) {
-        ImGui::Text("File exported!");
-    } else {
-        ImGui::Text("%s", ("Exporting" + string(dotCounter, '.')).c_str());
-    }
-    ImGui::End();
-    return;
-}
-
-void debugWindow() {
-    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
-    ImGui::Begin("Debug Log", windowsAreOpen+2);
-    ImGui::Text("%s", ("Frame Count: " + to_string(frameCount)).c_str());
-    ImGui::Text("%s", ("Dot Count: " + to_string(dotCounter)).c_str());
-    ImGui::BeginChild("ScrollWheel");
-    printDebugEntries();
     ImGui::EndChild();
     ImGui::End();
 }
