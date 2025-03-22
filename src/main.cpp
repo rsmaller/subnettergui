@@ -337,11 +337,10 @@ void ImGuiInit() {
     #ifdef __APPLE__
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
     #endif
-    windowBackend = glfwCreateWindow(100, 100, "backend", NULL, NULL);
+    windowBackend = glfwCreateWindow(900, 700, "SubnetterGUI", NULL, NULL);
     glfwMakeContextCurrent(windowBackend);
     float x, y;
     glfwGetMonitorContentScale(monitor, &x, &y);
-    glfwHideWindow(windowBackend);
     glewInit();
     currentImGuiContext = ImGui::CreateContext();
     ImGui::SetCurrentContext(currentImGuiContext);
@@ -373,6 +372,7 @@ void startImGuiFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
         debugLog("OpenGL error in startImGuiFrame():" + to_string(error));
