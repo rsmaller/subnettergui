@@ -360,7 +360,6 @@ void ImGuiInit() {
         debugLog("OpenGL error in ImGuiInit():" + to_string(error));
         printf("OpenGL Error!: %d\n", error);
     }
-    ImGui::SetNextWindowViewport(primaryViewPort->ID); // detach viewport from window
 }
 
 void startImGuiFrame() {
