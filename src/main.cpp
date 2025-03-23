@@ -1,4 +1,21 @@
 // ----------------------------------------------------------------------------------------------
+//  Table of Contents
+// ----------------------------------------------------------------------------------------------
+//  1.  Includes and Type Definitions
+//  2.  Global Variables
+//  3.  Debugging
+//  4.  IP Object Wrappers
+//  5.  Question Object Wrappers and Conditionals
+//  6.  ImGui Callbacks
+//  7.  ImGui Wrapper Functions
+//  8.  GLFW, OpenGL Initializaiton, and Rendering
+//  9.  3D Plotting
+//  10. Main Window
+//  11. Primary Window Functions
+//  12. Info Window Functions
+//  13. Entry Point Functions
+
+// ----------------------------------------------------------------------------------------------
 // SECTION: Includes and Type Definitions
 // ----------------------------------------------------------------------------------------------
 
