@@ -2,6 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//  A warning; for anyone modifying this code, the startingNode linked list is not thread safe and should NOT be used in programs with volatile memory allocations.
+//  ImGui does not use the smartMalloc and smartCalloc allocators because the linked list will decouple if used in threaded or volatile programs like ImGui.
+//  Fortunately, ImGui handles its own memory allocation.
+//  This allocator is only designed to be used in client code for tasks running on a single thread; its behavior is undefined for any other task!
+//  This header can be safely used in a multi-threaded program as long as the startingNode linked list is only accessed from the primary thread.
+//  Furthermore, malloc(), calloc(), and free() can be used alongside this allocator. This allocator is simply designed to clean up allocations at the end of runtime.
+//  The smart allocators and smart free functions in this code can still be used to dynamically allocate and free memory as needed, provided it is done on one thread.
+
 typedef struct memoryNode {
     void *pointer;
     struct memoryNode *nextNode;
@@ -87,7 +95,7 @@ void smartFree(void *pointer) {
     return;
 }
 
-void memoryCleanup() { // call this at the end of main to ensure any dangling pointers are handled.
+void memoryCleanup() { // call this at the end of main() to ensure any dangling pointers are handled.
     if (!startingNode) return;
     memoryNode *currentNodeToFree = startingNode;
     memoryNode *swapperNode = NULL;
