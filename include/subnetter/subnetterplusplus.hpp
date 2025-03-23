@@ -1,4 +1,16 @@
 // ----------------------------------------------------------------------------------------------
+//  Table of Contents
+// ----------------------------------------------------------------------------------------------
+//  1.  Includes and Type Definitions
+//  2.  Global Variables
+//  3.  ImGui Conditionals Preprocessing for Windows and Exports
+//  4.  IP Class
+//  5.  SubnetMask Class
+//  6.  ChangingIP Class
+//  7.  Subnet Class
+//  8.  Functions for Client Code
+
+// ----------------------------------------------------------------------------------------------
 // SECTION: Includes and Type Definitions
 // ----------------------------------------------------------------------------------------------
 
