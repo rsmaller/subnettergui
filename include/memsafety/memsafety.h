@@ -28,10 +28,10 @@ void printOutNodePointers() {
     if (!startingNode) return;
     memoryNode *currentNode = startingNode;
     while (currentNode -> nextNode != NULL) {
-        printf("%p\n", currentNode -> pointer);
+        printf("0x%p, ", currentNode -> pointer);
         currentNode = currentNode -> nextNode;
     }
-    printf("%p\n", currentNode -> pointer);
+    printf("0x%p\n", currentNode -> pointer);
     return;
 }
 
