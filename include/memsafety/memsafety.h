@@ -89,9 +89,9 @@ void smartFree(void *pointer) {
     }
     if (currentNodeToFree -> pointer == pointer) {
         free(pointer);
+        free(currentNodeToFree);
+        previousNode -> nextNode = nextNode;
     }
-    free(currentNodeToFree);
-    previousNode -> nextNode = nextNode;
     return;
 }
 
