@@ -982,7 +982,7 @@ void subnetMaskInfoWindow() {
     ImGui::Text("devices that can communicate with each other. If you give less space to the network portion, the number of street names, which are technically network IDs,");
     ImGui::Text("that can be generated is smaller. However, shortening the network portion means the host portion will get the leftover space and become larger, meaning");
     ImGui::Text("the number of houses, or devices, on the network will be larger. In other words, making fewer networks means each individual network will be larger.");
-    ImGui::Text("");
+    ImGui::Text(" ");
     ImGui::Text("Here is a practical example:");
     ImGui::Text("   For the sake of example, let's say we have an IP address 192.168.1.1 with a subnet mask of 255.255.255.0.");
     ImGui::Text("   The subnet mask can also be written as \"11111111.11111111.11111111.00000000\"");
