@@ -6,26 +6,32 @@ Subnetter++ is a graphical interface for Subnetting and VLSM calculations writte
 
 ## Dependencies
 
-This program uses the `ImGui` library and a 3D plotting extension for ImGui called `ImPlot3D`. To use the ImGui library, `GLFW` and `GLEW` are linked and initialized. ImGui is designed to run on top of a window platform, so it does not have any unique dependencies. GLFW and GLEW, however, will require various packages depending on your operating system. On Ubuntu-based Linux distributions, for example, the following packages are always required:
+Dependencies listed here are only for building this program yourself. Everything should work fine if you're using a prebuilt release. If something goes wrong, feel free to reference this section. This program uses the `ImGui` library and a 3D plotting extension for ImGui called `ImPlot3D`. To use the ImGui library, `GLFW` and `GLEW` are linked and initialized. ImGui is designed to run on top of a window platform, so it does not have any unique dependencies. GLFW and GLEW, however, will require various packages specifically on Linux. 
+
+On Ubuntu-based Linux distributions, for example, the following packages are required:
 
 ```
-libwayland-dev libxkbcommon-dev
+cmake g++ libwayland-dev libxkbcommon-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev
 ```
-Note: `xorg-dev` is also required when using the X11 window system.
+Note: `xwayland` is also recommended if your system uses Wayland by default to ensure Xorg compatibility.
+
+On Windows and macOS systems, please be sure to install Visual Studio, CMake, and MSVC with C++ Build tools.
 
 ## Compatibility
 
 SubnetterGUI is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW and GLEW are statically linked into this program with pre-compiled libraries. Due to limitations in GLFW's and GLEW's build process, other operating systems/architectures are not currently supported, and their library files are not included.
 
-## Compiling
+Also, keep in mind that because this program uses GLFW to render windows, window resizing and decorating is not possible on Linux systems running the Wayland windowing system. This is a limitation of the GLFW library itself. It is strongly recommended to switch to Xorg for this program to work properly.
 
-Before compiling, don't forget to initialize the CMake cache:
+## Building The Program
+
+Before building, initialize the CMake cache:
 
 ```
 cmake .
 ```
 
-This program can then be compiled using CMake's build option:
+This program can then be built using CMake's build option:
 
 ```
 cmake --build .
@@ -35,9 +41,9 @@ The binary will be dropped in the `build` folder under the name `subnettergui`.
 
 ## Installing Subnetter++ As An Application on Linux
 
-There is an install script called `install.sh` that will install the subnettergui binary for the user that runs it.
+There is an install script called `install.sh` that will install the subnettergui binary for the user that runs it. This will drop a desktop file in the user's application folder for easy access.
 
-The program must be compiled before running this script.
+The program must be built before running the install script.
 
 `uninstall.sh` will conversely uninstall the binary that was installed with the former script.
 
