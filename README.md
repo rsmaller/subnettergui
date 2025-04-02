@@ -66,6 +66,7 @@ Because VLSM can become quite large and unruly, only 256 subnets will be shown o
 The `Go to Start`, `Previous 256 Subnets`, `Next 256 Subnets`, and `Go to End` buttons will change which block of 256 subnets are on-screen.
 
 #### Calculator Flags
+
 There are many different flags than can be toggled when calculating a subnet.
 
 The `Binary` flag will show all IP addresses in binary format. 
@@ -104,5 +105,40 @@ The `Show Answers` button will fill the text boxes with the correct answers.
 The `Hide Answers` button will clear the text boxes.
 
 The `Generate New Question` button will create a new question with a randomly generated IP address and CIDR mask.
+
+If you have trouble answering any of these questions, the `Help > IP Info` and `Help > Subnet Mask Info` have more information about IP addressing and subnet schemes.
+
+### Studying IP Classes
+
+Before VLSM and CIDR were introduced, a type of addressing scheme called IP Classing was used where certain blocks of IP addresses would be assigned subnet masks.
+
+To start studying IP classes, go to `Tools > IP Classes`. The IP Classes window will ask for the following information about a random IP address:
+
+- The Class of the IP
+- The Class's Subnet Mask
+
+The `Check Answers`, `Show Answers`, `Hide Answers` and `Generate New Questions` buttons work the same in this window as they do in the subnetting practice window.
+
+More information about IP classes can be found in the `Help > IP Class Info` section.
+
+### Calculating IPv6 Address Properties
+
+IPv6 addresses are different from IPv4 addresses, and standard subnetting does not work for them.
+
+The tool for IPv6 calculations can be accessed from `Tools > IPv6 Tools`. This tool has two text boxes.
+
+The first text box accepts any format of IPv6 address as input, and it outputs the different sections of that IPv6 address, including:
+- The shorthand version of the address
+- The long version of the address
+- The address's prefix
+- The address's subnet ID
+- The address's interface ID
+- The address's type
+
+The second text box accepts a MAC address as input. A process called EUI64 is done as an example, showing how link-local IPv6 addresses network can be generated for a LAN using MAC addresses instead of a DHCP server:
+- An EUI64-generated interface ID using the inputted MAC address
+- A full link-local IPv6 address created using the generated interface ID
+
+More information about IPv6 addresses can be found in the `Help > IPv6 Info` section.
 
 [^1]: If one subnet mask is entered, a single subnet will be calculated. If two subnet masks are entered, VLSM will be calculated with the two subnet masks.
