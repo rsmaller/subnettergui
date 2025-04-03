@@ -69,7 +69,7 @@ typedef struct classesQuestion {
 
 //  window and window control variables to properly exit the program when windows are closed.
 GLFWwindow *windowBackend = nullptr;
-const int totalNumberOfWindows = 10;
+const int totalNumberOfWindows = 11;
 ImGuiContext *currentImGuiContext;
 ImGuiID outsideGLFWWindowID;
 bool windowsAreOpen[totalNumberOfWindows];
@@ -84,6 +84,7 @@ bool windowsAreOpen[totalNumberOfWindows];
     //  7 - IP Class Info Window
     //  8 - IP Info Window
     //  9 - Subnet Mask Info Window
+    //  10 - EUI64 Info Window
 
 //  Debug variables
 unsigned long long int frameCount = 0;
@@ -515,9 +516,10 @@ void mainWindow() {
         }
         if (ImGui::BeginMenu("Help")) {
             if (ImGui::MenuItem("IP Info")) windowsAreOpen[8] = true;
+            if (ImGui::MenuItem("Subnet Mask Info")) windowsAreOpen[9] = true;
             if (ImGui::MenuItem("IP Class Info")) windowsAreOpen[7] = true;
             if (ImGui::MenuItem("IPv6 Info")) windowsAreOpen[6] = true;
-            if (ImGui::MenuItem("Subnet Mask Info")) windowsAreOpen[9] = true;
+            if (ImGui::MenuItem("EUI64 Info")) windowsAreOpen[10] = true;
             ImGui::EndMenu();
         }
     ImGui::EndMenuBar();
@@ -1097,6 +1099,32 @@ void subnetMaskInfoWindow() {
     ImGui::End();
 }
 
+void EUI64InfoWindow() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
+    ImGui::Begin("EUI64 Info", windowsAreOpen+10);
+    ImGui::BeginChild("ScrollWheel");
+    ImGui::Text("EUI64 is a process for generating IPv6 addresses without using DHCP or any other automatic address configuration.");
+    ImGui::Text("EUI64 generates an interface ID for an IPv6 address using a device's MAC address.");
+    ImGui::Text("But why not use a MAC address as an interface ID? Well, MAC addresses are shorter than IPv6 interface IDs.");
+    ImGui::Text("MAC addresses are 48 bits, and interface IDs are 64 bits. Some padding must be added to use a MAC address as an interface ID.");
+    ImGui::Text("EUI64 adds this padding by doing two things. First, it flips the 7th bit from the left of the provided MAC address.");
+    ImGui::Text("After doing that, it inserts FF:FE directly into the middle of the MAC address.");
+    ImGui::Text("For example, if a device's MAC address is 2A:B4:62:11:74:ED, EUI64 would do the following:");
+    ImGui::Text("   Flip the 7th bit from the left, resulting in the MAC address 2A:B6:62:11:74:ED.");
+    ImGui::Text("   Insert FF:FE in the middle, giving the value: 2A:B6:62:FF:FE:11:74:ED.");
+    ImGui::Text(" ");
+    ImGui::Text("At this point, keep in mind that MAC addresses are written with octets, or 8-bit portions. 2A is the first octet of the example MAC address.");
+    ImGui::Text("However, IPv6 addresses are written in hextets, or 16-bit portions. Two octets make up one hextet.");
+    ImGui::Text("With that in mind, every pair of two octets must combine into one hextet.");
+    ImGui::Text("With the example 2A:B6:62:FF:FE:11:74:ED, the resulting interface ID would be 2AB6:62FF:FE11:74ED.");
+    ImGui::Text(" ");
+    ImGui::Text("EUI64 provides stateless autoconfiguration, so it is meant to be used on link-local addresses, or addresses that are used internally within a LAN network.");
+    ImGui::Text("The first hextet for a link-local address ranges from FE80 to FEBF, so an example EUI64-generated link-local address with the above MAC address would be:");
+    ImGui::Text("   FE80:712D:7EE2:2B92:2AB6:62FF:FE11:74ED.");
+    ImGui::EndChild();
+    ImGui::End();
+}
+
 // ----------------------------------------------------------------------------------------------
 // SECTION: Entry Point Functions
 // ----------------------------------------------------------------------------------------------
@@ -1142,6 +1170,9 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         }
         if (windowsAreOpen[9]) {
             subnetMaskInfoWindow();
+        }
+        if (windowsAreOpen[10]) {
+            EUI64InfoWindow();
         }
         if (graphData && subnettingStarted && subnettingSuccessful) {
             plotSubnetCubes();

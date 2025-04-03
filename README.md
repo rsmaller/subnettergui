@@ -135,10 +135,12 @@ The first text box accepts any format of IPv6 address as input, and it outputs t
 - The address's interface ID
 - The address's type
 
+More information about IPv6 addresses can be found in the `Help > IPv6 Info` section.
+
 The second text box accepts a MAC address as input. A process called EUI64 is done as an example, showing how link-local IPv6 addresses network can be generated for a LAN using MAC addresses instead of a DHCP server:
 - An EUI64-generated interface ID using the inputted MAC address
 - A full link-local IPv6 address created using the generated interface ID
 
-More information about IPv6 addresses can be found in the `Help > IPv6 Info` section.
+More information about EUI64 can be found in the `Help > EUI64 Info` section.
 
 [^1]: If one subnet mask is entered, a single subnet will be calculated. If two subnet masks are entered, VLSM will be calculated with the two subnet masks.
