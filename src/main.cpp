@@ -355,7 +355,7 @@ void ImGuiInit() {
     #ifdef __APPLE__
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
     #endif
-    windowBackend = glfwCreateWindow(900, 700, "Subnetter++", NULL, NULL);
+    windowBackend = glfwCreateWindow(1200, 700, "Subnetter++", NULL, NULL);
     glfwMakeContextCurrent(windowBackend);
     float x, y;
     glfwGetMonitorContentScale(monitor, &x, &y);
