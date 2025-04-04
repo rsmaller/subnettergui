@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 //  A warning; for anyone modifying this code, the startingNode linked list is not thread safe and should NOT be used in programs with volatile memory allocations.
-//  ImGui does not use the smartMalloc and smartCalloc allocators because the linked list will decouple if used in threaded or volatile programs like ImGui.
+//  ImGui does not use the malloc_ac and calloc_ac allocators because the linked list will decouple if used in threaded or volatile programs like ImGui.
 //  Fortunately, ImGui handles its own memory allocation.
 //  This allocator is only designed to be used in client code for tasks running on a single thread; its behavior is undefined for any other task!
 //  This header can be safely used in a multi-threaded program as long as the startingNode linked list is only accessed from the primary thread.
@@ -19,17 +19,19 @@ typedef struct memoryNode {
     struct memoryNode *nextNode;
 } memoryNode;
 
-void *smartMalloc(size_t);
+void *malloc_ac(size_t);
 
-void *smartCalloc(size_t, size_t);
+void *calloc_ac(size_t, size_t);
 
-void *smartRealloc(void *, size_t);
+void *realloc_ac(void *, size_t);
 
-void smartFree(void *);
+void free_ac(void *);
 
-void printOutNodePointers();
+void node_printout();
 
-void memoryCleanup();
+void mem_cc();
+
+int register_mem_cc();
 
 #ifdef __cplusplus
 }

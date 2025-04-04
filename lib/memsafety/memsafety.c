@@ -7,7 +7,7 @@ extern "C" {
 static memoryNode *startingNode = NULL;
 static memoryNode *endingNode = NULL;
 
-static memoryNode *constructMemoryNode(void *pointer) {
+static memoryNode *mem_node(void *pointer) {
     memoryNode *returnValue = (memoryNode *)malloc(sizeof(memoryNode));
     if (!returnValue) {
         printf("Heap allocation failure. Terminating\n");
@@ -18,7 +18,7 @@ static memoryNode *constructMemoryNode(void *pointer) {
     return returnValue;
 }
 
-void printOutNodePointers() {
+void node_printout() {
     if (!startingNode) {
         printf("Memory linked list is uninitialized\n");
         return;
@@ -32,39 +32,39 @@ void printOutNodePointers() {
     return;
 }
 
-void *smartMalloc(size_t size) {
+void *malloc_ac(size_t size) {
     void *pointer = malloc(size);
     if (!pointer) {
         printf("Heap allocation failure. Terminating\n");
         exit(1);
     }
     if (!startingNode) { // if starting node has not been created, create it with the first allocated pointer.
-        startingNode = constructMemoryNode(pointer);
+        startingNode = mem_node(pointer);
         endingNode = startingNode;
         return pointer;
     }
-    endingNode -> nextNode = constructMemoryNode(pointer);
+    endingNode -> nextNode = mem_node(pointer);
     endingNode = endingNode -> nextNode;
     return pointer;
 }
 
-void *smartCalloc(size_t size1, size_t size2) {
+void *calloc_ac(size_t size1, size_t size2) {
     void *pointer = calloc(size1, size2);
     if (!pointer) {
         printf("Heap allocation failure. Terminating\n");
         exit(1);
     }
     if (!startingNode) { // if starting node has not been created, create it with the first allocated pointer.
-        startingNode = constructMemoryNode(pointer);
+        startingNode = mem_node(pointer);
         endingNode = startingNode;
         return pointer;
     }
-    endingNode -> nextNode = constructMemoryNode(pointer);
+    endingNode -> nextNode = mem_node(pointer);
     endingNode = endingNode -> nextNode;
     return pointer;
 }
 
-void *smartRealloc(void *pointer, size_t size) {
+void *realloc_ac(void *pointer, size_t size) {
     if (!startingNode || !pointer) return NULL;
     void *returnPointer = pointer;
     memoryNode *currentNodeToReallocate = startingNode;
@@ -83,7 +83,7 @@ void *smartRealloc(void *pointer, size_t size) {
     return NULL;
 }
 
-void smartFree(void *pointer) {
+void free_ac(void *pointer) {
     memoryNode *currentNodeToFree = startingNode;
     memoryNode *previousNode = NULL;
     memoryNode *nextNode = NULL;
@@ -116,7 +116,7 @@ void smartFree(void *pointer) {
     return;
 }
 
-void memoryCleanup() { // call this at the end of main() to ensure any dangling pointers are handled.
+void mem_cc() { // call this at the end of main() to ensure any dangling pointers are handled.
     if (!startingNode) return;
     memoryNode *currentNodeToFree = startingNode;
     memoryNode *swapperNode = NULL;
@@ -130,6 +130,10 @@ void memoryCleanup() { // call this at the end of main() to ensure any dangling 
     free(currentNodeToFree);
     startingNode = NULL;
     endingNode = NULL;
+}
+
+int register_mem_cc() {
+    return atexit(mem_cc);
 }
 
 #ifdef __cplusplus
