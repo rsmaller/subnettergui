@@ -84,16 +84,18 @@ void *smartRealloc(void *pointer, size_t size) {
 }
 
 void smartFree(void *pointer) {
-    if (!startingNode || !pointer) return;
-    if (pointer == startingNode -> pointer) {
-        free(pointer);
-        free(startingNode);
-        startingNode = startingNode -> nextNode;
-        return;
-    }
     memoryNode *currentNodeToFree = startingNode;
     memoryNode *previousNode = NULL;
     memoryNode *nextNode = NULL;
+    if (!startingNode || !pointer) {
+        return;
+    }
+    if (pointer == startingNode -> pointer) {
+        startingNode = startingNode -> nextNode;
+        free(pointer);
+        free(currentNodeToFree);
+        return;
+    }
     while (currentNodeToFree -> pointer != pointer && currentNodeToFree -> nextNode) {
         previousNode = currentNodeToFree;
         currentNodeToFree = currentNodeToFree -> nextNode;
@@ -103,6 +105,7 @@ void smartFree(void *pointer) {
         free(pointer);
         free(endingNode);
         endingNode = previousNode;
+        endingNode -> nextNode = NULL;
         return;
     }
     if (currentNodeToFree -> pointer == pointer) {
