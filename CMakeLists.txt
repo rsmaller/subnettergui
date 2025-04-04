@@ -13,6 +13,7 @@ add_library(imgui STATIC
     lib/imgui/imgui_tables.cpp lib/imgui/imgui_widgets.cpp lib/imgui/imgui_demo.cpp)
 add_library(implot3d STATIC lib/implot3d/implot3d.cpp lib/implot3d/implot3d_demo.cpp lib/implot3d/implot3d_items.cpp 
     lib/implot3d/implot3d_meshes.cpp)
+add_library(memsafety STATIC lib/memsafety/memsafety.c)
 
 IF (WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /IGNORE:4099")
@@ -44,3 +45,4 @@ target_compile_definitions(subnettergui PRIVATE GLEW_STATIC)
 target_link_libraries(subnettergui PRIVATE imgui)
 target_link_libraries(subnettergui PRIVATE glfw3)
 target_link_libraries(subnettergui PRIVATE implot3d)
+target_link_libraries(subnettergui PRIVATE memsafety)
