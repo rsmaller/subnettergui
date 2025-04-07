@@ -27,11 +27,11 @@ void *realloc_ac(void *, size_t);
 
 void free_ac(void *);
 
-void node_printout();
+void node_printout(void);
 
-void mem_cc();
+void mem_cc(void);
 
-int register_mem_cc();
+int register_mem_cc(void);
 
 #ifdef __cplusplus
 }

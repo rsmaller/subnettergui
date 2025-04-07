@@ -18,7 +18,7 @@ static memoryNode *mem_node(void *pointer) {
     return returnValue;
 }
 
-void node_printout() {
+void node_printout(void) {
     if (!startingNode) {
         printf("Memory linked list is uninitialized\n");
         return;
@@ -116,7 +116,7 @@ void free_ac(void *pointer) {
     return;
 }
 
-void mem_cc() { // call this at the end of main() to ensure any dangling pointers are handled.
+void mem_cc(void) { // call this at the end of main() to ensure any dangling pointers are handled.
     if (!startingNode) return;
     memoryNode *currentNodeToFree = startingNode;
     memoryNode *swapperNode = NULL;
@@ -132,7 +132,7 @@ void mem_cc() { // call this at the end of main() to ensure any dangling pointer
     endingNode = NULL;
 }
 
-int register_mem_cc() {
+int register_mem_cc(void) {
     return atexit(mem_cc);
 }
 
