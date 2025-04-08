@@ -96,7 +96,7 @@ public:
             this -> IPAddress = StringToIPInt(stringArg);
             this -> IPString = stringArg;
         } else if (isIPNumber(stringArg)) {
-            this -> IPAddress.IP32 = (unsigned int)stoi(stringArg);
+            this -> IPAddress.IP32 = static_cast<unsigned int>(stoi(stringArg));
             this -> IPString = intToIPString(this -> IPAddress);
         } else {
             this -> IPString = "0.0.0.0";
@@ -145,7 +145,7 @@ public:
     static bool isIPNumber(string testString) {
         smatch matches;
         regex IPNumberPattern("^\\d{1,10}$");
-        return regex_search(testString, matches, IPNumberPattern) && (testString == to_string((unsigned int)stoi(testString)));
+        return regex_search(testString, matches, IPNumberPattern) && (testString == to_string(static_cast<unsigned int>(stoi(testString))));
     }
 
     static IPNumeric StringToIPInt(string stringArg) {
@@ -156,7 +156,7 @@ public:
         if (isIPFormat(stringArg)) {
             operatingString = stringArg;
         } else if (isCIDRMask(stringArg)) {
-            CIDRConversion.IP32 = ~((1<<(32-stoi(stringArg)))-1);
+            CIDRConversion.IP32 = ~static_cast<unsigned int>(((1<<(32-stoi(stringArg)))-1));
             operatingString = intToIPString(CIDRConversion);
         } else {
             returnValue = {0};
@@ -165,7 +165,7 @@ public:
         for (int i=3; i>=0; i--) {
             currentOctet = operatingString.substr(0, operatingString.find('.'));
             operatingString.erase(0, operatingString.find('.') + 1);
-            returnValue.octets[i] = (unsigned char)stoi(currentOctet);
+            returnValue.octets[i] = static_cast<unsigned char>(stoi(currentOctet));
         }
         return returnValue;
     }
@@ -186,7 +186,7 @@ public:
         int maxBitSize = sizeof(T) * 8 - 1;
         for (int i=maxBitSize; i>=0; i--) {
             if (numArg - (1<<i) >=0) {
-                numArg = (T)((int)numArg - (1<<i));
+                numArg = static_cast<T>((static_cast<int>(numArg) - (1<<i)));
                 returnString.append("1");
             } else {
                 returnString.append("0");
@@ -259,7 +259,7 @@ public:
             this -> IPString = stringArg;
             this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
         }
-        this -> hostBits = fetchHostBits((int)this -> IPAddress.IP32);
+        this -> hostBits = fetchHostBits(static_cast<int>(this -> IPAddress.IP32));
         if (this -> hostBits == 32) {
             this -> blockSize = 4294967296ULL;
         } else if (!invalidFormat) {
@@ -274,7 +274,7 @@ public:
         }
     }
 
-    SubnetMask(int CIDRMask) : IP(~((1ULL<<(32-CIDRMask)) - 1)) {
+    SubnetMask(int CIDRMask) : IP(~static_cast<unsigned int>(((1ULL<<(32-CIDRMask)) - 1))) {
         this -> hostBits = 32 - CIDRMask;
         if (!invalidFormat) {
             this -> blockSize = 1ULL<<this -> hostBits;
@@ -375,9 +375,9 @@ public:
         for (int i=3; i>=0; i--) {
             returnString += IP::toBinaryString(IPArg.IPAddress.octets[i]);
         }
-        for (int i=0; i<(int)returnString.length(); i++) {
-            if (i>=32-changingBits && returnString[(size_t)i] != '.') {
-                returnString[(size_t)i] = 'x';
+        for (int i=0; i<static_cast<int>(returnString.length()); i++) {
+            if (i>=32-changingBits && returnString[static_cast<size_t>(i)] != '.') {
+                returnString[static_cast<size_t>(i)] = 'x';
             }
         }
         for (int i=1; i<=3; i++) {
@@ -387,7 +387,7 @@ public:
     }
 
     int getChangingOctets(SubnetMask netMaskArg) {
-        return (int)ceil(netMaskArg.hostBits / 8.0); // division requires float argument to return float.
+        return static_cast<int>(ceil(netMaskArg.hostBits / 8.0)); // division requires float argument to return float.
     }
 };
 
@@ -407,7 +407,7 @@ public:
     Subnet(IP IPAddress, SubnetMask netMask) {
         this -> networkIP = IPAddress & netMask;
         this -> startIP = networkIP + 1;
-        this -> broadcastIP = networkIP + (unsigned int)(netMask.blockSize - 1);
+        this -> broadcastIP = networkIP + static_cast<unsigned int>(netMask.blockSize - 1);
         this -> endIP = broadcastIP - 1;
         this -> netMask = netMask;
     }
@@ -476,9 +476,9 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     #else
         subnetsToGenerate = totalSubnetsToGenerate;
     #endif
-    IP localIPCopy = (IPAddr & netMask1) + ((unsigned int)(totalAddedToIP - 256) * (unsigned int)netMask2.blockSize);
+    IP localIPCopy = (IPAddr & netMask1) + (static_cast<unsigned int>(totalAddedToIP - 256) * static_cast<unsigned int>(netMask2.blockSize));
     IP veryFirstIP = IPAddr & netMask1;
-    IP veryLastIP = (IPAddr & netMask1) + (unsigned int)((totalSubnetsToGenerate * netMask2.blockSize) - 1);
+    IP veryLastIP = (IPAddr & netMask1) + static_cast<unsigned int>((totalSubnetsToGenerate * netMask2.blockSize) - 1);
     string netMask1StringToUse;
     string netMask2StringToUse;
     string startingIPToUse;
@@ -519,7 +519,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
         VLSMOutput("\n");
     }
     if (reverseFlag) {
-        localIPCopy += (unsigned int)netMask2.blockSize * (unsigned int)(subnetsToGenerate - 1);
+        localIPCopy += static_cast<unsigned int>(netMask2.blockSize) * static_cast<unsigned int>(subnetsToGenerate - 1);
         for (int i=0; i<subnetsToGenerate; i++) {
             #ifdef IMGUI_API
             if (!windowsAreOpen[0]) return;
@@ -528,7 +528,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
             if (exportFlag) {
                 VLSMOutput("\n");
             }
-            localIPCopy -= (unsigned int)netMask2.blockSize;
+            localIPCopy -= static_cast<unsigned int>(netMask2.blockSize);
         }
     } else {
         for (int i=0; i<subnetsToGenerate; i++) {
@@ -539,7 +539,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
             if (exportFlag) {
                 VLSMOutput("\n");
             }
-            localIPCopy += (unsigned int)netMask2.blockSize;
+            localIPCopy += static_cast<unsigned int>(netMask2.blockSize);
         }
     }
 }
@@ -549,7 +549,7 @@ void timedVLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportF
     startingClock = clock();
     VLSM(IPAddr, netMask1, netMask2, exportFlag);
     endingClock = clock();
-    double timeTotal = (double)(endingClock - startingClock) / CLOCKS_PER_SEC;
+    double timeTotal = static_cast<double>(endingClock - startingClock) / CLOCKS_PER_SEC;
     if (debugFlag && exportFlag) {
         exportOutput((to_string(timeTotal) + " seconds to run").c_str());
     } else if (debugFlag) {
