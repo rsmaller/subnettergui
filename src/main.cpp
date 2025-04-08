@@ -71,6 +71,7 @@ typedef struct classesQuestion {
 GLFWwindow *windowBackend = nullptr;
 const int totalNumberOfWindows = 11;
 ImGuiContext *currentImGuiContext;
+ImPlot3DContext *currentImPlot3DContext;
 ImGuiID outsideGLFWWindowID;
 bool windowsAreOpen[totalNumberOfWindows];
     //  Indices:
@@ -337,6 +338,7 @@ void glfwErrorCallback(int error, const char *msg) {
 }
 
 void windowTerminate() {
+    ImPlot3D::DestroyContext(currentImPlot3DContext);
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext(currentImGuiContext);
@@ -371,7 +373,7 @@ void ImGuiInit() {
     ImGui_ImplOpenGL3_Init("#version 330");
     ImGuiViewport* primaryViewPort = ImGui::GetMainViewport();
     primaryViewPort -> PlatformHandle = static_cast<void *>(windowBackend);
-    ImPlot3D::CreateContext();
+    currentImPlot3DContext = ImPlot3D::CreateContext();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
         debugLog("OpenGL error in ImGuiInit():" + to_string(error));
