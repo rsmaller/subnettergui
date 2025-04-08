@@ -92,39 +92,39 @@ unsigned long long int dotCounter = 1;
 vector<string> debugEntries;
 
 //  buffers for primary window input data
-char *mainInputBuffer1 = (char *)calloc_ac(256, 1); // main IP input
-char *mainInputBuffer2 = (char *)calloc_ac(256, 1); // netmask 1 input
-char *mainInputBuffer3 = (char *)calloc_ac(256, 1); // netmask 2 input
+char *mainInputBuffer1 = static_cast<char *>(calloc_ac(256, 1)); // main IP input
+char *mainInputBuffer2 = static_cast<char *>(calloc_ac(256, 1)); // netmask 1 input
+char *mainInputBuffer3 = static_cast<char *>(calloc_ac(256, 1)); // netmask 2 input
 
 //  buffers for study input data
-char *studyInputBuffer1 = (char *)calloc_ac(256, 1); // main study network IP input
-char *studyInputBuffer2 = (char *)calloc_ac(256, 1); // reserved input
-char *studyInputBuffer3 = (char *)calloc_ac(256, 1); // reserved input
-char *studyInputBuffer4 = (char *)calloc_ac(256, 1); // reserved input
-char *studyInputBuffer5 = (char *)calloc_ac(256, 1); // reserved input
-char *studyInputBuffer6 = (char *)calloc_ac(256, 1); // reserved input
-char *studyInputBuffer7 = (char *)calloc_ac(256, 1); // reserved input
-char *studyInputBuffer8 = (char *)calloc_ac(256, 1); // reserved input
+char *studyInputBuffer1 = static_cast<char *>(calloc_ac(256, 1)); // main study network IP input
+char *studyInputBuffer2 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
+char *studyInputBuffer3 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
+char *studyInputBuffer4 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
+char *studyInputBuffer5 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
+char *studyInputBuffer6 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
+char *studyInputBuffer7 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
+char *studyInputBuffer8 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
 subnettingQuestion currentSubnetQuestion = {IP(0), SubnetMask(0), "", "", "", "", "", ""}; // the subnetting question currently displayed on the screen
 bool currentSubnetQuestionAnswered = false;
 
 //  buffers for class input data
-char *classInputBuffer1 = (char *)calloc_ac(256, 1);
-char *classInputBuffer2 = (char *)calloc_ac(256, 1);
-char *classInputBuffer3 = (char *)calloc_ac(256, 1);
+char *classInputBuffer1 = static_cast<char *>(calloc_ac(256, 1));
+char *classInputBuffer2 = static_cast<char *>(calloc_ac(256, 1));
+char *classInputBuffer3 = static_cast<char *>(calloc_ac(256, 1));
 classesQuestion currentClassQuestion = {IP(0), SubnetMask(0), "", "", "", ""}; // the classes question currently displayed on the screen
 bool currentClassQuestionAnswered = false;
 
 //  buffers for export input data
-char *exportInputBuffer = (char *)calloc_ac(512, 1); // main input for export path
+char *exportInputBuffer = static_cast<char *>(calloc_ac(512, 1)); // main input for export path
 extern ofstream exportFileStream;
 bool exportThreadComplete = false;
 mutex exportThreadMutex;
 bool currentlyInExportThread = false;
 
 //  IPv6 Tools
-char *IPv6InputBuffer = (char *)calloc_ac(256, 1);
-char *MACInputBuffer = (char *)calloc_ac(256, 1);
+char *IPv6InputBuffer = static_cast<char *>(calloc_ac(256, 1));
+char *MACInputBuffer = static_cast<char *>(calloc_ac(256, 1));
 IPv6 currentIPv6Addr;
 unsigned short *currentMACAddr;
 stringstream randomThreeHextetStream;
@@ -202,8 +202,8 @@ subnettingQuestion randomSubnetQuestion() {
     returnValue.answer2 = to_string(generatedSubnetMask.blockSize);
     returnValue.answer3 = networkIP.IPString;
     returnValue.answer4 = (networkIP + 1).IPString;
-    returnValue.answer5 = (networkIP + (int)(generatedSubnetMask.blockSize - 2ULL)).IPString;
-    returnValue.answer6 = (networkIP + (int)(generatedSubnetMask.blockSize - 1ULL)).IPString;
+    returnValue.answer5 = (networkIP + static_cast<int>(generatedSubnetMask.blockSize - 2ULL)).IPString;
+    returnValue.answer6 = (networkIP + static_cast<int>(generatedSubnetMask.blockSize - 1ULL)).IPString;
     returnValue.answer7 = generatedIP.IPBinaryString;
     returnValue.answer8 = generatedSubnetMask.IPBinaryString;
     return returnValue;
@@ -277,38 +277,38 @@ void checkClassAnswers() {
 // ----------------------------------------------------------------------------------------------
 
 int argumentChangedCallback(ImGuiInputTextCallbackData *data) {
-    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
+    static_cast<void>(data); // data parameter is not used but is required for function datatype to be correct; ignored.
     currentIP.IPAddress.IP32 = 0;
     totalAddedToIP = 256;
     return 1;
 }
 
 int subnetQuestionChangedCallback(ImGuiInputTextCallbackData *data) {
-    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
+    static_cast<void>(data); // data parameter is not used but is required for function datatype to be correct; ignored.
     currentSubnetQuestionAnswered = false;
     return 1;
 }
 
 int classQuestionChangedCallback(ImGuiInputTextCallbackData *data) {
-    (void)data;
+    static_cast<void>(data);
     currentClassQuestionAnswered = false;
     return 1;
 }
 
 int exportChangedCallback(ImGuiInputTextCallbackData *data) {
-    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
+    static_cast<void>(data); // data parameter is not used but is required for function datatype to be correct; ignored.
     exportButtonPreviouslyPressed = false;
     return 1;
 }
 
 int IPv6ChangedCallback(ImGuiInputTextCallbackData *data) {
-    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
+    static_cast<void>(data); // data parameter is not used but is required for function datatype to be correct; ignored.
     currentIPv6Addr = IPv6(IPv6InputBuffer);
     return 1;
 }
 
 int MACChangedCallback(ImGuiInputTextCallbackData *data) {
-    (void)data; // data parameter is not used but is required for function datatype to be correct; ignored.
+    static_cast<void>(data); // data parameter is not used but is required for function datatype to be correct; ignored.
     currentMACAddr = IPv6::MACStringToHextets(MACInputBuffer);
     randomThreeHextetStream.str("");
     randomThreeHextetStream << hex << setfill('0') << setw(4) << getRandomShort();
@@ -370,7 +370,7 @@ void ImGuiInit() {
     ImGui_ImplGlfw_InitForOpenGL(windowBackend, true);
     ImGui_ImplOpenGL3_Init("#version 330");
     ImGuiViewport* primaryViewPort = ImGui::GetMainViewport();
-    primaryViewPort -> PlatformHandle = (void *)windowBackend;
+    primaryViewPort -> PlatformHandle = static_cast<void *>(windowBackend);
     ImPlot3D::CreateContext();
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -440,10 +440,10 @@ void resetPlotColors() {
 }
 
 void plotSubnetCubes() {
-    float cube1SideLength = (float)cbrt(netMaskArg1.blockSize);
-    float vertex1DistanceFromOrigin = (float)cube1SideLength / 2;
-    float cube2SideLength = (float)cbrt(netMaskArg2.blockSize);
-    float vertex2DistanceFromOrigin = (float)cube2SideLength / 2;
+    float cube1SideLength = static_cast<float>(cbrt(netMaskArg1.blockSize));
+    float vertex1DistanceFromOrigin = static_cast<float>(cube1SideLength / 2.0f);
+    float cube2SideLength = static_cast<float>(cbrt(netMaskArg2.blockSize));
+    float vertex2DistanceFromOrigin = static_cast<float>(cube2SideLength / 2.0f);
     float vertexDifference = vertex1DistanceFromOrigin - vertex2DistanceFromOrigin;
     ImPlot3DPoint big_cube_vtx[8] = {
         {-vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin}, // 0: Bottom-back-left
@@ -568,18 +568,18 @@ void mainWindow() {
     ImGui::SameLine();
     if (ImGui::Button("Previous 256 Subnets") && (totalAddedToIP > 256)) {
         if (subnettingStarted) debugLog("Previous Button Pressed");
-        if (totalAddedToIP > 256) {currentIP -= 256 * (unsigned int)netMaskArg2.blockSize;
+        if (totalAddedToIP > 256) {currentIP -= 256 * static_cast<unsigned int>(netMaskArg2.blockSize);
         totalAddedToIP -= 256;}
     }
     ImGui::SameLine();
     if (ImGui::Button("Next 256 Subnets") && (totalAddedToIP < totalSubnetsToGenerate)) {
         if (subnettingStarted) debugLog("Next Button Pressed");
-        currentIP += 256 * (unsigned int)netMaskArg2.blockSize;
+        currentIP += 256 * static_cast<unsigned int>(netMaskArg2.blockSize);
         totalAddedToIP += 256;
     }
     ImGui::SameLine();
     if (ImGui::Button("Go to End") && totalAddedToIP != totalSubnetsToGenerate && totalSubnetsToGenerate > 256) {
-        currentIP += (unsigned int)(totalSubnetsToGenerate- 256) * (unsigned int)netMaskArg2.blockSize;
+        currentIP += static_cast<unsigned int>(totalSubnetsToGenerate- 256) * static_cast<unsigned int>(netMaskArg2.blockSize);
         totalAddedToIP = totalSubnetsToGenerate - (totalSubnetsToGenerate % 256);
     }
     if (!subnettingStarted) {
@@ -1130,7 +1130,7 @@ void EUI64InfoWindow() {
 
 int Main() { // the pseudo-main function that gets called either by WinMain() or main()
     register_mem_cc();
-    srand((unsigned int)time(NULL)); // initialize random number generator's counter
+    srand(static_cast<unsigned int>(time(NULL))); // initialize random number generator's counter
     ImGuiInit(); // window creation and context initialization
     windowsAreOpen[0] = true;
     for (unsigned long i=1; i<sizeof(windowsAreOpen); i++) { // set non-main windows that exist to be closed; only have main window open.
