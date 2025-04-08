@@ -105,7 +105,7 @@ char *studyInputBuffer5 = static_cast<char *>(calloc_ac(256, 1)); // reserved in
 char *studyInputBuffer6 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
 char *studyInputBuffer7 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
 char *studyInputBuffer8 = static_cast<char *>(calloc_ac(256, 1)); // reserved input
-subnettingQuestion currentSubnetQuestion = {IP(0), SubnetMask(0), "", "", "", "", "", ""}; // the subnetting question currently displayed on the screen
+subnettingQuestion currentSubnetQuestion = {IP(0), SubnetMask(0), "", "", "", "", "", "", "", "", ""}; // the subnetting question currently displayed on the screen
 bool currentSubnetQuestionAnswered = false;
 
 //  buffers for class input data

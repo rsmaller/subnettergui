@@ -275,7 +275,7 @@ struct ImPlot3DColormapData {
     inline ImU32 LerpTable(ImPlot3DColormap cmap, float t) const {
         int off = TableOffsets[cmap];
         int siz = TableSizes[cmap];
-        int idx = Quals[cmap] ? ImClamp((int)(siz * t), 0, siz - 1) : (int)((siz - 1) * t + 0.5f);
+        int idx = Quals[cmap] ? ImClamp((int)((float)siz * t), 0, siz - 1) : (int)((float)(siz - 1) * t + 0.5f);
         return Tables[off + idx];
     }
 };

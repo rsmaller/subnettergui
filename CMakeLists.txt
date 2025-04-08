@@ -38,7 +38,7 @@ ENDIF()
 if (MSVC)
     target_compile_options(subnettergui PRIVATE /W4)
 else()
-    target_compile_options(subnettergui PRIVATE -Wall -Wpedantic)
+    target_compile_options(subnettergui PRIVATE -Wall -Wextra -Wpedantic -Werror -Walloca -Wcast-qual -Wconversion -std=c++23)
 endif()
 
 target_compile_definitions(subnettergui PRIVATE GLEW_STATIC)
