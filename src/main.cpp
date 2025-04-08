@@ -614,9 +614,7 @@ void mainWindow() {
         ImGui::Text("%s", ("Magnitude difference: " + to_string(networkMagnitudeDifference)).c_str());
         ImGui::Text("%s", ("Current IP: " + currentIP.IPString).c_str());
     }
-    if (currentIP.IPAddress.IP32 == 0) {
-        currentIP = IPArg & netMaskArg1;
-    }
+    currentIP = IPArg & netMaskArg1;
     timedVLSM(currentIP, netMaskArg1, netMaskArg2, false);
     ImGui::EndChild();
     ImGui::End();
