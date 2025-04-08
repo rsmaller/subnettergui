@@ -36,7 +36,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 ENDIF()
 
 if (MSVC)
-    target_compile_options(subnettergui PRIVATE /W4 /Wall /wd5045 /wd4514 /wd4820 /wd5039 /wd4668) # unreferenced library functions, spectre mitigations, and other bloated information messages disabled
+    target_compile_options(subnettergui PRIVATE /W4 /Wall /wd4514 /wd5045 /wd4820 /wd4668) # unreferenced library functions, spectre mitigations, and other bloated information messages disabled
 else()
     target_compile_options(subnettergui PRIVATE -Wall -Wextra -Wpedantic -Werror -Walloca -Wcast-qual -Wconversion -std=c++23)
 endif()

@@ -333,7 +333,7 @@ bool sameLineInIf() {
 // SECTION: GLFW, OpenGL Initializaiton, and Rendering
 // ----------------------------------------------------------------------------------------------
 
-void glfwErrorCallback(int error, const char *msg) {
+void glfwErrorCallback(int error, const char *msg) noexcept {
     if (error != 65544) printf("Error %d: %s\n", error, msg);
 }
 
