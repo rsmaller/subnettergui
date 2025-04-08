@@ -91,7 +91,7 @@ public:
         currentLoopIteration = 0;
 
         if (regex_search(stringToManipulate, doubleColonMatch, IPv6DoubleColonRegex)) {
-            int lengthDifference = 39 - (int)stringToManipulate.length();
+            int lengthDifference = 39 - static_cast<int>(stringToManipulate.length());
             int numberOfColonsToAdd = (lengthDifference / 5);
             int numberOfZeroesToAdd = lengthDifference - numberOfColonsToAdd;
             while (numberOfZeroesToAdd) {
@@ -163,7 +163,7 @@ public:
         }
 
         while (regex_search(sanitizedString, greedyZeroMatch, greedyZeroRegex)) { // truncate the longest block of zeroes into a double colon
-            if ((int)greedyZeroMatch[0].length() > (int)greediestMatch.length()) {
+            if (static_cast<int>(greedyZeroMatch[0].length()) > static_cast<int>(greediestMatch.length())) {
                 greediestMatch = greedyZeroMatch[0];
             }
             sanitizedString = sanitizedString.substr(0, greedyZeroMatch.position()) + ":" + sanitizedString.substr(greedyZeroMatch.position() + greedyZeroMatch.length(), sanitizedString.length() - 1);
@@ -173,7 +173,7 @@ public:
         currentLoopIteration = 0;
         currentLoopIteration = 0;
         if (greediestMatch.compare("")) {
-            index = (int)truncatedString.find(greediestMatch);
+            index = static_cast<int>(truncatedString.find(greediestMatch));
             truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
         } // end of zero block truncation
         while (regex_search(truncatedString, leadingZeroesAtBeginningMatch, leadingZeroesAtBeginningRegex)) {
@@ -202,7 +202,7 @@ public:
         stringArg = IPv6Sanitize(stringArg);
         int currentIndex = 0;
         string currentString = "";
-        unsigned short *hextets = (unsigned short *)calloc(8, sizeof(short));
+        unsigned short *hextets = static_cast<unsigned short *>(calloc(8, sizeof(short)));
         for (int i=0; i<8; i++) {
             currentString = "";
             while (stringArg[currentIndex] != ':' && (size_t)currentIndex < stringArg.length()) {
@@ -210,13 +210,13 @@ public:
                 currentIndex++;
             }
             currentIndex++;
-            hextets[i] = (unsigned short)stoi("0x" + currentString, nullptr, 16);
+            hextets[i] = static_cast<unsigned short>(stoi("0x" + currentString, nullptr, 16));
         }
         return hextets;
     }
 
     static unsigned short *MACStringToHextets(string stringArg) {
-        unsigned short *hextets = (unsigned short *)calloc(3, sizeof(short));
+        unsigned short *hextets = static_cast<unsigned short *>(calloc(3, sizeof(short)));
         smatch MACMatch;
         regex MACRegex("^[0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}[:-][0-9a-fA-F]{2}$");
         if (!regex_search(stringArg, MACMatch, MACRegex)) {
@@ -238,16 +238,16 @@ public:
                 currentIndex++;
             }
             currentIndex++;
-            hextets[i] = (unsigned short)stoi("0x" + currentString, nullptr, 16);
+            hextets[i] = static_cast<unsigned short>(stoi("0x" + currentString, nullptr, 16));
         }
         return hextets;
     }
 
     static unsigned short *MACHextetsToEUIHextets(unsigned short *MACHextets) {
-        unsigned short *EUIHextets = (unsigned short *)calloc(4, sizeof(short));
-        EUIHextets[0] = MACHextets[0] ^ (unsigned short)0b00000010;
-        EUIHextets[1] = (MACHextets[1] & (unsigned short)0xff00) + 0x00ff;
-        EUIHextets[2] = (MACHextets[1] & (unsigned short)0x00ff) + 0xfe00;
+        unsigned short *EUIHextets = static_cast<unsigned short *>(calloc(4, sizeof(short)));
+        EUIHextets[0] = MACHextets[0] ^ static_cast<unsigned short>(0b00000010);
+        EUIHextets[1] = (MACHextets[1] & static_cast<unsigned short>(0xff00)) + 0x00ff;
+        EUIHextets[2] = (MACHextets[1] & static_cast<unsigned short>(0x00ff)) + 0xfe00;
         EUIHextets[3] = MACHextets[2];
         return EUIHextets;
     }
@@ -272,79 +272,79 @@ public:
 
     static string MACHextetsToString(unsigned short *hextets) {
         stringstream MACString;
-        unsigned char *macOctets = (unsigned char *)hextets;
-        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[1] << ":";
-        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[0] << ":";
-        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[3] << ":";
-        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[2] << ":";
-        MACString << hex << setfill('0') << setw(2) << (unsigned short)macOctets[5] << ":";
-        MACString << hex << setfill('0') << setw(2) <<  (unsigned short)macOctets[4];
+        unsigned char *macOctets = reinterpret_cast<unsigned char *>(hextets);
+        MACString << hex << setfill('0') << setw(2) << static_cast<unsigned short>(macOctets[1]) << ":";
+        MACString << hex << setfill('0') << setw(2) << static_cast<unsigned short>(macOctets[0]) << ":";
+        MACString << hex << setfill('0') << setw(2) << static_cast<unsigned short>(macOctets[3]) << ":";
+        MACString << hex << setfill('0') << setw(2) << static_cast<unsigned short>(macOctets[2]) << ":";
+        MACString << hex << setfill('0') << setw(2) << static_cast<unsigned short>(macOctets[5]) << ":";
+        MACString << hex << setfill('0') << setw(2) << static_cast<unsigned short>(macOctets[4]);
         return MACString.str();
     }
 
     string type() {
 
         if (
-            ((this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[1] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[2] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[3] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[4] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[5] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[6] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[7] & (unsigned short)0xfffe) == (unsigned short)0)
+            ((this -> hextets[0] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[1] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[2] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[3] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[4] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[5] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[6] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[7] & static_cast<unsigned short>(0xfffe)) == static_cast<unsigned short>(0))
         ) {
             return "loopback";
         }
 
         if (
-            ((this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0xff02) &&
-            ((this -> hextets[1] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[2] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[3] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[4] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[5] & (unsigned short)0xffff) == (unsigned short)0x0001) &&
-            ((this -> hextets[6] & (unsigned short)0xff00) == (unsigned short)0xff00)
+            ((this -> hextets[0] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0xff02)) &&
+            ((this -> hextets[1] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[2] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[3] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[4] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[5] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0x0001)) &&
+            ((this -> hextets[6] & static_cast<unsigned short>(0xff00)) == static_cast<unsigned short>(0xff00))
         ) {
             return "solicited node multicast";
         }
 
         if (
-            ((this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[1] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[2] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[3] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[4] & (unsigned short)0xffff) == (unsigned short)0) &&
-            ((this -> hextets[5] & (unsigned short)0xffff) == (unsigned short)0)
+            ((this -> hextets[0] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[1] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[2] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[3] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[4] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0)) &&
+            ((this -> hextets[5] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0))
         ) {
             return "IPv4 backwards compatible";
         }
 
 
         if (
-            (this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0x2001 ||
-            (this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0x2002 ||
-            (this -> hextets[0] & (unsigned short)0xffff) == (unsigned short)0x3ffe
+            (this -> hextets[0] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0x2001) ||
+            (this -> hextets[0] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0x2002) ||
+            (this -> hextets[0] & static_cast<unsigned short>(0xffff)) == static_cast<unsigned short>(0x3ffe)
         ) {
             return "aggregatable global unicast or anycast";
         }
 
-        if ((this -> hextets[0] & (unsigned short)0b1111111111000000) == (unsigned short)0xfe80) {
+        if ((this -> hextets[0] & static_cast<unsigned short>(0b1111111111000000)) == static_cast<unsigned short>(0xfe80)) {
             return "link-local unicast or anycast";
         }
-        if ((this -> hextets[0] & (unsigned short)0b1111111111000000) == (unsigned short)0xfec0) {
+        if ((this -> hextets[0] & static_cast<unsigned short>(0b1111111111000000)) == static_cast<unsigned short>(0xfec0)) {
             return "site-local unicast or anycast";
         }
-        if ((this -> hextets[0] & (unsigned short)0b1111111100000000) == (unsigned short)0xff00) {
+        if ((this -> hextets[0] & static_cast<unsigned short>(0b1111111100000000)) == static_cast<unsigned short>(0xff00)) {
             return "assigned multicast";
         }
         
-        if ((this -> hextets[0] & (unsigned short)0b1111111000000000) == (unsigned short)0xfc00) {
+        if ((this -> hextets[0] & static_cast<unsigned short>(0b1111111000000000)) == static_cast<unsigned short>(0xfc00)) {
             return "unique local unicast";
         }
         
 
-        if ((this -> hextets[0] & (unsigned short)0b1110000000000000) == (unsigned short)0x2000) {
+        if ((this -> hextets[0] & static_cast<unsigned short>(0b1110000000000000)) == static_cast<unsigned short>(0x2000)) {
             return "generic global unicast";
         }
         return "unspecified";
