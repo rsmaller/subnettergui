@@ -4,28 +4,34 @@
 
 Subnetter++ is a graphical interface for Subnetting and VLSM calculations written in C++. This tool has a variety of tools for learning how to subnet and calculating subnets.
 
+## Compatibility
+
+SubnetterGUI is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW and GLEW are statically linked into this program with pre-compiled libraries. Due to limitations in GLFW's and GLEW's build process, other operating systems/architectures are not currently supported, and their library files are not included.
+
 ## Dependencies
 
-Dependencies listed here are only for building this program yourself. Everything should work fine if you're using a prebuilt release. If something goes wrong, feel free to reference this section. This program uses the `ImGui` library and a 3D plotting extension for ImGui called `ImPlot3D`. To use the ImGui library, `GLFW` and `GLEW` are linked and initialized. ImGui is designed to run on top of a window platform, so it does not have any unique dependencies. GLFW and GLEW, however, will require various packages specifically on Linux. 
+Dependencies listed here are only for building this program yourself. Everything should work fine if you're using a prebuilt release. If something goes wrong, feel free to reference this section.
 
-On Ubuntu-based Linux distributions, for example, the following packages are required:
+This program uses the `ImGui` library and a 3D plotting extension for ImGui called `ImPlot3D`. To use the ImGui library, `GLFW` and `GLEW` are linked and initialized. ImGui is designed to run on top of a window platform, so it does not have any unique dependencies. GLFW and GLEW, however, will require various packages specifically on Linux. 
+
+This application is designed to be built with MSVC on Windows and macOS systems, so please be sure to install Visual Studio, CMake, and MSVC with C++ Build tools.
+
+Linux machines should instead use g++ to build this application. On Ubuntu-based Linux distributions, for example, the following packages are required:
 
 ```
 cmake g++ libwayland-dev libxkbcommon-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev
 ```
 Note: `xwayland` is also recommended if your system uses Wayland by default to ensure Xorg compatibility.
 
-On Windows and macOS systems, please be sure to install Visual Studio, CMake, and MSVC with C++ Build tools.
+Keep in mind that because this program uses GLFW to render windows, window resizing and decorating are not possible on Linux systems running the Wayland window manager. This is a limitation of GLFW itself. If you are on Wayland, it is strongly recommended to switch to Xorg for this program to work properly.
 
-## Compatibility
-
-SubnetterGUI is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW and GLEW are statically linked into this program with pre-compiled libraries. Due to limitations in GLFW's and GLEW's build process, other operating systems/architectures are not currently supported, and their library files are not included.
-
-Also, keep in mind that because this program uses GLFW to render windows, window resizing and decorating is not possible on Linux systems running the Wayland windowing system. This is a limitation of the GLFW library itself. It is strongly recommended to switch to Xorg for this program to work properly.
+Regardless, this application is designed to be built with `CMake`, which is required on all supported operating systems and compilers. CMake can be installed via a package manager, including the `choco` package manager on Windows.
 
 ## Building The Program
 
-Before building, initialize the CMake cache:
+After ensuring your system is compatible and has all necessary dependencies, it can be built with CMake.
+
+Before building, initialize the CMake cache. This should be done from the root folder of the cloned repo:
 
 ```
 cmake .
