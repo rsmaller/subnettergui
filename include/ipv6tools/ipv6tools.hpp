@@ -72,19 +72,19 @@ public:
         }
         currentLoopIteration = 0;
         while (regex_search(stringToManipulate, zeroHextetMatch, IPv6ZeroHextetRegex)) {
-            stringToManipulate = stringToManipulate.substr(0, zeroHextetMatch.position()) + ":0000:" + stringToManipulate.substr(zeroHextetMatch.position() + zeroHextetMatch.length(), stringToManipulate.length() - 1);
+            stringToManipulate = stringToManipulate.substr(0U, static_cast<size_t>(zeroHextetMatch.position())) + ":0000:" + stringToManipulate.substr(static_cast<size_t>(zeroHextetMatch.position()) + static_cast<size_t>(zeroHextetMatch.length()), static_cast<size_t>(stringToManipulate.length()) - 1U);
             if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
             currentLoopIteration++; 
         }
         currentLoopIteration = 0;
         while (regex_search(stringToManipulate, leadingZeroMatch, IPv6LeadingZeroRegex)) {
-            stringToManipulate = stringToManipulate.substr(0, leadingZeroMatch.position()) + ":" + string(6 - leadingZeroMatch.length(), '0') + stringToManipulate.substr(leadingZeroMatch.position() + 1, stringToManipulate.length() - 1);
+            stringToManipulate = stringToManipulate.substr(0U, static_cast<size_t>(leadingZeroMatch.position())) + ":" + string(6U - static_cast<size_t>(leadingZeroMatch.length()), '0') + stringToManipulate.substr(static_cast<size_t>(leadingZeroMatch.position()) + 1U, static_cast<size_t>(stringToManipulate.length()) - 1U);
             if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
             currentLoopIteration++; 
         }
         currentLoopIteration = 0;
         while (regex_search(stringToManipulate, endOfStringLeadingZeroMatch, endOfStringLeadingZeroRegex)) {
-            stringToManipulate = stringToManipulate.substr(0, endOfStringLeadingZeroMatch.position() + 1) + "0" + stringToManipulate.substr(endOfStringLeadingZeroMatch.position() + 1, stringToManipulate.length()  - 1);
+            stringToManipulate = stringToManipulate.substr(0U, static_cast<size_t>(endOfStringLeadingZeroMatch.position()) + 1U) + "0" + stringToManipulate.substr(static_cast<size_t>(endOfStringLeadingZeroMatch.position()) + 1U, static_cast<size_t>(stringToManipulate.length())  - 1U);
             if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
             currentLoopIteration++; 
         }
@@ -106,7 +106,7 @@ public:
                 if (currentLoopIteration > loopMaximum) return "0000:0000:0000:0000:0000:0000:0000:0000";
                 currentLoopIteration++; 
             }
-            stringToManipulate = stringToManipulate.substr(0, doubleColonMatch.position() + 1) + zeroBlockString + stringToManipulate.substr(doubleColonMatch.position() + 1, stringToManipulate.length() - 1);
+            stringToManipulate = stringToManipulate.substr(0U, static_cast<size_t>(doubleColonMatch.position()) + 1) + zeroBlockString + stringToManipulate.substr(static_cast<size_t>(doubleColonMatch.position()) + 1U, static_cast<size_t>(stringToManipulate.length()) - 1U);
         }
 
         if (!regex_search(stringToManipulate, IPv6FormatMatch, IPv6FormatRegex)) {
@@ -148,10 +148,10 @@ public:
         smatch doubleColonMatch;
         regex doubleColonRegex("\\:\\:");
 
-        int index;
+        size_t index;
 
         while (regex_search(truncatedString, leadingZeroMatch, leadingZeroRegex)) {
-            truncatedString = truncatedString.substr(0, leadingZeroMatch.position()+1) + truncatedString.substr(leadingZeroMatch.position() + leadingZeroMatch.length(), truncatedString.length() - 1);
+            truncatedString = truncatedString.substr(0U, static_cast<size_t>(leadingZeroMatch.position()) + 1U) + truncatedString.substr(static_cast<size_t>(leadingZeroMatch.position()) + static_cast<size_t>(leadingZeroMatch.length()), static_cast<size_t>(truncatedString.length()) - 1U);
             if (currentLoopIteration > loopMaximum) break;
             currentLoopIteration++; 
         }
@@ -159,22 +159,22 @@ public:
         sanitizedString = truncatedString;
 
         if (regex_search(sanitizedString, leadingZeroesAtBeginningMatch, leadingZeroesAtBeginningRegex)) {
-            sanitizedString = sanitizedString.substr(0, leadingZeroesAtBeginningMatch.position()) + sanitizedString.substr(leadingZeroesAtBeginningMatch.position() + leadingZeroesAtBeginningMatch.length(), sanitizedString.length() - 1);
+            sanitizedString = sanitizedString.substr(0U, static_cast<size_t>(leadingZeroesAtBeginningMatch.position())) + sanitizedString.substr(static_cast<size_t>(leadingZeroesAtBeginningMatch.position()) + static_cast<size_t>(leadingZeroesAtBeginningMatch.length()), static_cast<size_t>(sanitizedString.length()) - 1U);
         }
 
         while (regex_search(sanitizedString, greedyZeroMatch, greedyZeroRegex)) { // truncate the longest block of zeroes into a double colon
             if (static_cast<int>(greedyZeroMatch[0].length()) > static_cast<int>(greediestMatch.length())) {
                 greediestMatch = greedyZeroMatch[0];
             }
-            sanitizedString = sanitizedString.substr(0, greedyZeroMatch.position()) + ":" + sanitizedString.substr(greedyZeroMatch.position() + greedyZeroMatch.length(), sanitizedString.length() - 1);
+            sanitizedString = sanitizedString.substr(0U, static_cast<size_t>(greedyZeroMatch.position())) + ":" + sanitizedString.substr(static_cast<size_t>(greedyZeroMatch.position()) + static_cast<size_t>(greedyZeroMatch.length()), static_cast<size_t>(sanitizedString.length()) - 1U);
             if (currentLoopIteration > loopMaximum) break;
             currentLoopIteration++;
         }
         currentLoopIteration = 0;
         currentLoopIteration = 0;
         if (greediestMatch.compare("")) {
-            index = static_cast<int>(truncatedString.find(greediestMatch));
-            truncatedString = truncatedString.substr(0, index) + "::" + truncatedString.substr(index + greediestMatch.length(), truncatedString.length() - 1);
+            index = truncatedString.find(greediestMatch);
+            truncatedString = truncatedString.substr(0U, index) + "::" + truncatedString.substr(index + static_cast<size_t>(greediestMatch.length()), static_cast<size_t>(truncatedString.length()) - 1U);
         } // end of zero block truncation
         while (regex_search(truncatedString, leadingZeroesAtBeginningMatch, leadingZeroesAtBeginningRegex)) {
             truncatedString = truncatedString.substr(1, truncatedString.length());
@@ -200,12 +200,12 @@ public:
 
     static unsigned short *IPv6StringToHextets(string stringArg) {
         stringArg = IPv6Sanitize(stringArg);
-        int currentIndex = 0;
+        size_t currentIndex = 0;
         string currentString = "";
         unsigned short *hextets = static_cast<unsigned short *>(calloc(8, sizeof(short)));
         for (int i=0; i<8; i++) {
             currentString = "";
-            while (stringArg[currentIndex] != ':' && (size_t)currentIndex < stringArg.length()) {
+            while (stringArg[currentIndex] != ':' && static_cast<size_t>(currentIndex) < stringArg.length()) {
                 currentString += stringArg[currentIndex];
                 currentIndex++;
             }
@@ -224,16 +224,16 @@ public:
             return hextets;
         }
         string calculationString = "";
-        for (int i=0; i<(int)stringArg.length(); i++) {
+        for (unsigned int i=0; i<stringArg.length(); i++) {
             if (i != 2 && i != 8 && i != 14) {
                 calculationString += stringArg[i];
             }
         }
-        int currentIndex = 0;
+        size_t currentIndex = 0;
         string currentString = "";
-        for (int i=0; i<3; i++) {
+        for (unsigned int i=0; i<3; i++) {
             currentString = "";
-            while (calculationString[currentIndex] != ':' && calculationString[currentIndex] != '-' && (size_t)currentIndex < calculationString.length()) {
+            while (calculationString[currentIndex] != ':' && calculationString[currentIndex] != '-' && static_cast<size_t>(currentIndex) < calculationString.length()) {
                 currentString += calculationString[currentIndex];
                 currentIndex++;
             }
@@ -245,9 +245,9 @@ public:
 
     static unsigned short *MACHextetsToEUIHextets(unsigned short *MACHextets) {
         unsigned short *EUIHextets = static_cast<unsigned short *>(calloc(4, sizeof(short)));
-        EUIHextets[0] = MACHextets[0] ^ static_cast<unsigned short>(0b00000010);
-        EUIHextets[1] = (MACHextets[1] & static_cast<unsigned short>(0xff00)) + 0x00ff;
-        EUIHextets[2] = (MACHextets[1] & static_cast<unsigned short>(0x00ff)) + 0xfe00;
+        EUIHextets[0U] = static_cast<unsigned short>(MACHextets[0U] ^ static_cast<unsigned short>(0b00000010));
+        EUIHextets[1] = static_cast<unsigned short>((MACHextets[1] & static_cast<unsigned short>(0xff00)) + static_cast<unsigned short>(0x00ff));
+        EUIHextets[2] = static_cast<unsigned short>((MACHextets[1] & static_cast<unsigned short>(0x00ff)) + static_cast<unsigned short>(0xfe00));
         EUIHextets[3] = MACHextets[2];
         return EUIHextets;
     }

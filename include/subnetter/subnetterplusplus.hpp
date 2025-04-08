@@ -244,10 +244,10 @@ public:
 
 class SubnetMask : public IP {
 public:
-    long long blockSize;
-    long long numberOfSubnets;
-    int hostBits;
-    int networkBits;
+    unsigned long long blockSize;
+    unsigned long long numberOfSubnets;
+    unsigned int hostBits;
+    unsigned int networkBits;
 
     SubnetMask(string stringArg) : IP(stringArg) {
         if (isCIDRMask(stringArg)) {
@@ -259,7 +259,7 @@ public:
             this -> IPString = stringArg;
             this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
         }
-        this -> hostBits = fetchHostBits(static_cast<int>(this -> IPAddress.IP32));
+        this -> hostBits = fetchHostBits(this -> IPAddress.IP32);
         if (this -> hostBits == 32) {
             this -> blockSize = 4294967296ULL;
         } else if (!invalidFormat) {
@@ -274,7 +274,7 @@ public:
         }
     }
 
-    SubnetMask(int CIDRMask) : IP(~static_cast<unsigned int>(((1ULL<<(32-CIDRMask)) - 1))) {
+    SubnetMask(unsigned int CIDRMask) : IP(~static_cast<unsigned int>(((1ULL<<(32-CIDRMask)) - 1))) {
         this -> hostBits = 32 - CIDRMask;
         if (!invalidFormat) {
             this -> blockSize = 1ULL<<this -> hostBits;
@@ -289,20 +289,20 @@ public:
 
     SubnetMask() {}
 
-    static int CIDRToIPNumber(int CIDRNumber) {
+    static unsigned int CIDRToIPNumber(int CIDRNumber) {
         if (CIDRNumber == 0) {
             return 0;
         }
-        return ~((1 << (32 - CIDRNumber)) - 1);
+        return ~static_cast<unsigned int>((1 << (32 - CIDRNumber)) - 1);
     }
 
-    static int fetchHostBits(int IPNumber) {
+    static unsigned int fetchHostBits(unsigned int IPNumber) {
         if (IPNumber == 0) {
             return 32;
         }
-        int IPComplement = (int)(~IPNumber) + 1;
-        for (int i=0; i<=32; i++) {
-            if (1<<i == IPComplement) {
+        unsigned int IPComplement = static_cast<unsigned int>((~IPNumber) + 1);
+        for (unsigned int i=0; i<=32; i++) {
+            if (static_cast<unsigned int>(1<<i) == IPComplement) {
                 return i;
             }
         }
@@ -316,15 +316,15 @@ public:
         return true;
     }
 
-    static int getClosestNetworkBits(SubnetMask netArg) {
-        int currentIP32 = netArg.IPAddress.IP32;
-        int IP32Exp = 1<<31;
-        int bitshiftOperand = 30;
+    static unsigned int getClosestNetworkBits(SubnetMask netArg) {
+        unsigned int currentIP32 = netArg.IPAddress.IP32;
+        unsigned int IP32Exp = static_cast<unsigned int>(1<<31);
+        unsigned int bitshiftOperand = 30;
         while (IP32Exp < currentIP32) {
             IP32Exp += 1 << bitshiftOperand;
             bitshiftOperand--;
         }
-        return 32 - fetchHostBits(IP32Exp);
+        return 32U - fetchHostBits(IP32Exp);
     }
 };
 
@@ -371,12 +371,12 @@ public:
 
     static string getChangingIPBinaryString(IP IPArg, SubnetMask netMaskArg) {
         string returnString = "";
-        int changingBits = netMaskArg.hostBits;
+        unsigned int changingBits = netMaskArg.hostBits;
         for (int i=3; i>=0; i--) {
             returnString += IP::toBinaryString(IPArg.IPAddress.octets[i]);
         }
-        for (int i=0; i<static_cast<int>(returnString.length()); i++) {
-            if (i>=32-changingBits && returnString[static_cast<size_t>(i)] != '.') {
+        for (unsigned int i=0; i<static_cast<unsigned int>(returnString.length()); i++) {
+            if (i>=32U-changingBits && returnString[static_cast<size_t>(i)] != '.') {
                 returnString[static_cast<size_t>(i)] = 'x';
             }
         }
@@ -464,9 +464,9 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
         netMask1 = netMask2;
         netMask2 = swapMask;
     }
-    int networkMagnitudeDifference = netMask1.hostBits - netMask2.hostBits;
-    long long int totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
-    long long int subnetsToGenerate;
+    unsigned int networkMagnitudeDifference = netMask1.hostBits - netMask2.hostBits;
+    unsigned long long int totalSubnetsToGenerate = 1ULL<<networkMagnitudeDifference;
+    unsigned long long int subnetsToGenerate;
     #ifdef IMGUI_API // Limit generated subnets in graphical interface to 256 but not in CLI
     if(exportFlag) {
         subnetsToGenerate = totalSubnetsToGenerate;
@@ -520,7 +520,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     }
     if (reverseFlag) {
         localIPCopy += static_cast<unsigned int>(netMask2.blockSize) * static_cast<unsigned int>(subnetsToGenerate - 1);
-        for (int i=0; i<subnetsToGenerate; i++) {
+        for (unsigned int i=0; i<subnetsToGenerate; i++) {
             #ifdef IMGUI_API
             if (!windowsAreOpen[0]) return;
             #endif
@@ -531,7 +531,7 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
             localIPCopy -= static_cast<unsigned int>(netMask2.blockSize);
         }
     } else {
-        for (int i=0; i<subnetsToGenerate; i++) {
+        for (unsigned int i=0; i<subnetsToGenerate; i++) {
             #ifdef IMGUI_API
             if (!windowsAreOpen[0]) return;
             #endif

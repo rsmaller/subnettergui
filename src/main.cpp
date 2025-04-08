@@ -153,7 +153,7 @@ SubnetMask netMaskArg1;
 SubnetMask netMaskArg2;
 IP currentIP(0); 
 extern unsigned long long totalAddedToIP;
-int networkMagnitudeDifference = 0;
+unsigned int networkMagnitudeDifference = 0;
 unsigned long long int totalSubnetsToGenerate = 0;
 
 // ----------------------------------------------------------------------------------------------
@@ -202,9 +202,9 @@ subnettingQuestion randomSubnetQuestion() {
     returnValue.answer1 = generatedSubnetMask.IPString;
     returnValue.answer2 = to_string(generatedSubnetMask.blockSize);
     returnValue.answer3 = networkIP.IPString;
-    returnValue.answer4 = (networkIP + 1).IPString;
-    returnValue.answer5 = (networkIP + static_cast<int>(generatedSubnetMask.blockSize - 2ULL)).IPString;
-    returnValue.answer6 = (networkIP + static_cast<int>(generatedSubnetMask.blockSize - 1ULL)).IPString;
+    returnValue.answer4 = (networkIP + 1U).IPString;
+    returnValue.answer5 = (networkIP + static_cast<unsigned int>(generatedSubnetMask.blockSize - 2ULL)).IPString;
+    returnValue.answer6 = (networkIP + static_cast<unsigned int>(generatedSubnetMask.blockSize - 1ULL)).IPString;
     returnValue.answer7 = generatedIP.IPBinaryString;
     returnValue.answer8 = generatedSubnetMask.IPBinaryString;
     return returnValue;

@@ -14,7 +14,7 @@ unsigned short getRandomShort() {
 }
 
 unsigned int getRandomIPNumber() {
-	return ((char)rand() << 24) + ((char)rand() << 16) + ((char)rand() << 8) + (char)rand();
+	return (unsigned int)((char)rand() << 24) + (unsigned int)((char)rand() << 16) + (unsigned int)((char)rand() << 8) + (unsigned int)(char)rand();
 }
 
 unsigned short *getRandomIPv6Number() { // returns size 8 array for IPv6 number
@@ -40,7 +40,7 @@ bool chance(unsigned int numerator, unsigned int denominator) {
 	return generatedNumber <= numerator;
 }
 
-double testChance(int numerator, int denominator) {
+double testChance(unsigned int numerator, unsigned int denominator) {
 	int totalTrue = 0;
 	int numberOfTests = 100000;
 	for (int i=0; i<numberOfTests; i++) {
@@ -52,5 +52,5 @@ double testChance(int numerator, int denominator) {
 }
 
 unsigned int getRandomCIDR() {
-	return rand() % 33;
+	return (unsigned int)rand() % 33;
 }
