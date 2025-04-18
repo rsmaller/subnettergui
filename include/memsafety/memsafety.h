@@ -1,6 +1,11 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+    #define ALLOCATOR_ATTRIBS
+#else
+    #define ALLOCATOR_ATTRIBS __attribute__((malloc))
+#endif
 
 //  A warning; for anyone modifying this code, the startingNode linked list is not thread safe and should NOT be used in programs with volatile memory allocations.
 //  ImGui does not use the malloc_ac and calloc_ac allocators because the linked list will decouple if used in threaded or volatile programs like ImGui.
@@ -19,9 +24,11 @@ typedef struct memoryNode {
     struct memoryNode *nextNode;
 } memoryNode;
 
-void *malloc_ac(size_t);
+void * ALLOCATOR_ATTRIBS malloc_ac(size_t);
 
-void *calloc_ac(size_t, size_t);
+void * ALLOCATOR_ATTRIBS calloc_ac(size_t, size_t);
+
+void mem_cc(void);
 
 void *realloc_ac(void *, size_t);
 

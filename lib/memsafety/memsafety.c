@@ -32,7 +32,7 @@ void node_printout(void) {
     return;
 }
 
-void *malloc_ac(size_t size) {
+void * ALLOCATOR_ATTRIBS malloc_ac(size_t size) {
     void *pointer = malloc(size);
     if (!pointer) {
         printf("Heap allocation failure. Terminating\n");
@@ -48,7 +48,7 @@ void *malloc_ac(size_t size) {
     return pointer;
 }
 
-void *calloc_ac(size_t size1, size_t size2) {
+void * ALLOCATOR_ATTRIBS calloc_ac(size_t size1, size_t size2) {
     void *pointer = calloc(size1, size2);
     if (!pointer) {
         printf("Heap allocation failure. Terminating\n");
