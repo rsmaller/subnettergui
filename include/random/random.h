@@ -5,12 +5,12 @@
 
 unsigned int getRandomInteger(unsigned int start, unsigned int end) {
 	assert(end > start);
-	unsigned long long int range = end - start + 1;
-	return (unsigned int)(rand() % range + start);
+	unsigned int range = end - start + 1;
+	return (unsigned int)((unsigned int)rand() % range + start);
 }
 
 unsigned short getRandomShort() {
-	return (unsigned short)(rand() % 0xffffU);
+	return (unsigned short)((unsigned short)rand() % (unsigned short)0xffffU);
 }
 
 unsigned int getRandomIPNumber() {
@@ -21,7 +21,7 @@ unsigned short *getRandomIPv6Number() { // returns size 8 array for IPv6 number
 	unsigned short *returnArray = (unsigned short *)calloc(8, 2);
 	rand();
 	for (int i=0; i<8; i++) {
-		returnArray[i] = (unsigned short)(rand() % 0xffffU);
+		returnArray[i] = (unsigned short)((unsigned short)rand() % (unsigned short)0xffffU);
 	}
 	return returnArray;
 }
@@ -30,7 +30,7 @@ unsigned short *getRandomMACNumber() { // returns size 8 array for IPv6 number
 	unsigned short *returnArray = (unsigned short *)calloc(3, 2);
 	rand();
 	for (int i=0; i<3; i++) {
-		returnArray[i] = (unsigned short)(rand() % 0xffffU);
+		returnArray[i] = (unsigned short)((unsigned short)rand() % (unsigned short)0xffffU);
 	}
 	return returnArray;
 }

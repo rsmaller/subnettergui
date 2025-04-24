@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,7 +9,7 @@
 #ifdef _MSC_VER
     #define ALLOCATOR_ATTRIBS
     #define CONSTRUCTOR
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(__GNUC__)
     #define ALLOCATOR_ATTRIBS __attribute__((malloc))
     #define CONSTRUCTOR __attribute__((constructor))
 #else
@@ -21,9 +25,7 @@
 //  Furthermore, malloc(), calloc(), and free() can be used alongside this allocator. This allocator is simply designed to clean up allocations at the end of runtime.
 //  The smart allocators and smart free functions in this code can still be used to dynamically allocate and free memory as needed, provided it is done on one thread.
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 
 typedef struct memoryNode {
     void *pointer;

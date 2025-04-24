@@ -1,8 +1,8 @@
-#include "memsafety.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "memsafety.h"
 
 #if defined(_MSC_VER)
     #pragma section(".CRT$XCU", read)
