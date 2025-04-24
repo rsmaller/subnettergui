@@ -42,10 +42,6 @@ void free_ac(void *);
 
 void node_printout(void);
 
-void mem_cc(void);
-
-int CONSTRUCTOR register_mem_cc(void);
-
 #ifdef __cplusplus
 }
 #endif
