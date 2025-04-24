@@ -40,6 +40,7 @@ else()
     target_compile_options(subnettergui PRIVATE -Wall -Wextra -Wpedantic -Werror -Walloca -Wcast-qual -Wconversion -std=c++23)
 endif()
 
+# add_definitions(-DMEMSAFETY_DEBUG) # debug switch
 target_compile_definitions(subnettergui PRIVATE GLEW_STATIC)
 target_link_libraries(subnettergui PRIVATE imgui)
 target_link_libraries(subnettergui PRIVATE glfw3)

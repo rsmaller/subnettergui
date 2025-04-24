@@ -140,6 +140,12 @@ void mem_cc(void) { // call this at the end of main() to ensure any dangling poi
 }
 
 static int CONSTRUCTOR register_mem_cc(void) {
+    #ifdef MEMSAFETY_DEBUG
+        FILE *file =fopen("./MEM_CC_REG_SUCCESS", "wt");
+        char message[] = "mem_cc has been registered successfully";
+        fwrite(message, sizeof(char), sizeof(message)/sizeof(char), file);
+        fclose(file);
+    #endif
     return atexit(mem_cc);
 }
 
