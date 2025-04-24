@@ -140,7 +140,6 @@ void mem_cc(void) { // call this at the end of main() to ensure any dangling poi
 }
 
 int CONSTRUCTOR register_mem_cc(void) {
-    fopen("./THISRAN.txt", "w");
     return atexit(mem_cc);
 }
 
