@@ -4,6 +4,15 @@
 extern "C" {
 #endif
 
+#if defined(_MSC_VER)
+    #pragma section(".CRT$XCU", read)
+    #define CONSTRUCTOR_INTERNAL __declspec(allocate(".CRT$XCU"))
+#elif defined(__GNUC__) || defined(__clang__)
+    #define CONSTRUCTOR_INTERNAL __attribute__((constructor))
+#else
+    #define CONSTRUCTOR_INTERNAL
+#endif
+
 static memoryNode *startingNode = NULL;
 static memoryNode *endingNode = NULL;
 
@@ -132,9 +141,12 @@ void mem_cc(void) { // call this at the end of main() to ensure any dangling poi
     endingNode = NULL;
 }
 
-int register_mem_cc(void) {
+int CONSTRUCTOR register_mem_cc(void) {
+    fopen("./THISRAN.txt", "w");
     return atexit(mem_cc);
 }
+
+CONSTRUCTOR_INTERNAL int (*memsafetyStartup)(void) = register_mem_cc;
 
 #ifdef __cplusplus
 }

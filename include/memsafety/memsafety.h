@@ -1,10 +1,21 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifdef _MSC_VER
     #define ALLOCATOR_ATTRIBS
-#else
+#elif defined(__GNUC__) || defined(__clang__)
     #define ALLOCATOR_ATTRIBS __attribute__((malloc))
+#else
+    #define ALLOCATOR_ATTRIBS
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+    #define CONSTRUCTOR __attribute__((constructor))
+#elif defined(_MSC_VER)
+    #define CONSTRUCTOR
+#else
+    #define CONSTRUCTOR
 #endif
 
 //  A warning; for anyone modifying this code, the startingNode linked list is not thread safe and should NOT be used in programs with volatile memory allocations.
@@ -38,7 +49,7 @@ void node_printout(void);
 
 void mem_cc(void);
 
-int register_mem_cc(void);
+int CONSTRUCTOR register_mem_cc(void);
 
 #ifdef __cplusplus
 }

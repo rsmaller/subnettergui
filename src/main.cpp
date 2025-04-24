@@ -1129,7 +1129,7 @@ void EUI64InfoWindow() {
 // ----------------------------------------------------------------------------------------------
 
 int Main() { // the pseudo-main function that gets called either by WinMain() or main()
-    register_mem_cc();
+    // register_mem_cc();
     srand(static_cast<unsigned int>(time(NULL))); // initialize random number generator's counter
     ImGuiInit(); // window creation and context initialization
     windowsAreOpen[0] = true;
