@@ -139,7 +139,7 @@ void mem_cc(void) { // call this at the end of main() to ensure any dangling poi
     endingNode = NULL;
 }
 
-int CONSTRUCTOR register_mem_cc(void) {
+static int CONSTRUCTOR register_mem_cc(void) {
     return atexit(mem_cc);
 }
 
