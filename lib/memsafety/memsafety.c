@@ -7,8 +7,6 @@ extern "C" {
 #if defined(_MSC_VER)
     #pragma section(".CRT$XCU", read)
     #define CONSTRUCTOR_INTERNAL __declspec(allocate(".CRT$XCU"))
-#elif defined(__GNUC__) || defined(__clang__)
-    #define CONSTRUCTOR_INTERNAL __attribute__((constructor))
 #else
     #define CONSTRUCTOR_INTERNAL
 #endif

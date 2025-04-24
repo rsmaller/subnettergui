@@ -4,17 +4,12 @@
 
 #ifdef _MSC_VER
     #define ALLOCATOR_ATTRIBS
+    #define CONSTRUCTOR
 #elif defined(__GNUC__) || defined(__clang__)
     #define ALLOCATOR_ATTRIBS __attribute__((malloc))
+    #define CONSTRUCTOR __attribute__((constructor))
 #else
     #define ALLOCATOR_ATTRIBS
-#endif
-
-#if defined(__GNUC__) || defined(__clang__)
-    #define CONSTRUCTOR __attribute__((constructor))
-#elif defined(_MSC_VER)
-    #define CONSTRUCTOR
-#else
     #define CONSTRUCTOR
 #endif
 
