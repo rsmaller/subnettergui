@@ -153,7 +153,7 @@ static int CONSTRUCTOR register_mem_cc(void) {
     return atexit(mem_cc);
 }
 
-CONSTRUCTOR_INTERNAL int (*memsafetyStartup)(void) = register_mem_cc;
+CONSTRUCTOR_INTERNAL static int (*memsafetyStartup)(void) = register_mem_cc;
 
 #ifdef __cplusplus
 }
