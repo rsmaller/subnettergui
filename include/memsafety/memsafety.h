@@ -9,7 +9,7 @@ extern "C" {
 #ifdef _MSC_VER
     #define ALLOCATOR_ATTRIBS
     #define CONSTRUCTOR
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__clang__)
     #define ALLOCATOR_ATTRIBS __attribute__((malloc))
     #define CONSTRUCTOR __attribute__((constructor))
 #else

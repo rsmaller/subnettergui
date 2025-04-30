@@ -11,6 +11,10 @@ extern "C" {
     #define CONSTRUCTOR_INTERNAL
 #endif
 
+#if !defined(_MSC_VER) && !defined(__GNUC__) && !defined(__clang__)
+    #pragma message("memsafety.c: This compiler does not support macros implemented in this library. Please make sure to register mem_cc to run on exit in your client code.")
+#endif
+
 static memoryNode *startingNode = NULL;
 static memoryNode *endingNode = NULL;
 
