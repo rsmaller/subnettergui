@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.11.0)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./build)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ./bin)
 project(subnettergui VERSION 0.0.1)
