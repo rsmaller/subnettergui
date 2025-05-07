@@ -14,7 +14,7 @@ Dependencies listed here are only for building this program yourself. Everything
 
 This program uses the `ImGui` library and a 3D plotting extension for ImGui called `ImPlot3D`. To use the ImGui library, `GLFW` and `GLEW` are linked and initialized. ImGui is designed to run on top of a window platform, so it does not have any unique dependencies. GLFW and GLEW, however, will require various packages specifically on Linux. 
 
-This application is designed to be built with MSVC on Windows and macOS systems, so please be sure to install Visual Studio, CMake, and MSVC with C++ Build tools.
+This application is designed to be built with MSVC on Windows and macOS systems, so please be sure to install Visual Studio, CMake, and MSVC with C++ Build tools. For simply running the release, make sure to install Visual C++ Redistributable for Visual Studio 2015.
 
 Linux machines should instead use g++ to build this application. On Ubuntu-based Linux distributions, for example, the following packages are required:
 
