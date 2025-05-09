@@ -18,6 +18,7 @@ add_library(memsafety STATIC lib/memsafety/memsafety.c)
 IF (WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:LIBCMT /IGNORE:4099")
     add_executable(subnettergui WIN32 src/main.cpp)
+    target_compile_options(subnettergui PRIVATE /wd4710 /wd4711) # Ignore warnings about inlining
     set_target_properties(glew PROPERTIES IMPORTED_LOCATION "./lib/bin/glew/win32/glew32s.lib")
     set_target_properties(glfw3 PROPERTIES IMPORTED_LOCATION "./lib/bin/glfw/win32/glfw3.lib")
     target_link_libraries(subnettergui PRIVATE opengl32 glew)
