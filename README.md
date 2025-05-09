@@ -10,20 +10,29 @@ SubnetterGUI is designed for Windows x86-64, macOS arm64, and Linux x86-64. GLFW
 
 ## Dependencies
 
-Dependencies listed here are only for building this program yourself. Everything should work fine if you're using a prebuilt release. If something goes wrong, feel free to reference this section.
+Dependencies listed here are only for building this program yourself. Everything should work fine if you're using a prebuilt release. Should any of the build process dependencies be required for one of the releases anyway, please refer to this section.
 
 This program uses the `ImGui` library and a 3D plotting extension for ImGui called `ImPlot3D`. To use the ImGui library, `GLFW` and `GLEW` are linked and initialized. ImGui is designed to run on top of a window platform, so it does not have any unique dependencies. GLFW and GLEW, however, will require various packages specifically on Linux. 
 
-This application is designed to be built with MSVC on Windows and macOS systems, so please be sure to install Visual Studio, CMake, and MSVC with C++ Build tools. For simply running the release, make sure to install Visual C++ Redistributable for Visual Studio 2015.
+This application is designed to be built with MSVC on Windows and macOS systems, so please be sure to install [Build Tools for Visual Studio 2022](https://visualstudio.microsoft.com/downloads/).
 
-Linux machines should instead use g++ to build this application. On Ubuntu-based Linux distributions, for example, the following packages are required:
+Futhermore, this project requires `Visual Studio C++ Build Tools`, which can be found under ther `Desktop development with C++` section in the Visual Studio Build Tools Installer.
+Install the following packages:
+<ul>
+    <li>MSVC VS 2022 C++ Build Tools</li>
+    <li>Windows 10/11 SDK</li>
+</ul>
+
+For simply running the Windows release, make sure to install `Visual C++ Redistributable for Visual Studio 2015` if you machine doesn't have it already.
+
+Instead of MSVC, Linux machines should use g++ to build this application. On Ubuntu-based Linux distributions, for example, the following packages are required:
 
 ```
 cmake g++ libwayland-dev libxkbcommon-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev xorg-dev
 ```
 Note: `xwayland` is also recommended if your system uses Wayland by default to ensure Xorg compatibility.
 
-Keep in mind that because this program uses GLFW to render windows, window resizing and decorating are not possible on Linux systems running the Wayland window manager. This is a limitation of GLFW itself. If you are on Wayland, it is strongly recommended to switch to Xorg for this program to work properly.
+Keep in mind that because this program uses GLFW to render windows, window resizing and decorating are not possible on Linux systems running the Wayland window manager. This is a limitation of GLFW itself. If you are on Wayland, it is strongly recommended to switch to Xorg for this program to work properly. Go [here](https://askubuntu.com/questions/1410256/how-do-i-use-the-x-window-manager-instead-of-wayland-on-ubuntu-22-04) for more information on how to do this.
 
 Regardless, this application is designed to be built with `CMake`, which is required on all supported operating systems and compilers. CMake can be installed via a package manager, including the `choco` package manager on Windows.
 
