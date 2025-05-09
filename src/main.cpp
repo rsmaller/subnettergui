@@ -649,14 +649,29 @@ void studyWindow() {
         resetCurrentSubnetQuestion();
     }
     if (currentSubnetQuestionAnswered) {
-        if (!currentSubnetQuestion.answer1.compare(studyInputBuffer1)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");}
-        if (!currentSubnetQuestion.answer2.compare(studyInputBuffer2)) {ImGui::Text("Block Size is correct!");} else {ImGui::Text("Block Size is incorrect.");}
-        if (!currentSubnetQuestion.answer3.compare(studyInputBuffer3)) {ImGui::Text("Network Address is correct!");} else {ImGui::Text("Network Address is incorrect.");}
-        if (!currentSubnetQuestion.answer4.compare(studyInputBuffer4)) {ImGui::Text("First Usable Address is correct!");} else {ImGui::Text("First Usable Address is incorrect.");}
-        if (!currentSubnetQuestion.answer5.compare(studyInputBuffer5)) {ImGui::Text("Last Usable Address is correct!");} else {ImGui::Text("Last Usable Address is incorrect.");}
-        if (!currentSubnetQuestion.answer6.compare(studyInputBuffer6)) {ImGui::Text("Broadcast Address is correct!");} else {ImGui::Text("Broadcast Address is incorrect.");}
-        if (!currentSubnetQuestion.answer7.compare(studyInputBuffer7)) {ImGui::Text("Binary for Provided IP is correct!");} else {ImGui::Text("Binary for Provided IP is incorrect.");}
-        if (!currentSubnetQuestion.answer8.compare(studyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is correct!");} else {ImGui::Text("Binary for Subnet Mask is incorrect.");}
+        if (!currentSubnetQuestion.answer1.compare(studyInputBuffer1)) {ImGui::Text("Subnet Mask is correct!");} 
+        else if (string("").compare(studyInputBuffer1)) {ImGui::Text("Subnet Mask is incorrect.");}
+
+        if (!currentSubnetQuestion.answer2.compare(studyInputBuffer2)) {ImGui::Text("Block Size is correct!");} 
+        else if (string("").compare(studyInputBuffer2)) {ImGui::Text("Block Size is incorrect.");}
+
+        if (!currentSubnetQuestion.answer3.compare(studyInputBuffer3)) {ImGui::Text("Network Address is correct!");} 
+        else if (string("").compare(studyInputBuffer3)) {ImGui::Text("Network Address is incorrect.");}
+
+        if (!currentSubnetQuestion.answer4.compare(studyInputBuffer4)) {ImGui::Text("First Usable Address is correct!");} 
+        else if (string("").compare(studyInputBuffer4)) {ImGui::Text("First Usable Address is incorrect.");}
+
+        if (!currentSubnetQuestion.answer5.compare(studyInputBuffer5)) {ImGui::Text("Last Usable Address is correct!");} 
+        else if (string("").compare(studyInputBuffer5)) {ImGui::Text("Last Usable Address is incorrect.");}
+
+        if (!currentSubnetQuestion.answer6.compare(studyInputBuffer6)) {ImGui::Text("Broadcast Address is correct!");} 
+        else if (string("").compare(studyInputBuffer6)) {ImGui::Text("Broadcast Address is incorrect.");}
+
+        if (!currentSubnetQuestion.answer7.compare(studyInputBuffer7)) {ImGui::Text("Binary for Provided IP is correct!");} 
+        else if (string("").compare(studyInputBuffer7)) {ImGui::Text("Binary for Provided IP is incorrect.");}
+
+        if (!currentSubnetQuestion.answer8.compare(studyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is correct!");} 
+        else if (string("").compare(studyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is incorrect.");}   
     }
     ImGui::End();
     return;
@@ -681,8 +696,11 @@ void IPClassWindow() {
         resetCurrentClassQuestion();
     }
     if (currentClassQuestionAnswered) {
-        if (!currentClassQuestion.answer1.compare(classInputBuffer1)) {ImGui::Text("IP Class is correct!");} else {ImGui::Text("IP Class is incorrect.");}
-        if (!currentClassQuestion.answer2.compare(classInputBuffer2)) {ImGui::Text("Subnet Mask is correct!");} else {ImGui::Text("Subnet Mask is incorrect.");} 
+        if (!currentClassQuestion.answer1.compare(classInputBuffer1)) {ImGui::Text("IP Class is correct!");} 
+        else if (string("").compare(classInputBuffer1)) {ImGui::Text("IP Class is incorrect.");}
+
+        if (!currentClassQuestion.answer2.compare(classInputBuffer2)) {ImGui::Text("Subnet Mask is correct!");} 
+        else if (string("").compare(classInputBuffer2)) {ImGui::Text("Subnet Mask is incorrect.");} 
     }
     ImGui::End();
     return;
