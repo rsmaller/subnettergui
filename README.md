@@ -31,16 +31,10 @@ Regardless, this application is designed to be built with `CMake`, which is requ
 
 After ensuring your system is compatible and has all necessary dependencies, it can be built with CMake.
 
-Before building, initialize the CMake cache. This should be done from the root folder of the cloned repo:
+The `release-build.py` script will handle the cmake configuration and building automatically. To build with it, run:
 
 ```
-cmake .
-```
-
-This program can then be built using CMake's build option:
-
-```
-cmake --build .
+python release-build.py
 ```
 
 The binary will be dropped in the `build` folder under the name `subnettergui`.
