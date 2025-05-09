@@ -16,7 +16,7 @@ add_library(implot3d STATIC lib/implot3d/implot3d.cpp lib/implot3d/implot3d_demo
 add_library(memsafety STATIC lib/memsafety/memsafety.c)
 
 IF (WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /IGNORE:4099")
+    set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:LIBCMT /IGNORE:4099")
     add_executable(subnettergui WIN32 src/main.cpp)
     set_target_properties(glew PROPERTIES IMPORTED_LOCATION "./lib/bin/glew/win32/glew32s.lib")
     set_target_properties(glfw3 PROPERTIES IMPORTED_LOCATION "./lib/bin/glfw/win32/glfw3.lib")
