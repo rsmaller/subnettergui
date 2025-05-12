@@ -40,10 +40,16 @@ Regardless, this application is designed to be built with `CMake`, which is requ
 
 After ensuring your system is compatible and has all necessary dependencies, it can be built with CMake.
 
-The `release-build.py` script will handle the cmake configuration and building automatically. To build with it, run:
+The `release-build-win.py` script will handle the cmake configuration and building automatically on Windows. To build with it, run:
 
 ```
-python release-build.py
+python release-build-win.py
+```
+
+Conversely, on Linux and macOS systems, run the `release-build-unix.sh` file:
+
+```
+./release-build-unix.sh
 ```
 
 The binary will be dropped in the `build` folder under the name `subnettergui`.
