@@ -333,10 +333,6 @@ bool sameLineInIf() {
 // SECTION: GLFW, OpenGL Initializaiton, and Rendering
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-void glfwErrorCallback(int error, const char *msg) noexcept {
-    if (error != 65544) printf("Error %d: %s\n", error, msg);
-}
-
 void windowTerminate() {
     ImPlot3D::DestroyContext(currentImPlot3DContext);
     ImGui_ImplOpenGL3_Shutdown();
@@ -345,6 +341,14 @@ void windowTerminate() {
     glfwDestroyWindow(windowBackend);
     glfwTerminate();
     exit(0);
+}
+
+void glfwErrorCallback(int error, const char *msg) noexcept {
+    if (error == 65548) {
+        printf("This program is not designed to be run on the Wayland compositor. Please switch to X11 to use this app.\n");
+        windowTerminate();
+    }
+    if (error != 65544) printf("Error %d: %s\n", error, msg);
 }
 
 void ImGuiInit() {
@@ -374,6 +378,7 @@ void ImGuiInit() {
     ImGuiViewport* primaryViewPort = ImGui::GetMainViewport();
     primaryViewPort -> PlatformHandle = static_cast<void *>(windowBackend);
     currentImPlot3DContext = ImPlot3D::CreateContext();
+    debugLog("GLFW Platforms: " + string(glfwGetVersionString()));
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
         debugLog("OpenGL error in ImGuiInit():" + to_string(error));
