@@ -372,6 +372,8 @@ void ImGuiInit() {
     ioRef.DisplayFramebufferScale.y = 1.0f;
     ioRef.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ioRef.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    ioRef.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
+    ioRef.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(windowBackend, true);
     ImGui_ImplOpenGL3_Init("#version 330");
