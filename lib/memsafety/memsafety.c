@@ -49,7 +49,7 @@ void * ALLOCATOR_ATTRIBS malloc_ac(size_t size) {
         printf("Heap allocation failure. Terminating\n");
         exit(1);
     }
-    if (!startingNode) { // if starting node has not been created, create it with the first allocated pointer.
+    if (!startingNode) { // If starting node has not been created, create it with the first allocated pointer.
         startingNode = mem_node(pointer);
         endingNode = startingNode;
         return pointer;
@@ -65,7 +65,7 @@ void * ALLOCATOR_ATTRIBS calloc_ac(size_t size1, size_t size2) {
         printf("Heap allocation failure. Terminating\n");
         exit(1);
     }
-    if (!startingNode) { // if starting node has not been created, create it with the first allocated pointer.
+    if (!startingNode) { // If starting node has not been created, create it with the first allocated pointer.
         startingNode = mem_node(pointer);
         endingNode = startingNode;
         return pointer;
@@ -127,7 +127,7 @@ void free_ac(void *pointer) {
     return;
 }
 
-void mem_cc(void) { // call this at the end of main() to ensure any dangling pointers are handled.
+void mem_cc(void) { // Call this at the end of main() to ensure any dangling pointers are handled.
     if (!startingNode) return;
     memoryNode *currentNodeToFree = startingNode;
     memoryNode *swapperNode = NULL;
