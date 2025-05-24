@@ -16,10 +16,9 @@
 
 #pragma once
 #include <iostream>
-#include <string.h>
 #include <cmath>
 #include <regex>
-#include <time.h>
+#include <ctime>
 #include <fstream>
 using namespace std;
 
@@ -54,11 +53,11 @@ bool subnettingSuccessful = false;
 extern const int totalNumberOfWindows;
 extern bool windowsAreOpen[];
 
-void nonExportOutput(const char *string) {
+inline void nonExportOutput(const char *string) {
     ImGui::Text("%s", string);
 }
 
-void usage(const char *message) {
+inline void usage(const char *message) {
     ImGui::Text("%s", message);
 }
 #else
@@ -72,7 +71,7 @@ void usage(const char *message) {
 }
 #endif
 
-void exportOutput(const char *string) {
+inline void exportOutput(const char *string) {
     exportFileStream << string;
 }
 
@@ -82,82 +81,81 @@ void exportOutput(const char *string) {
 
 class IP {
 public:
-    IPNumeric IPAddress;
+    IPNumeric IPAddress = {.IP32 = 0U};
     string IPString;
     string IPBinaryString;
-    char IPClass;
-    static const uint32_t classBStartBinary = (const uint32_t)(0b1U    << 31); // Binary maps for classful address resolution. Class A implicitly starts at 0.
-    static const uint32_t classCStartBinary = (const uint32_t)(0b11U   << 30);
-    static const uint32_t classDStartBinary = (const uint32_t)(0b111U  << 29);
-    static const uint32_t classEStartBinary = (const uint32_t)(0b1111U << 28);
+    char IPClass = '\0';
+    static constexpr uint32_t classBStartBinary = (const uint32_t)(0b1U    << 31); // Binary maps for classful address resolution. Class A implicitly starts at 0.
+    static constexpr uint32_t classCStartBinary = (const uint32_t)(0b11U   << 30);
+    static constexpr uint32_t classDStartBinary = (const uint32_t)(0b111U  << 29);
+    static constexpr uint32_t classEStartBinary = (const uint32_t)(0b1111U << 28);
     bool invalidFormat = false;
-    friend ostream &operator<<(ostream &stream, IP IPArg);
+    friend ostream &operator<<(ostream &stream, const IP& IPArg);
 
-    IP() {} // Necessary for prototypes to work.
+    IP() = default;
 
-    IP(string stringArg) {
+    IP(const string& stringArg) { // NOLINT
         if (isIPFormat(stringArg)) {
-            this -> IPAddress = StringToIPInt(stringArg);
-            this -> IPString = stringArg;
+            IPAddress = StringToIPInt(stringArg);
+            IPString = stringArg;
         } else if (isIPNumber(stringArg)) {
-            this -> IPAddress.IP32 = static_cast<uint32_t>(stoi(stringArg));
-            this -> IPString = intToIPString(this -> IPAddress);
+            IPAddress.IP32 = static_cast<uint32_t>(stoi(stringArg));
+            IPString = intToIPString(IPAddress);
         } else {
-            this -> IPString = "0.0.0.0";
-            this -> IPAddress.IP32 = 0;
-            this -> invalidFormat = true;
+            IPString = "0.0.0.0";
+            IPAddress.IP32 = 0;
+            invalidFormat = true;
         }
-        this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
-        setIPClass(this);
+        IPBinaryString = toIPBinaryString(IPAddress);
+        setIPClass();
     }
 
-    IP(uint32_t IPArg) {
-        this -> IPAddress.IP32 = IPArg;
-        this -> IPString = intToIPString(this -> IPAddress);
-        this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
-        setIPClass(this);
+    IP(const uint32_t IPArg) { // NOLINT
+        IPAddress.IP32 = IPArg;
+        IPString = intToIPString(IPAddress);
+        IPBinaryString = toIPBinaryString(IPAddress);
+        setIPClass();
     }
 
-    void setIPClass(IP *constructedObject) {
-        if (constructedObject -> IPAddress.IP32 < classBStartBinary) {
-            constructedObject -> IPClass = 'A';
-        } else if (constructedObject -> IPAddress.IP32 < classCStartBinary) {
-            constructedObject -> IPClass = 'B';
-        } else if (constructedObject -> IPAddress.IP32 < classDStartBinary) {
-            constructedObject -> IPClass = 'C';
-        } else if (constructedObject -> IPAddress.IP32 < classEStartBinary) {
-            constructedObject -> IPClass = 'D';
+    void setIPClass() {
+        if (IPAddress.IP32 < classBStartBinary) {
+            IPClass = 'A';
+        } else if (IPAddress.IP32 < classCStartBinary) {
+            IPClass = 'B';
+        } else if (IPAddress.IP32 < classDStartBinary) {
+            IPClass = 'C';
+        } else if (IPAddress.IP32 < classEStartBinary) {
+            IPClass = 'D';
         } else {
-            constructedObject -> IPClass = 'E';
+            IPClass = 'E';
         }
     }
 
-    static bool isIPFormat(string testString) {
+    static bool isIPFormat(const string& testString) {
         smatch matches;
-        regex IPPattern("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$");
+        const regex IPPattern(R"(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)");
         return regex_search(testString, matches, IPPattern);
     }
 
-    static bool isCIDRMask(string testString) {
+    static bool isCIDRMask(const string& testString) {
         smatch matches;
         regex CIDRPattern("^\\d{1,2}$");
         return regex_search(testString, matches, CIDRPattern) && (32 >= stoi(testString) && stoi(testString) >= 0);
     }
 
-    static bool isIPNumber(string testString) {
+    static bool isIPNumber(const string& testString) {
         smatch matches;
         regex IPNumberPattern("^\\d{1,10}$");
         return regex_search(testString, matches, IPNumberPattern) && (testString == to_string(static_cast<uint32_t>(stoi(testString))));
     }
 
-    static IPNumeric StringToIPInt(string stringArg) {
+    static IPNumeric StringToIPInt(const string& stringArg) {
         IPNumeric returnValue;
-        IPNumeric CIDRConversion;
         string operatingString;
-        string currentOctet;
         if (isIPFormat(stringArg)) {
             operatingString = stringArg;
         } else if (isCIDRMask(stringArg)) {
+            IPNumeric CIDRConversion;
             CIDRConversion.IP32 = ~static_cast<uint32_t>(((1<<(32-stoi(stringArg)))-1));
             operatingString = intToIPString(CIDRConversion);
         } else {
@@ -165,15 +163,15 @@ public:
             return returnValue;
         }
         for (int i=3; i>=0; i--) {
-            currentOctet = operatingString.substr(0, operatingString.find('.'));
+            string currentOctet = operatingString.substr(0, operatingString.find('.'));
             operatingString.erase(0, operatingString.find('.') + 1);
             returnValue.octets[i] = static_cast<uint8_t>(stoi(currentOctet));
         }
         return returnValue;
     }
 
-    static string intToIPString(IPNumeric IPArg) {
-        string returnString = "";
+    static string intToIPString(const IPNumeric IPArg) {
+        string returnString;
         for (int i=3; i>0; i--) {
             returnString.append(to_string(IPArg.octets[i]));
             returnString.append(".");
@@ -184,8 +182,8 @@ public:
 
     template <typename T>
     static string toBinaryString(T numArg) {
-        string returnString = "";
-        int maxBitSize = sizeof(T) * 8 - 1;
+        string returnString;
+        const int maxBitSize = sizeof(T) * 8 - 1;
         for (int i=maxBitSize; i>=0; i--) {
             if (numArg - (1<<i) >=0) {
                 numArg = static_cast<T>((static_cast<int>(numArg) - (1<<i)));
@@ -198,7 +196,7 @@ public:
     }
 
     static string toIPBinaryString(IPNumeric IPArg) {
-        string returnString = "";
+        string returnString;
         for (int i=3; i>=0; i-=1) {
             returnString += toBinaryString<uint8_t>(IPArg.octets[i]);
             returnString += ".";
@@ -206,7 +204,7 @@ public:
         return returnString.erase(returnString.length() - 1);
     }
 
-    friend ostream &operator<<(ostream &stream, IP IPArg) {
+    friend ostream &operator<<(ostream &stream, const IP& IPArg) {
         if (binaryFlag) {
             return stream << IPArg.IPBinaryString;
         } else {
@@ -214,27 +212,27 @@ public:
         }
     }
 
-    IP operator+(uint32_t operand) {
-        return IP(this->IPAddress.IP32 + operand);
+    IP operator+(const uint32_t operand) const {
+        return {this->IPAddress.IP32 + operand};
     }
 
-    IP operator-(uint32_t operand) {
-        return IP(this->IPAddress.IP32 - operand);
+    IP operator-(const uint32_t operand) const {
+        return {this->IPAddress.IP32 - operand};
     }
 
-    IP operator&(IP operand) {
-        return IP(this->IPAddress.IP32 & operand.IPAddress.IP32);
+    IP operator&(const IP &operand) const {
+        return {this->IPAddress.IP32 & operand.IPAddress.IP32};
     }
 
-    void operator+=(uint32_t operand) {
+    void operator+=(const uint32_t operand) {
         *this = (*this + operand);
     }
 
-    void operator-=(uint32_t operand) {
+    void operator-=(const uint32_t operand) {
         *this = (*this - operand);
     }
 
-    void operator&=(uint32_t operand) {
+    void operator&=(const uint32_t operand) {
         *this = (*this & operand);
     }
 
@@ -246,63 +244,57 @@ public:
 
 class SubnetMask : public IP {
 public:
-    unsigned long long blockSize;
-    unsigned long long numberOfSubnets;
-    uint32_t hostBits;
-    uint32_t networkBits;
+    unsigned long long blockSize = 0;
+    unsigned long long numberOfSubnets = 0;
+    uint32_t hostBits = 0U;
+    uint32_t networkBits = 0U;
 
-    SubnetMask() {}
+    SubnetMask() = default;
     
-    SubnetMask(string stringArg) : IP(stringArg) {
+    SubnetMask(const string &stringArg) : IP(stringArg) { // NOLINT
         if (isCIDRMask(stringArg)) {
-            this -> IPAddress.IP32 = CIDRToIPNumber(stoi(stringArg));
-            this -> IPString = intToIPString(this -> IPAddress);
-            this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
-        } else if (!stringArg.compare("0.0.0.0")) {
-            this -> IPAddress.IP32 = 0;
-            this -> IPString = stringArg;
-            this -> IPBinaryString = toIPBinaryString(this -> IPAddress);
+            IPAddress.IP32 = CIDRToIPNumber(stoi(stringArg));
+            IPString = intToIPString(IPAddress);
+            IPBinaryString = toIPBinaryString(IPAddress);
+        } else if (stringArg == "0.0.0.0") {
+            IPAddress.IP32 = 0;
+            IPString = stringArg;
+            IPBinaryString = toIPBinaryString(IPAddress);
         }
-        this -> hostBits = fetchHostBits(this -> IPAddress.IP32);
-        if (this -> hostBits == 32) {
-            this -> blockSize = 4294967296ULL;
+        hostBits = fetchHostBits(IPAddress.IP32);
+        if (hostBits == 32) {
+            blockSize = 4294967296ULL;
         } else if (!invalidFormat) {
-            this -> blockSize = 1ULL<<(this -> hostBits);
+            blockSize = 1ULL<<(hostBits);
         } else {
-            this -> blockSize = 0;
+            blockSize = 0;
         }
-        this -> networkBits = 32 - hostBits;
-        this -> numberOfSubnets = 1ULL<<networkBits;
-        if (!verifyMask(*this) && this->IPString.compare("0.0.0.0")) {
+        networkBits = 32 - hostBits;
+        numberOfSubnets = 1ULL<<networkBits;
+        if (IPString != "0.0.0.0" && !verifyMask(*this)) {
             *this = SubnetMask(getClosestNetworkBits(*this));
         }
     }
 
-    SubnetMask(uint32_t CIDRMask) : IP(~static_cast<uint32_t>(((1ULL<<(32-CIDRMask)) - 1))) {
-        this -> hostBits = 32 - CIDRMask;
-        if (!invalidFormat) {
-            this -> blockSize = 1ULL<<this -> hostBits;
-            this -> networkBits = CIDRMask;
-            this -> numberOfSubnets = 1ULL<<networkBits;
-        } else {
-            this -> blockSize = 0;
-            this -> networkBits = 0;
-            this -> numberOfSubnets = 1;
-        }
+    SubnetMask(const uint32_t CIDRMask) : IP(~static_cast<uint32_t>(((1ULL<<(32-CIDRMask)) - 1))) { // NOLINT
+        hostBits = 32 - CIDRMask;
+        blockSize = 1ULL<<hostBits;
+        networkBits = CIDRMask;
+        numberOfSubnets = 1ULL<<networkBits;
     }
 
-    static uint32_t CIDRToIPNumber(int CIDRNumber) {
+    static uint32_t CIDRToIPNumber(const int CIDRNumber) {
         if (CIDRNumber == 0) {
             return 0;
         }
         return ~static_cast<uint32_t>((1 << (32 - CIDRNumber)) - 1);
     }
 
-    static uint32_t fetchHostBits(uint32_t IPNumber) {
+    static uint32_t fetchHostBits(const uint32_t IPNumber) {
         if (IPNumber == 0) {
             return 32;
         }
-        uint32_t IPComplement = static_cast<uint32_t>((~IPNumber) + 1);
+        auto IPComplement = static_cast<uint32_t>((~IPNumber) + 1);
         for (uint32_t i=0; i<=32; i++) {
             if (static_cast<uint32_t>(1<<i) == IPComplement) {
                 return i;
@@ -311,16 +303,16 @@ public:
         return 0;
     }
 
-    static bool verifyMask(SubnetMask netArg) {
-        if (SubnetMask(netArg.networkBits).IPString.compare(netArg.IPString)) {
+    static bool verifyMask(const SubnetMask &netArg) {
+        if (SubnetMask(netArg.networkBits).IPString == netArg.IPString) {
             return false;
         }
         return true;
     }
 
-    static uint32_t getClosestNetworkBits(SubnetMask netArg) {
-        uint32_t currentIP32 = netArg.IPAddress.IP32;
-        uint32_t IP32Exp = static_cast<uint32_t>(1<<31);
+    static uint32_t getClosestNetworkBits(const SubnetMask &netArg) {
+        const uint32_t currentIP32 = netArg.IPAddress.IP32;
+        auto IP32Exp = static_cast<uint32_t>(1<<31);
         uint32_t bitshiftOperand = 30;
         while (IP32Exp < currentIP32) {
             IP32Exp += 1 << bitshiftOperand;
@@ -341,15 +333,15 @@ public:
     SubnetMask netMask;
     friend ostream &operator<<(ostream &stream, IP IPArg);
 
-    ChangingIP() {}
+    ChangingIP() = default;
     
-    ChangingIP(IP IPAddress, SubnetMask netMask) {
-        this -> IPString = getChangingIPString(IPAddress, netMask);
-        this -> IPBinaryString = getChangingIPBinaryString(IPAddress, netMask);
+    ChangingIP(const IP& IPAddress, const SubnetMask &netMask) {
+        IPString = getChangingIPString(IPAddress, netMask);
+        IPBinaryString = getChangingIPBinaryString(IPAddress, netMask);
         this -> netMask = netMask;
     }
 
-    friend ostream &operator<<(ostream &stream, ChangingIP ChangingIPArg) {
+    friend ostream &operator<<(ostream &stream, const ChangingIP &ChangingIPArg) {
         if (binaryFlag) {
             return stream << ChangingIPArg.IPBinaryString;
         } else {
@@ -357,9 +349,9 @@ public:
         }
     }
 
-    string getChangingIPString(IP IPArg, SubnetMask netMaskArg) {
-        string returnString = "";
-        int changingOctets = getChangingOctets(netMaskArg);
+    static string getChangingIPString(const IP& IPArg, const SubnetMask& netMaskArg) {
+        string returnString;
+        const int changingOctets = getChangingOctets(netMaskArg);
         for (int i=3; i>=changingOctets; i--) {
             returnString.append(to_string(IPArg.IPAddress.octets[i]));
             returnString.append(".");
@@ -371,8 +363,8 @@ public:
         return returnString;
     }
 
-    static string getChangingIPBinaryString(IP IPArg, SubnetMask netMaskArg) {
-        string returnString = "";
+    static string getChangingIPBinaryString(const IP& IPArg, const SubnetMask& netMaskArg) {
+        string returnString;
         uint32_t changingBits = netMaskArg.hostBits;
         for (int i=3; i>=0; i--) {
             returnString += IP::toBinaryString(IPArg.IPAddress.octets[i]);
@@ -388,7 +380,7 @@ public:
         return returnString;
     }
 
-    int getChangingOctets(SubnetMask netMaskArg) {
+    static int getChangingOctets(const SubnetMask& netMaskArg) {
         return static_cast<int>(ceil(netMaskArg.hostBits / 8.0)); // Division requires float argument to return float.
     }
 };
@@ -406,17 +398,17 @@ public:
     SubnetMask netMask;
     friend ostream &operator<<(ostream &stream, Subnet subnetArg);
 
-    Subnet() {}
+    Subnet() = default;
 
-    Subnet(IP IPAddress, SubnetMask netMask) {
-        this -> networkIP = IPAddress & netMask;
-        this -> startIP = networkIP + 1;
-        this -> broadcastIP = networkIP + static_cast<uint32_t>(netMask.blockSize - 1);
-        this -> endIP = broadcastIP - 1;
+    Subnet(const IP& IPAddress, const SubnetMask& netMask) {
+        networkIP = IPAddress & netMask;
+        startIP = networkIP + 1;
+        broadcastIP = networkIP + static_cast<uint32_t>(netMask.blockSize - 1);
+        endIP = broadcastIP - 1;
         this -> netMask = netMask;
     }
 
-    static string subnetToString(Subnet subnetArg) {
+    static string subnetToString(const Subnet subnetArg) { // NOLINT
         switch (subnetArg.netMask.blockSize) {
             case 1: return subnetArg.networkIP.IPString + "/" + to_string(subnetArg.netMask.networkBits);
             case 2: return subnetArg.networkIP.IPString + "/" + to_string(subnetArg.netMask.networkBits) + "\n\t" + subnetArg.networkIP.IPString + " - " + subnetArg.broadcastIP.IPString;
@@ -425,7 +417,7 @@ public:
         }
     }
 
-    static string subnetToBinaryString(Subnet subnetArg) {
+    static string subnetToBinaryString(Subnet subnetArg) { // NOLINT
         switch (subnetArg.netMask.blockSize) {
             case 1: return subnetArg.networkIP.IPBinaryString + "/" + to_string(subnetArg.netMask.networkBits);
             case 2: return subnetArg.networkIP.IPBinaryString + "/" + to_string(subnetArg.netMask.networkBits) + "\n\t" 
@@ -436,7 +428,7 @@ public:
         }
     }
 
-    friend ostream &operator<<(ostream &stream, Subnet subnetArg) {
+    friend ostream &operator<<(ostream &stream, Subnet subnetArg) { // NOLINT
         if (binaryFlag) {
             return stream << subnetToBinaryString(subnetArg);
         } else {
@@ -449,7 +441,7 @@ public:
 // SECTION: Functions for Client Code
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) {
+inline void VLSM(const IP& IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) {
     void (*VLSMOutput)(const char *string);
     if (exportFlag) {
         VLSMOutput = &exportOutput;
@@ -548,12 +540,11 @@ void VLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) 
     }
 }
 
-void timedVLSM(IP IPAddr, SubnetMask netMask1, SubnetMask netMask2, bool exportFlag) {
-    clock_t startingClock, endingClock;
-    startingClock = clock();
+inline void timedVLSM(const IP& IPAddr, const SubnetMask& netMask1, const SubnetMask& netMask2, const bool exportFlag) {
+    const clock_t startingClock = clock();
     VLSM(IPAddr, netMask1, netMask2, exportFlag);
-    endingClock = clock();
-    double timeTotal = static_cast<double>(endingClock - startingClock) / CLOCKS_PER_SEC;
+    const clock_t endingClock = clock();
+    const double timeTotal = static_cast<double>(endingClock - startingClock) / CLOCKS_PER_SEC;
     if (debugFlag && exportFlag) {
         exportOutput((to_string(timeTotal) + " seconds to run").c_str());
     } else if (debugFlag) {
