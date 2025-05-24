@@ -8,7 +8,7 @@
 //  5.  Question Object Wrappers and Conditionals
 //  6.  ImGui Callbacks
 //  7.  ImGui Wrapper Functions
-//  8.  GLFW, OpenGL Initializaiton, and Rendering
+//  8.  GLFW, OpenGL Initialization, and Rendering
 //  9.  3D Plotting
 //  10. Main Window
 //  11. Primary Window Functions
@@ -21,17 +21,14 @@
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "GLFW/glfw3native.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "implot3d.h"
-#include "implot3d_internal.h"
 #include "random.h"
 #include "subnetterplusplus.hpp"
 #include "ipv6tools.hpp"
 #include "memsafety.h"
-#include <iostream>
 #include <string>
 #include <cmath>
 #include <filesystem>
@@ -91,11 +88,6 @@ unsigned long long int frameCount = 0;
 unsigned long long int dotCounter = 1;
 vector<string> debugEntries;
 
-//  Flags.
-extern bool binaryFlag;
-extern bool debugFlag;
-extern bool reverseFlag;
-
 //  Buffers for primary window input data.
 char *subnetCalculatorInputBuffer1 = static_cast<char *>(calloc_ac(256, 1)); // Main IP input.
 char *subnetCalculatorInputBuffer2 = static_cast<char *>(calloc_ac(256, 1)); // Netmask 1 input.
@@ -135,7 +127,6 @@ classesQuestion currentClassQuestion = { .questionIP = IP(0),
                                          .answer2 = "" }; // the classes question currently displayed on the screen
 
 //  Buffers for export input data.
-extern ofstream exportFileStream;
 mutex exportThreadMutex;
 char *exportPathInputBuffer  = static_cast<char *>(calloc_ac(512, 1));
 bool exportThreadComplete    = false;
@@ -149,7 +140,6 @@ unsigned short *currentMACAddr;
 stringstream randomThreeHextetStream;
 
 //  Primary conditionals.
-extern bool subnettingSuccessful;
 bool subnettingStarted             = false;
 bool exportButtonPreviouslyPressed = false;
 bool graphData                     = false;
@@ -169,8 +159,7 @@ float smallCubeEdgeColor[4]  = {0.779f, 0.779f, 0.779f, 1.0f};
 IP IPArg; 
 SubnetMask netMaskArg1;
 SubnetMask netMaskArg2;
-IP currentIP(0); 
-extern unsigned long long totalAddedToIP;
+IP currentIP(0);
 unsigned int networkMagnitudeDifference       = 0;
 unsigned long long int totalSubnetsToGenerate = 0;
 
@@ -178,18 +167,17 @@ unsigned long long int totalSubnetsToGenerate = 0;
 // SECTION: Debugging
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-void debugLog(string lineToAdd) {
+void debugLog(const string &lineToAdd) {
     debugEntries.push_back(lineToAdd);
 }
 
 void debug() {
     debugLog("debugging function ran");
-    return;
 }
 
 void printDebugEntries() {
-    for (unsigned long i=0; i<debugEntries.size(); i++) {
-        ImGui::Text("%s", (">>> " + debugEntries[i]).c_str());
+    for (const auto & debugEntry : debugEntries) {
+        ImGui::Text("%s", (">>> " + debugEntry).c_str());
     }
 }
 
@@ -198,11 +186,11 @@ void printDebugEntries() {
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
 IP constructRandomIP() {
-    return IP(getRandomIPNumber());
+    return {getRandomIPNumber()};
 }
 
 SubnetMask constructRandomSubnetMask() {
-    return SubnetMask(getRandomInteger(0, 32));
+    return {getRandomInteger(0, 32)};
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------------
@@ -212,7 +200,7 @@ SubnetMask constructRandomSubnetMask() {
 subnettingQuestion randomSubnetQuestion() {
     subnettingQuestion returnValue;
     IP generatedIP = constructRandomIP();
-    SubnetMask generatedSubnetMask = constructRandomSubnetMask();
+    const SubnetMask generatedSubnetMask = constructRandomSubnetMask();
     IP networkIP = generatedIP & generatedSubnetMask;
     returnValue.questionString = "Find all subnet information for a /" + to_string(generatedSubnetMask.networkBits) + " subnet containing the IP address " + generatedIP.IPString + ".";
     returnValue.questionIP = generatedIP;
@@ -246,14 +234,14 @@ classesQuestion randomClassQuestion() {
 }
 
 void resetCurrentSubnetQuestion() {
-    memcpy(subnetStudyInputBuffer1, "", 255);
-    memcpy(subnetStudyInputBuffer2, "", 255);
-    memcpy(subnetStudyInputBuffer3, "", 255);
-    memcpy(subnetStudyInputBuffer4, "", 255);
-    memcpy(subnetStudyInputBuffer5, "", 255);
-    memcpy(subnetStudyInputBuffer6, "", 255);
-    memcpy(subnetStudyInputBuffer7, "", 255);
-    memcpy(subnetStudyInputBuffer8, "", 255);
+    memset(subnetStudyInputBuffer1, 0, 255);
+    memset(subnetStudyInputBuffer2, 0, 255);
+    memset(subnetStudyInputBuffer3, 0, 255);
+    memset(subnetStudyInputBuffer4, 0, 255);
+    memset(subnetStudyInputBuffer5, 0, 255);
+    memset(subnetStudyInputBuffer6, 0, 255);
+    memset(subnetStudyInputBuffer7, 0, 255);
+    memset(subnetStudyInputBuffer8, 0, 255);
     currentSubnetQuestionAnswered = false;
 }
 
@@ -274,9 +262,9 @@ void checkSubnetAnswers() {
 }
 
 void resetCurrentClassQuestion() {
-    memcpy(classStudyInputBuffer1, "", 255);
-    memcpy(classStudyInputBuffer2, "", 255);
-    memcpy(classStudyInputBuffer3, "", 255);
+    memset(classStudyInputBuffer1, 0, 255);
+    memset(classStudyInputBuffer2, 0, 255);
+    memset(classStudyInputBuffer3, 0, 255);
     currentClassQuestionAnswered = false;
 }
 
@@ -294,38 +282,38 @@ void checkClassAnswers() {
 // SECTION: ImGui Callbacks
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-int argumentChangedCallback(ImGuiInputTextCallbackData *data) {
+int argumentChangedCallback(ImGuiInputTextCallbackData *data) { // NOLINT
     static_cast<void>(data); // Ignore callback input.
     currentIP.IPAddress.IP32 = 0;
     totalAddedToIP = 256;
     return 1;
 }
 
-int subnetQuestionChangedCallback(ImGuiInputTextCallbackData *data) {
+int subnetQuestionChangedCallback(ImGuiInputTextCallbackData *data) {// NOLINT
     static_cast<void>(data); // Ignore callback input.
     currentSubnetQuestionAnswered = false;
     return 1;
 }
 
-int classQuestionChangedCallback(ImGuiInputTextCallbackData *data) {
+int classQuestionChangedCallback(ImGuiInputTextCallbackData *data) {// NOLINT
     static_cast<void>(data); // Ignore callback input.
     currentClassQuestionAnswered = false;
     return 1;
 }
 
-int exportChangedCallback(ImGuiInputTextCallbackData *data) {
+int exportChangedCallback(ImGuiInputTextCallbackData *data) { // NOLINT
     static_cast<void>(data); // Ignore callback input.
     exportButtonPreviouslyPressed = false;
     return 1;
 }
 
-int IPv6ChangedCallback(ImGuiInputTextCallbackData *data) {
+int IPv6ChangedCallback(ImGuiInputTextCallbackData *data) { // NOLINT
     static_cast<void>(data); // Ignore callback input.
     currentIPv6Addr = IPv6(IPv6InputBuffer);
     return 1;
 }
 
-int MACChangedCallback(ImGuiInputTextCallbackData *data) {
+int MACChangedCallback(ImGuiInputTextCallbackData *data) { // NOLINT
     static_cast<void>(data); // Ignore callback input.
     currentMACAddr = IPv6::MACStringToHextets(MACInputBuffer);
     randomThreeHextetStream.str("");
@@ -347,7 +335,7 @@ bool sameLineInIf() {
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------------
-// SECTION: GLFW, OpenGL Initializaiton, and Rendering
+// SECTION: GLFW, OpenGL Initialization, and Rendering
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
 void windowTerminate() {
@@ -377,7 +365,7 @@ void ImGuiInit() {
     #ifdef __APPLE__
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
     #endif
-    windowBackend = glfwCreateWindow(1200, 700, "Subnetter++", NULL, NULL);
+    windowBackend = glfwCreateWindow(1200, 700, "Subnetter++", nullptr, nullptr);
     glfwMakeContextCurrent(windowBackend);
     float x, y;
     glfwGetMonitorContentScale(monitor, &x, &y);
@@ -466,12 +454,12 @@ void resetPlotColors() {
 }
 
 void plotSubnetCubes() {
-    float cube1SideLength           = static_cast<float>(cbrt(netMaskArg1.blockSize));
-    float vertex1DistanceFromOrigin = static_cast<float>(cube1SideLength / 2.0f);
-    float cube2SideLength           = static_cast<float>(cbrt(netMaskArg2.blockSize));
-    float vertex2DistanceFromOrigin = static_cast<float>(cube2SideLength / 2.0f);
-    float vertexDifference          = vertex1DistanceFromOrigin - vertex2DistanceFromOrigin;
-    ImPlot3DPoint big_cube_vtx[8]   = {
+    const auto cube1SideLength           = static_cast<float>(cbrt(netMaskArg1.blockSize));
+    auto vertex1DistanceFromOrigin = static_cast<float>(cube1SideLength / 2.0f);
+    const auto cube2SideLength           = static_cast<float>(cbrt(netMaskArg2.blockSize));
+    const auto vertex2DistanceFromOrigin = static_cast<float>(cube2SideLength / 2.0f);
+    const float vertexDifference          = vertex1DistanceFromOrigin - vertex2DistanceFromOrigin;
+    const ImPlot3DPoint big_cube_vtx[8]   = {
         {-vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin}, // 0: Bottom-back-left.
         { vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin}, // 1: Bottom-back-right.
         { vertex1DistanceFromOrigin,  vertex1DistanceFromOrigin, -vertex1DistanceFromOrigin}, // 2: Top-back-right.
@@ -481,7 +469,7 @@ void plotSubnetCubes() {
         { vertex1DistanceFromOrigin,  vertex1DistanceFromOrigin,  vertex1DistanceFromOrigin}, // 6: Top-front-right.
         {-vertex1DistanceFromOrigin,  vertex1DistanceFromOrigin,  vertex1DistanceFromOrigin}, // 7: Top-front-left.
     };
-    ImPlot3DPoint small_cube_vtx[8] = {
+    const ImPlot3DPoint small_cube_vtx[8] = {
         {-vertex2DistanceFromOrigin - vertexDifference, -vertex2DistanceFromOrigin + vertexDifference, -vertex2DistanceFromOrigin - vertexDifference}, // 0: Bottom-back-left.
         { vertex2DistanceFromOrigin - vertexDifference, -vertex2DistanceFromOrigin + vertexDifference, -vertex2DistanceFromOrigin - vertexDifference}, // 1: Bottom-back-right.
         { vertex2DistanceFromOrigin - vertexDifference,  vertex2DistanceFromOrigin + vertexDifference, -vertex2DistanceFromOrigin - vertexDifference}, // 2: Top-back-right.
@@ -572,7 +560,8 @@ void mainWindow() {
         totalAddedToIP = 256;
     }
     ImGui::SameLine();
-    if (ImGui::Button("Generate Random Subnet")) {
+    if (ImGui::Button("Generate Random Subnet"))
+    {
         currentIP.IPAddress.IP32 = 0;
         totalAddedToIP = 256;
         memcpy(subnetCalculatorInputBuffer1, constructRandomIP().IPString.c_str(), 255);
@@ -580,7 +569,7 @@ void mainWindow() {
         memcpy(subnetCalculatorInputBuffer3, to_string(getRandomCIDR()).c_str(), 255);
         subnettingStarted = false;
     }
-    if (windowsAreOpen[2] && sameLineInIf() && ImGui::Button("Clear Debug Log")) {
+    if (windowsAreOpen[2] && sameLineInIf() && ImGui::Button("Clear Debug Log")) { // NOLINT
         debugEntries.clear();
     }
     if (windowsAreOpen[2]) {
@@ -613,20 +602,20 @@ void mainWindow() {
         return;
     }
     ImGui::BeginChild("ScrollWheel");
-    SubnetMask swapMask;
     IPArg = IP(subnetCalculatorInputBuffer1);
-    if (strcmp(subnetCalculatorInputBuffer2, "") && !strcmp(subnetCalculatorInputBuffer3, "")) {
+    if (strcmp(subnetCalculatorInputBuffer2, "") != 0 && !strcmp(subnetCalculatorInputBuffer3, "")) {
         netMaskArg1 = SubnetMask(subnetCalculatorInputBuffer2);
         netMaskArg2 = SubnetMask(subnetCalculatorInputBuffer2);
-    } else if (!strcmp(subnetCalculatorInputBuffer2, "") && strcmp(subnetCalculatorInputBuffer3, "")) {
+    } else if (!strcmp(subnetCalculatorInputBuffer2, "") && strcmp(subnetCalculatorInputBuffer3, "") != 0) {
         netMaskArg1 = SubnetMask(subnetCalculatorInputBuffer3);
         netMaskArg2 = SubnetMask(subnetCalculatorInputBuffer3);
     } else {
         netMaskArg1 = SubnetMask(subnetCalculatorInputBuffer2);
         netMaskArg2 = SubnetMask(subnetCalculatorInputBuffer3);
     }
-    if (netMaskArg1.networkBits > netMaskArg2.networkBits) { // If netMaskArg1's CIDR mask is greater than netMaskArg2's, swap them to ensure that netMaskArg1's CIDR mask is >= to netMaskArg2's.
-        swapMask = netMaskArg1;
+    if (netMaskArg1.networkBits > netMaskArg2.networkBits) {
+        // If netMaskArg1's CIDR mask is greater than netMaskArg2's, swap them to ensure that netMaskArg1's CIDR mask is >= to netMaskArg2's.
+        const SubnetMask swapMask = netMaskArg1;
         netMaskArg1 = netMaskArg2;
         netMaskArg2 = swapMask;
     }
@@ -651,7 +640,7 @@ void mainWindow() {
 void studyWindow() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("Study", windowsAreOpen+3);
-    if (currentSubnetQuestion.questionString.compare("")) { 
+    if (!currentSubnetQuestion.questionString.empty()) {
         ImGui::Text("%s", currentSubnetQuestion.questionString.c_str());
         ImGui::InputText("Subnet Mask", subnetStudyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
         ImGui::InputText("Block Size", subnetStudyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, subnetQuestionChangedCallback);
@@ -673,38 +662,37 @@ void studyWindow() {
         resetCurrentSubnetQuestion();
     }
     if (currentSubnetQuestionAnswered) {
-        if (!currentSubnetQuestion.answer1.compare(subnetStudyInputBuffer1)) {ImGui::Text("Subnet Mask is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer1)) {ImGui::Text("Subnet Mask is incorrect.");}
+        if (currentSubnetQuestion.answer1 == subnetStudyInputBuffer1) {ImGui::Text("Subnet Mask is correct!");}
+        else if (strcmp(subnetStudyInputBuffer1, "") != 0) {ImGui::Text("Subnet Mask is incorrect.");}
 
-        if (!currentSubnetQuestion.answer2.compare(subnetStudyInputBuffer2)) {ImGui::Text("Block Size is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer2)) {ImGui::Text("Block Size is incorrect.");}
+        if (currentSubnetQuestion.answer2 == subnetStudyInputBuffer2) {ImGui::Text("Block Size is correct!");}
+        else if (strcmp(subnetStudyInputBuffer2, "") != 0) {ImGui::Text("Block Size is incorrect.");}
 
-        if (!currentSubnetQuestion.answer3.compare(subnetStudyInputBuffer3)) {ImGui::Text("Network Address is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer3)) {ImGui::Text("Network Address is incorrect.");}
+        if (currentSubnetQuestion.answer3 == subnetStudyInputBuffer3) {ImGui::Text("Network Address is correct!");}
+        else if (strcmp(subnetStudyInputBuffer3, "") != 0) {ImGui::Text("Network Address is incorrect.");}
 
-        if (!currentSubnetQuestion.answer4.compare(subnetStudyInputBuffer4)) {ImGui::Text("First Usable Address is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer4)) {ImGui::Text("First Usable Address is incorrect.");}
+        if (currentSubnetQuestion.answer4 == subnetStudyInputBuffer4) {ImGui::Text("First Usable Address is correct!");}
+        else if (strcmp(subnetStudyInputBuffer4, "") != 0) {ImGui::Text("First Usable Address is incorrect.");}
 
-        if (!currentSubnetQuestion.answer5.compare(subnetStudyInputBuffer5)) {ImGui::Text("Last Usable Address is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer5)) {ImGui::Text("Last Usable Address is incorrect.");}
+        if (currentSubnetQuestion.answer5 == subnetStudyInputBuffer5) {ImGui::Text("Last Usable Address is correct!");}
+        else if (strcmp(subnetStudyInputBuffer5, "") != 0) {ImGui::Text("Last Usable Address is incorrect.");}
 
-        if (!currentSubnetQuestion.answer6.compare(subnetStudyInputBuffer6)) {ImGui::Text("Broadcast Address is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer6)) {ImGui::Text("Broadcast Address is incorrect.");}
+        if (currentSubnetQuestion.answer6 == subnetStudyInputBuffer6) {ImGui::Text("Broadcast Address is correct!");}
+        else if (strcmp(subnetStudyInputBuffer6, "") != 0) {ImGui::Text("Broadcast Address is incorrect.");}
 
-        if (!currentSubnetQuestion.answer7.compare(subnetStudyInputBuffer7)) {ImGui::Text("Binary for Provided IP is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer7)) {ImGui::Text("Binary for Provided IP is incorrect.");}
+        if (currentSubnetQuestion.answer7 == subnetStudyInputBuffer7) {ImGui::Text("Binary for Provided IP is correct!");}
+        else if (strcmp(subnetStudyInputBuffer7, "") != 0) {ImGui::Text("Binary for Provided IP is incorrect.");}
 
-        if (!currentSubnetQuestion.answer8.compare(subnetStudyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is correct!");} 
-        else if (string("").compare(subnetStudyInputBuffer8)) {ImGui::Text("Binary for Subnet Mask is incorrect.");}   
+        if (currentSubnetQuestion.answer8 == subnetStudyInputBuffer8) {ImGui::Text("Binary for Subnet Mask is correct!");}
+        else if (strcmp(subnetStudyInputBuffer8, "") != 0) {ImGui::Text("Binary for Subnet Mask is incorrect.");}
     }
     ImGui::End();
-    return;
 }
 
 void IPClassWindow() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("IP Classes", windowsAreOpen+5);
-    if (currentClassQuestion.questionString.compare("")) {
+    if (currentClassQuestion.questionString.empty()) {
         ImGui::Text("%s", currentClassQuestion.questionString.c_str());
         ImGui::InputText("IP Class", classStudyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
         ImGui::InputText("Subnet Mask", classStudyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
@@ -720,14 +708,13 @@ void IPClassWindow() {
         resetCurrentClassQuestion();
     }
     if (currentClassQuestionAnswered) {
-        if (!currentClassQuestion.answer1.compare(classStudyInputBuffer1)) {ImGui::Text("IP Class is correct!");} 
-        else if (string("").compare(classStudyInputBuffer1)) {ImGui::Text("IP Class is incorrect.");}
+        if (currentClassQuestion.answer1 == classStudyInputBuffer1) {ImGui::Text("IP Class is correct!");}
+        else if (strcmp(classStudyInputBuffer1, "") != 0) {ImGui::Text("IP Class is incorrect.");}
 
-        if (!currentClassQuestion.answer2.compare(classStudyInputBuffer2)) {ImGui::Text("Subnet Mask is correct!");} 
-        else if (string("").compare(classStudyInputBuffer2)) {ImGui::Text("Subnet Mask is incorrect.");} 
+        if (currentClassQuestion.answer2 == classStudyInputBuffer2) {ImGui::Text("Subnet Mask is correct!");}
+        else if (strcmp(classStudyInputBuffer2, "") != 0) {ImGui::Text("Subnet Mask is incorrect.");}
     }
     ImGui::End();
-    return;
 }
 
 void IPv6Window() {
@@ -745,7 +732,7 @@ void IPv6Window() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear IPv6")) {
-        memcpy(IPv6InputBuffer, "", 255);
+        memset(IPv6InputBuffer, 0, 255);
     }
     ImGui::Text("%s", ("Shorthand:    " + currentIPv6Addr.shortenedIPv6String).c_str());
     ImGui::Text("%s", ("Full:         " + currentIPv6Addr.IPv6String).c_str());
@@ -758,12 +745,12 @@ void IPv6Window() {
     ImGui::InputText("MAC Address", MACInputBuffer, 255, ImGuiInputTextFlags_CallbackEdit, MACChangedCallback);
     if (ImGui::Button("Generate Random MAC Address")) {
         memcpy(MACInputBuffer, IPv6::MACHextetsToString(getRandomMACNumber()).c_str(), 255);
-        MACChangedCallback(NULL);
+        MACChangedCallback(nullptr);
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear MAC")) {
-        memcpy(MACInputBuffer, "", 255);
-        MACChangedCallback(NULL);
+        memset(MACInputBuffer, 0, 255);
+        MACChangedCallback(nullptr);
         randomThreeHextetStream.str("0000:0000:0000");
     }
     ImGui::Text("%s", ("EUI64 Interface ID:                          " + EUIString).c_str());
@@ -831,7 +818,6 @@ void exportWindow() {
         ImGui::Text("%s", ("Exporting" + string(dotCounter, '.')).c_str());
     }
     ImGui::End();
-    return;
 }
 
 void debugWindow() {
@@ -913,7 +899,7 @@ void IPClassInfoWindow() {
     ImGui::Text("The groups of IP addresses for each IP class is as follows:");
     ImGui::Text("   Class A addresses range from 0.0.0.0 to 127.255.255.255. This would be 0.0.0.0/1 as a subnet.");
     ImGui::Text("   Class B addresses range from 128.0.0.0 to 191.255.255.255. This would be 128.0.0.0/2 as a subnet.");
-    ImGui::Text("   Class C addresses range from 192.0.0.0 to 223.255.255.255. This owuld be 192.0.0.0/3 as a subnet.");
+    ImGui::Text("   Class C addresses range from 192.0.0.0 to 223.255.255.255. This would be 192.0.0.0/3 as a subnet.");
     ImGui::Text("   Class D addresses range from 224.0.0.0 to 239.255.255.255. This would be 224.0.0.0/4 as a subnet.");
     ImGui::Text("   Class E addresses range from 240.0.0.0 to 255.255.255.255. This would be 240.0.0.0/4 as a subnet.");
     ImGui::Text(" ");
@@ -973,7 +959,7 @@ void IPInfoWindow() {
     ImGui::Text("   These values are then added together to get 100 + 40 + 2, or 142.");
     ImGui::Text("   In everyday life, we usually skip this calculation because we would speak it.");
     ImGui::Text("   \"One hundred forty-two\" is the same as 100 + 40 + 2.");
-    ImGui::Text("In binary, we cannot write the same number as \"142\". It would instead have to be written as \"10001110\":");
+    ImGui::Text(R"(In binary, we cannot write the same number as "142". It would instead have to be written as "10001110":)");
     ImGui::Text("   The 1's place is 0. That means the value at the 1's place is the place * 0, or 1 * 0 => 0.");
     ImGui::Text("   The 2's place is 1. The calculation for that digit would be 2 * 1 => 2.");
     ImGui::Text("   The 4's place is 1. The calculation would be 4 * 1 => 4.");
@@ -983,10 +969,10 @@ void IPInfoWindow() {
     ImGui::Text("   The 64's place is 0. The calculation would be 64 * 0 => 0.");
     ImGui::Text("   The 128's place is 1. The calculation would be 128 * 1 => 128.");
     ImGui::Text("   Just like in decimal, these values are added together to get 128 + 8 + 4 + 2, which is 142.");
-    ImGui::Text("   Based on this calculation, it could be said that \"10001110\" is the binary representation of \"142\".");
+    ImGui::Text(R"(   Based on this calculation, it could be said that "10001110" is the binary representation of "142".)");
     ImGui::Text(" ");
     ImGui::Text("IPv4 addresses are binary numbers. They are stored in 32 \"bits\", meaning 32 binary digits.");
-    ImGui::Text("Therefore, an IPv4 address can be anything from \"00000000000000000000000000000000\" to \"11111111111111111111111111111111\".");
+    ImGui::Text(R"(Therefore, an IPv4 address can be anything from "00000000000000000000000000000000" to "11111111111111111111111111111111".)");
     ImGui::Text("The above numbers converted to decimal are 0 to 4,294,967,295.");
     ImGui::Text(" ");
     ImGui::Text("But how can a 32-bit binary number be written as something like 112.14.8.2?");
@@ -1009,7 +995,7 @@ void subnetMaskInfoWindow() {
     ImGui::Text("The meaning of 255.255.255.0 as a subnet mask versus an IP address is very different, however.");
     ImGui::Text("As mentioned in the IP info block, IP addresses have a network and host portion. The network portion is analogous to the street");
     ImGui::Text("a device resides on, while the host portion is more like the house number for a device on that street of devices.");
-    ImGui::Text("For the IPv4 address 192.168.0.1, how would we know which part of the address is the \"street\" versus the \"house number\"?");
+    ImGui::Text(R"(For the IPv4 address 192.168.0.1, how would we know which part of the address is the "street" versus the "house number"?)");
     ImGui::Text("In short, we can't. An IPv4 address by itself does not have a specific network or host portion. It is the subnet mask's job to");
     ImGui::Text("specify that information.");
     ImGui::Text(" ");
@@ -1036,11 +1022,11 @@ void subnetMaskInfoWindow() {
     ImGui::Text(" ");
     ImGui::Text("To answer the first question this example presents, it is important to understand the question \"How many different numbers can be generated with X amount of digits?\"");
     ImGui::Text("In the decimal number system, we use base 10, meaning that each digit in our number system has 10 different possibilities: 0 through 9.");
-    ImGui::Text("Therefore, in a three digit number, we can have 000-999. 0 through 999 is 1,000 numbers. If we add a digit, the number of possibilties multiplies by 10: 10,000.");
+    ImGui::Text("Therefore, in a three digit number, we can have 000-999. 0 through 999 is 1,000 numbers. If we add a digit, the number of possibilities multiplies by 10: 10,000.");
     ImGui::Text("0 through 9,999 is 10,000 numbers.");
     ImGui::Text("And so, a pattern emerges. Each digit we add lets us create 10 times as many numbers.");
     ImGui::Text("The solution to this question, therefore, is that we multiply by 10 for each digit, or 10 time 10 X times. This is exponentiation, so we can rewrite the problem as follows:");
-    ImGui::Text("The number of possibile numbers that can be generated with X amount of digits in the decimal number system is 10 to the X.");
+    ImGui::Text("The number of possible numbers that can be generated with X amount of digits in the decimal number system is 10 to the X.");
     ImGui::Text(" ");
     ImGui::Text("This may not yet seem related to our original problem of figuring out what network and host portions mean. We must rephrase the problem in binary.");
     ImGui::Text("In the binary number system, we use base 2, meaning each digit in binary has 2 different possibilities: 0 and 1.");
@@ -1064,7 +1050,7 @@ void subnetMaskInfoWindow() {
     ImGui::Text(" ");
     ImGui::Text("It may be observed now that there are 8 different numbers that can be made with 3 binary digits, and they are all listed above.");
     ImGui::Text("The solution to the digits problem in binary is very similar to the solution in decimal: we simply replace 10 in the solution with 2.");
-    ImGui::Text("The number of possibile numbers that can be generated with X amount of digits in the binary number system is 2 to the X.");
+    ImGui::Text("The number of possible numbers that can be generated with X amount of digits in the binary number system is 2 to the X.");
     ImGui::Text("This can easily be tested by adding another digit. For each of the numbers in the list of 8 above, it will be preceded by either a 0 or a 1.");
     ImGui::Text("Because of this, each number now has two copies: one with a leading 0 and one with a leading 1. Therefore, the list doubles in size");
     ImGui::Text("meaning twice as many numbers can be generated in 4 digits as opposed to 3.");
@@ -1089,7 +1075,7 @@ void subnetMaskInfoWindow() {
     ImGui::Text(" ");
     ImGui::Text("The distinction between the network portion and network ID is that the subnet mask does not determine exactly what the street name could be in our analogy;");
     ImGui::Text("What it does determine, however, is how long the street name is allowed to be. A subnet mask with 3 network bits would be analogous to only allowing a street name to be 3");
-    ImGui::Text("Letters long. But that means the street name could be \"abc\". So the network portion of the subnet mask would be three \"letters\", but the network ID of our");
+    ImGui::Text(R"(Letters long. But that means the street name could be "abc". So the network portion of the subnet mask would be three "letters", but the network ID of our)");
     ImGui::Text("network specifically would be \"abc\".");
     ImGui::Text(" ");
     ImGui::Text("Since we have set the network ID to be a bunch of zeroes, we can assume that any address we make with that network ID will be on that network.");
@@ -1131,7 +1117,7 @@ void subnetMaskInfoWindow() {
     ImGui::Text("   This subnet has a host portion of 16 bits and a network portion of 16 bits.");
     ImGui::Text("   Therefore, the subnet that 172.16.82.12 resides on contains 2 to the 16 IP addresses, or 65536 addresses.");
     ImGui::Text("   The network address of this network would be where the host portion, the last 16 bits, are all zeroes, which would be 172.16.0.0.");
-    ImGui::Text("   The broacast address of this network would be where the host portion is all ones, which would be 172.16.255.255.");
+    ImGui::Text("   The broadcast address of this network would be where the host portion is all ones, which would be 172.16.255.255.");
     ImGui::Text("   This subnet would therefore consist of devices with addresses ranging from 172.16.0.1 to 172.16.255.254.");
     ImGui::Text(" ");
     ImGui::Text("If you can follow along with this explanation and do the calculations yourself, congratulations! You now know how to subnet.");
@@ -1172,7 +1158,7 @@ void EUI64InfoWindow() {
 
 int Main() { // the pseudo-main function that gets called either by WinMain() or main()
     // register_mem_cc();
-    srand(static_cast<unsigned int>(time(NULL))); // initialize random number generator's counter
+    srand(static_cast<unsigned int>(time(nullptr))); // initialize random number generator's counter NOLINT(*-msc51-cpp)
     ImGuiInit(); // window creation and context initialization
     windowsAreOpen[0] = true;
     for (unsigned long i=1; i<sizeof(windowsAreOpen); i++) { // set non-main windows that exist to be closed; only have main window open.

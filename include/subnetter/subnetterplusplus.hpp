@@ -85,10 +85,10 @@ public:
     string IPString;
     string IPBinaryString;
     char IPClass = '\0';
-    static constexpr uint32_t classBStartBinary = (const uint32_t)(0b1U    << 31); // Binary maps for classful address resolution. Class A implicitly starts at 0.
-    static constexpr uint32_t classCStartBinary = (const uint32_t)(0b11U   << 30);
-    static constexpr uint32_t classDStartBinary = (const uint32_t)(0b111U  << 29);
-    static constexpr uint32_t classEStartBinary = (const uint32_t)(0b1111U << 28);
+    static constexpr uint32_t classBStartBinary = 0b1U      << 31U; // Binary maps for classful address resolution. Class A implicitly starts at 0.
+    static constexpr uint32_t classCStartBinary = 0b11U     << 30U;
+    static constexpr uint32_t classDStartBinary = 0b111U    << 29U;
+    static constexpr uint32_t classEStartBinary = 0b1111U   << 28U;
     bool invalidFormat = false;
     friend ostream &operator<<(ostream &stream, const IP& IPArg);
 

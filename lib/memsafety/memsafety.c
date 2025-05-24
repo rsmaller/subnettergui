@@ -40,7 +40,6 @@ void node_printout(void) {
         currentNode = currentNode -> nextNode;
     }
     printf("0x%p\n", currentNode -> pointer);
-    return;
 }
 
 void * ALLOCATOR_ATTRIBS malloc_ac(size_t size) {
@@ -77,13 +76,12 @@ void * ALLOCATOR_ATTRIBS calloc_ac(size_t size1, size_t size2) {
 
 void *realloc_ac(void *pointer, size_t size) {
     if (!startingNode || !pointer) return NULL;
-    void *returnPointer = pointer;
     memoryNode *currentNodeToReallocate = startingNode;
     while (currentNodeToReallocate -> pointer != pointer && currentNodeToReallocate -> nextNode) {
         currentNodeToReallocate = currentNodeToReallocate -> nextNode;
     }
     if (currentNodeToReallocate -> pointer == pointer) {
-        returnPointer = realloc(pointer, size);
+        void *returnPointer = realloc(pointer, size);
         if (!returnPointer) {
             printf("Heap allocation failure. Terminating\n");
             exit(1);
@@ -112,19 +110,18 @@ void free_ac(void *pointer) {
         currentNodeToFree = currentNodeToFree -> nextNode;
         nextNode = currentNodeToFree -> nextNode;
     }
-    if (pointer == endingNode -> pointer) {
+    if (previousNode && pointer == endingNode -> pointer) {
         free(pointer);
         free(endingNode);
         endingNode = previousNode;
         endingNode -> nextNode = NULL;
         return;
     }
-    if (currentNodeToFree -> pointer == pointer) {
+    if (previousNode && currentNodeToFree -> pointer == pointer) {
         free(pointer);
         free(currentNodeToFree);
         previousNode -> nextNode = nextNode;
     }
-    return;
 }
 
 void mem_cc(void) { // Call this at the end of main() to ensure any dangling pointers are handled.
@@ -153,7 +150,7 @@ static int CONSTRUCTOR register_mem_cc(void) {
     return atexit(mem_cc);
 }
 
-static int CONSTRUCTOR_INTERNAL (*memsafetyStartup)(void) = register_mem_cc;
+static int CONSTRUCTOR_INTERNAL (*memsafetyStartup)(void) = register_mem_cc; // NOLINT
 
 #ifdef __cplusplus
 }

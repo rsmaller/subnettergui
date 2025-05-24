@@ -16,9 +16,7 @@ add_library(implot3d STATIC lib/implot3d/implot3d.cpp lib/implot3d/implot3d_demo
 add_library(memsafety STATIC lib/memsafety/memsafety.c)
 
 IF (WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:LIBCMT /IGNORE:4099")
     add_executable(subnettergui WIN32 src/main.cpp)
-    target_compile_options(subnettergui PRIVATE /wd4710 /wd4711) # Ignore warnings about inlining
     set_target_properties(glew PROPERTIES IMPORTED_LOCATION "./lib/bin/glew/win32/glew32s.lib")
     set_target_properties(glfw3 PROPERTIES IMPORTED_LOCATION "./lib/bin/glfw/win32/glfw3.lib")
     target_link_libraries(subnettergui PRIVATE opengl32 glew)
@@ -36,6 +34,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 ENDIF()
 
 if (MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /IGNORE:4099")
+    target_compile_options(subnettergui PRIVATE /wd4710 /wd4711) # Ignore warnings about inlining
     target_compile_options(subnettergui PRIVATE /W4 /Wall /wd4514 /wd5045 /wd4820 /wd4668) # unreferenced library functions, spectre mitigations, and other trivial warning messages disabled
 else()
     target_compile_options(subnettergui PRIVATE -Wall -Wextra -Wpedantic -Werror -Walloca -Wcast-qual -Wconversion -std=c++23)

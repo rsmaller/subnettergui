@@ -1,56 +1,61 @@
 #pragma once
-#include <assert.h>
-#include <time.h>
-#include <stdlib.h>
 
-unsigned int getRandomInteger(unsigned int start, unsigned int end) {
+#ifdef __cplusplus
+	#include <assert.h>
+	#define cast(x, type) (static_cast<type>(x))
+#else
+	#include <cassert>
+	#define cast(x, type) ((type)x)
+#endif
+
+inline unsigned int getRandomInteger(const unsigned int start, const unsigned int end) {
 	assert(end > start);
-	unsigned int range = end - start + 1;
-	return (unsigned int)((unsigned int)rand() % range + start);
+	const unsigned int range = end - start + 1;
+	return cast(rand(), unsigned int) % range + start;
 }
 
-unsigned short getRandomShort() {
-	return (unsigned short)((unsigned short)rand() % (unsigned short)0xffffU);
+inline unsigned short getRandomShort() {
+	return cast((cast(rand(), unsigned short) % cast(0xffffU, unsigned short)), unsigned short);
 }
 
-unsigned int getRandomIPNumber() {
-	return (unsigned int)((char)rand() << 24) + (unsigned int)((char)rand() << 16) + (unsigned int)((char)rand() << 8) + (unsigned int)(char)rand();
+inline unsigned int getRandomIPNumber() {
+	return cast(cast(rand(), char) << 24, unsigned int) + cast(cast(rand(), char) << 16, unsigned int) + cast(cast(rand(), char) << 8, unsigned int) + cast(cast(rand(),char),unsigned int);
 }
 
-unsigned short *getRandomIPv6Number() { // returns size 8 array for IPv6 number
-	unsigned short *returnArray = (unsigned short *)calloc(8, 2);
+inline unsigned short *getRandomIPv6Number() { // returns size 8 array for IPv6 number
+	unsigned short *returnArray = cast(calloc(8, 2), unsigned short *);
 	rand();
 	for (int i=0; i<8; i++) {
-		returnArray[i] = (unsigned short)((unsigned short)rand() % (unsigned short)0xffffU);
+		returnArray[i] = cast(cast(rand(), unsigned short) % cast(0xffffU, unsigned short), unsigned short);
 	}
 	return returnArray;
 }
 
-unsigned short *getRandomMACNumber() { // returns size 8 array for IPv6 number
-	unsigned short *returnArray = (unsigned short *)calloc(3, 2);
+inline unsigned short *getRandomMACNumber() { // returns size 8 array for IPv6 number
+	unsigned short *returnArray = cast(calloc(3, 2), unsigned short *);
 	rand();
 	for (int i=0; i<3; i++) {
-		returnArray[i] = (unsigned short)((unsigned short)rand() % (unsigned short)0xffffU);
+		returnArray[i] = cast(cast(rand(), unsigned short) % cast(0xffffU, unsigned short), unsigned short);
 	}
 	return returnArray;
 }
 
-bool chance(unsigned int numerator, unsigned int denominator) {
-	unsigned int generatedNumber = getRandomInteger(1, denominator);
+inline bool chance(const unsigned int numerator, const unsigned int denominator) {
+	const unsigned int generatedNumber = getRandomInteger(1, denominator);
 	return generatedNumber <= numerator;
 }
 
-double testChance(unsigned int numerator, unsigned int denominator) {
+inline double testChance(const unsigned int numerator, const unsigned int denominator) {
 	int totalTrue = 0;
-	int numberOfTests = 100000;
+	const int numberOfTests = 100000; // NOLINT
 	for (int i=0; i<numberOfTests; i++) {
 		if (chance(numerator, denominator)) {
 			totalTrue++;	
 		}
 	}
-	return (double)totalTrue / (double)numberOfTests;
+	return cast(totalTrue, double) / cast(numberOfTests, double);
 }
 
-unsigned int getRandomCIDR() {
-	return (unsigned int)rand() % 33;
+inline unsigned int getRandomCIDR() {
+	return cast(rand(),unsigned int) % 33U;
 }
