@@ -338,6 +338,12 @@ bool sameLineInIf() {
 // SECTION: GLFW, OpenGL Initialization, and Rendering
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
+#ifdef CMAKE_DEBUG
+    #define MAIN_WINDOW_NAME "SubnetterGUI (Debug Mode)"
+#else
+    #define MAIN_WINDOW_NAME "SubnetterGUI"
+#endif
+
 void windowTerminate() {
     ImPlot3D::DestroyContext(currentImPlot3DContext);
     ImGui_ImplOpenGL3_Shutdown();
@@ -365,7 +371,7 @@ void ImGuiInit() {
     #ifdef __APPLE__
         glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
     #endif
-    windowBackend = glfwCreateWindow(1200, 700, "Subnetter++", nullptr, nullptr);
+    windowBackend = glfwCreateWindow(1200, 700,  MAIN_WINDOW_NAME, nullptr, nullptr);
     glfwMakeContextCurrent(windowBackend);
     float x, y;
     glfwGetMonitorContentScale(monitor, &x, &y);
@@ -1156,7 +1162,7 @@ void EUI64InfoWindow() {
 // SECTION: Entry Point Functions
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-int Main() { // the pseudo-main function that gets called either by WinMain() or main()
+int Main() { // the pseudo-main function that gets called either by WinMain() or main() NOLINT
     // register_mem_cc();
     srand(static_cast<unsigned int>(time(nullptr))); // initialize random number generator's counter NOLINT(*-msc51-cpp)
     ImGuiInit(); // window creation and context initialization
@@ -1215,7 +1221,7 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         }
     }
     windowTerminate();
-    return 0;
+    // return 0;
 }
 
 #ifdef _WIN32 // call WinMain() as the main function on Windows and main() on other platforms
