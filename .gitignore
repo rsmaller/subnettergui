@@ -32,6 +32,7 @@
 /cmake-build-debug-msvc
 /cmake-build-minsizerel
 /cmake-build-release
+/cmake-build-release-msvc
 /cmake-build-relwithdebinfo
 /.cmake
 /.idea
