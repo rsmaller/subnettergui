@@ -16,7 +16,7 @@
 //  13. Entry Point Functions
 
 // -------------------------------------------------------------------------------------------------------------------------------------------
-// SECTION: Includes and Type Definitions
+// SECTION: Includes and Definitions
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
 #include "GL/glew.h"
@@ -1221,7 +1221,7 @@ int Main() { // the pseudo-main function that gets called either by WinMain() or
         }
     }
     windowTerminate();
-    // return 0;
+    return 0;
 }
 
 #ifdef _WIN32 // call WinMain() as the main function on Windows and main() on other platforms

@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/cc  -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/visualinfo.dir/__/__/src/visualinfo.c.o -o ../../../../bin/visualinfo  -Wl,-rpath,/Users/ryan/Documents/GitHub/subnettergui/lib ../../../libGLEW.2.1.0.dylib -framework OpenGL
