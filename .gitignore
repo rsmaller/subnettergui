@@ -37,3 +37,4 @@
 /.cmake
 /.idea
 /Testing
+.DS_Store
