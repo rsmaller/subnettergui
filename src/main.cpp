@@ -381,6 +381,11 @@ void ImGuiInit() {
     ImGuiIO &ioRef = ImGui::GetIO();
     ioRef.DisplayFramebufferScale.x = 1.0f;
     ioRef.DisplayFramebufferScale.y = 1.0f;
+    #ifdef __APPLE__
+        ioRef.FontGlobalScale = 0.5f; // Apple retina displays are scaled 2x compared to other machines.
+    #else
+        ioRef.FontGlobalScale = 1.0f;
+    #endif
     ioRef.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ioRef.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ioRef.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
