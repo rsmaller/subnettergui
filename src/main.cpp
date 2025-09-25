@@ -698,11 +698,9 @@ void studyWindow() {
 void IPClassWindow() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(100,100), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("IP Classes", windowsAreOpen+5);
-    if (currentClassQuestion.questionString.empty()) {
-        ImGui::Text("%s", currentClassQuestion.questionString.c_str());
-        ImGui::InputText("IP Class", classStudyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
-        ImGui::InputText("Subnet Mask", classStudyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
-    }
+    ImGui::Text("%s", currentClassQuestion.questionString.c_str());
+    ImGui::InputText("IP Class", classStudyInputBuffer1, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
+    ImGui::InputText("Subnet Mask", classStudyInputBuffer2, 255, ImGuiInputTextFlags_CallbackEdit, classQuestionChangedCallback);
     if (ImGui::Button("Check Answers")) {checkClassAnswers();}
     ImGui::SameLine();
     if (ImGui::Button("Show Answers")) {showClassAnswers();}
