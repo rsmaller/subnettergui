@@ -1166,7 +1166,6 @@ void EUI64InfoWindow() {
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
 int Main() { // the pseudo-main function that gets called either by WinMain() or main() NOLINT
-    // register_mem_cc();
     srand(static_cast<unsigned int>(time(nullptr))); // initialize random number generator's counter NOLINT(*-msc51-cpp)
     ImGuiInit(); // window creation and context initialization
     windowsAreOpen[0] = true;
@@ -1234,7 +1233,6 @@ void WinMain() {
 #endif
 #if defined __linux__ || __APPLE__
 int main() {
-    Main();
-    return 0;
+    return Main();
 }
 #endif
